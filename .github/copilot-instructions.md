@@ -1,51 +1,43 @@
-# copilot-instructions.md — corte.ai
+# copilot-instructions.md — petcenter
 
 This file is the master reference for all agents working in this repository. Read it fully before touching any code. Agent-specific artifacts are stored in dedicated folders: use `.claude/agents/` for Claude agents and `.github/agents/` for Copilot agents — load and execute only the instruction set that corresponds to the agent currently running; do not mix contents between the two folders. This file contains the domain, architecture, and cross-cutting rules that apply to all agents.
 
----
-
 ## Product
 
-**corte.ai** is a multi-tenant SaaS platform for barbershop appointment scheduling, accessed via a public link — no app install required.
+**petcenter** is a multi-tenant SaaS platform for petshop appointment scheduling, accessed via a public link — no app install required.
 
 **Core user journey:**
 
-1. A client opens the public link and browses barbershops filtered by location, distance, ratings, and services.
-2. The client selects a barbershop, picks a barber and a service, and requests an available time slot.
+1. A client opens the public link and browses petshops filtered by location, distance, ratings, species served, and services.
+2. The client selects a petshop, picks a professional and a service, and requests an available time slot.
 3. The booking request is queued via RabbitMQ to prevent overbooking; the client receives confirmation once the slot is secured.
-4. At service completion, the barber may adjust the final price to reflect add-ons or discounts. Payment is collected in person — no online payment gateway.
-5. After the appointment, the client may optionally rate the barber and the barbershop.
+4. At service completion, the professional may adjust the final price to reflect add-ons or discounts. Payment is collected in person — no online payment gateway.
+5. After the appointment, the client may optionally rate the professional and the petshop.
 
-**Tenant model:** A tenant is an **Empresa** (representing a barbershop). All data is strictly scoped to the tenant. A user belongs to exactly one Empresa. There is no cross-tenant data access — ever.
+**Tenant model:** A tenant is an **Empresa** (representing a petshop). All data is strictly scoped to the tenant. A user belongs to exactly one Empresa. There is no cross-tenant data access — ever.
 
-**Admin panel:** Operational records (barbershops, barbers, services, schedules, and configurations) are managed by authorized users in a dedicated admin panel.
-
----
-
-## Architecture
-
-The system is a **monorepo** with independently deployable services that communicate over HTTP and a message queue.
+**Admin panel:** Operational records (petshops, professionals, services, schedules, pets, owners, and configurations) are managed by authorized users in a dedicated admin panel.
 
 ```
-corte.ai/
-  apps/
-    backend/          ← .NET 10 Minimal API  (REST, auth, persistence)
-    frontend/         ← Next.js 16 App Router (responsive web, public booking)
-    mobile/           ← React Native + Expo (client-facing booking app)
-    microservices/
-      rabbitmq/       ← RabbitMQ message broker (booking queue)
-  openspec/           ← spec-driven change management
-  .claude/
-    agents/           ← specialist agent prompts (Claude)
-  .github/
-    agents/           ← specialist agent prompts (Copilot)
+petcenter/
+        apps/
+                backend/          ← .NET 10 Minimal API  (REST, auth, persistence)
+                frontend/         ← Next.js 16 App Router (responsive web, public booking)
+                mobile/           ← React Native + Expo (client-facing booking app)
+                microservices/
+                        rabbitmq/       ← RabbitMQ message broker (booking queue)
+        openspec/           ← spec-driven change management
+        .claude/
+                agents/           ← specialist agent prompts (Claude)
+        .github/
+                agents/           ← specialist agent prompts (Copilot)
 ```
 
 ### Service communication map
 
 ```
 [Client Browser / Mobile App]
-        │  GET /barbershops, GET /barbershops/{id}/slots
+        │  GET /petshops, GET /petshops/{id}/slots
         │  POST /bookings  (booking request)
         ▼
 [.NET API — apps/backend]
@@ -124,7 +116,7 @@ These contracts are frozen. **No agent may change them unilaterally.** Any chang
 {
   "bookingId": "uuid",
   "empresaId": "uuid",
-  "barberId": "uuid",
+  "professionalId": "uuid",
   "serviceId": "uuid",
   "clientId": "uuid",
   "requestedAt": "ISO-8601",
@@ -149,18 +141,18 @@ All authenticated requests carry a bearer token in `Authorization: Bearer <token
 
 These rules apply to every file in the monorepo, regardless of layer.
 
-| Context                             | Language | Examples                                                   |
-| ----------------------------------- | -------- | ---------------------------------------------------------- |
-| Domain entity names                 | pt-BR    | `Empresa`, `Barbeiro`, `Serviço`, `Agendamento`, `Horário` |
-| Database table and column names     | pt-BR    | `empresas`, `barbeiros`, `agendamentos`, `criado_em`       |
-| Error messages shown to users       | pt-BR    | `"Horário indisponível."`, `"Nome é obrigatório."`         |
-| API validation messages             | pt-BR    | `"Data de início é obrigatória."`                          |
-| UI labels, button text, page titles | pt-BR    | `"Agendar"`, `"Meus favoritos"`, `"Avaliar atendimento"`   |
-| Code identifiers (all layers)       | English  | `CreateBookingService`, `BarberRepository`, `useSlots`     |
-| Technical suffixes                  | English  | `Service`, `Repository`, `Endpoint`, `Handler`             |
-| Code comments and docstrings        | English  | —                                                          |
-| API route paths                     | English  | `/bookings`, `/barbershops`, `/barbers`, `/health`         |
-| Log messages (structured logs)      | English  | `"Booking conflict detected"`, `"Slot confirmed"`          |
+| Context                             | Language | Examples                                                              |
+| ----------------------------------- | -------- | --------------------------------------------------------------------- |
+| Domain entity names                 | pt-BR    | `Empresa`, `Pet`, `Profissional`, `Serviço`, `Agendamento`, `Horário` |
+| Database table and column names     | pt-BR    | `empresas`, `pets`, `profissionais`, `agendamentos`, `criado_em`     |
+| Error messages shown to users       | pt-BR    | `"Horário indisponível."`, `"Nome é obrigatório."`                    |
+| API validation messages             | pt-BR    | `"Data de início é obrigatória."`                                     |
+| UI labels, button text, page titles | pt-BR    | `"Agendar"`, `"Meus favoritos"`, `"Avaliar atendimento"`              |
+| Code identifiers (all layers)       | English  | `CreateBookingService`, `ProfessionalRepository`, `useSlots`          |
+| Technical suffixes                  | English  | `Service`, `Repository`, `Endpoint`, `Handler`                        |
+| Code comments and docstrings        | English  | —                                                                     |
+| API route paths                     | English  | `/bookings`, `/petshops`, `/professionals`, `/health`                 |
+| Log messages (structured logs)      | English  | `"Booking conflict detected"`, `"Slot confirmed"`                     |
 
 ---
 
