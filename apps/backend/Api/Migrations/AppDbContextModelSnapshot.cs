@@ -22,7 +22,97 @@ namespace Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Api.Modules.Disponibilidade.Domain.DisponibilidadeProfissional", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DiaSemana")
+                        .HasColumnType("integer");
+
+                    b.Property<TimeOnly>("HoraFim")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<TimeOnly>("HoraInicio")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<Guid>("ProfissionalId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfissionalId");
+
+                    b.ToTable("disponibilidades_profissionais", (string)null);
+                });
+
             modelBuilder.Entity("Api.Modules.Empresas.Domain.Empresa", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Bairro")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("bairro");
+
+                    b.Property<string>("Cidade")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("cidade");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("descricao");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("Publica")
+                        .HasColumnType("boolean")
+                        .HasColumnName("publica");
+
+                    b.Property<string>("ResumoContato")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("resumo_contato");
+
+                    b.Property<string>("ResumoEndereco")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("resumo_endereco");
+
+                    b.Property<string>("Slug")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("slug");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Nome")
+                        .IsUnique();
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.ToTable("empresas", (string)null);
+                });
+
+            modelBuilder.Entity("Api.Modules.Profissionais.Domain.Profissional", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -34,6 +124,13 @@ namespace Api.Migrations
                     b.Property<DateTime>("CriadoEm")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Especialidade")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -41,10 +138,42 @@ namespace Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Nome")
-                        .IsUnique();
+                    b.HasIndex("EmpresaId");
 
-                    b.ToTable("empresas", (string)null);
+                    b.ToTable("profissionais", (string)null);
+                });
+
+            modelBuilder.Entity("Api.Modules.Servicos.Domain.Servico", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DuracaoMinutos")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<decimal>("PrecoBase")
+                        .HasColumnType("numeric(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmpresaId");
+
+                    b.ToTable("servicos", (string)null);
                 });
 
             modelBuilder.Entity("Api.Modules.Usuarios.Domain.Usuario", b =>
@@ -80,6 +209,33 @@ namespace Api.Migrations
                     b.HasIndex("EmpresaId");
 
                     b.ToTable("usuarios", (string)null);
+                });
+
+            modelBuilder.Entity("Api.Modules.Disponibilidade.Domain.DisponibilidadeProfissional", b =>
+                {
+                    b.HasOne("Api.Modules.Profissionais.Domain.Profissional", null)
+                        .WithMany()
+                        .HasForeignKey("ProfissionalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Api.Modules.Profissionais.Domain.Profissional", b =>
+                {
+                    b.HasOne("Api.Modules.Empresas.Domain.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Api.Modules.Servicos.Domain.Servico", b =>
+                {
+                    b.HasOne("Api.Modules.Empresas.Domain.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Api.Modules.Usuarios.Domain.Usuario", b =>

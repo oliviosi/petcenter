@@ -1,0 +1,14 @@
+namespace Api.Modules.Empresas.Routes.UpdatePublicProfile;
+
+public class UpdateEmpresaPublicProfileResponse
+{
+    public Guid Id { get; set; }
+    public string Nome { get; set; } = string.Empty;
+    public string? Slug { get; set; }
+    public string? Descricao { get; set; }
+    public string? Cidade { get; set; }
+    public string? Bairro { get; set; }
+    public string? ResumoContato { get; set; }
+    public string? ResumoEndereco { get; set; }
+    public bool Publica { get; set; }
+}
