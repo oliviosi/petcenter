@@ -1,7 +1,9 @@
 using Api.Infrastructure.Persistence;
 using Api.Modules.Auth.Routes;
+using Api.Modules.Bookings.Routes;
 using Api.Modules.Disponibilidade.Routes;
 using Api.Modules.Empresas.Routes;
+using Api.Modules.ProfessionalServiceAssignments.Routes;
 using Api.Modules.Profissionais.Routes;
 using Api.Modules.Servicos.Routes;
 
@@ -16,6 +18,8 @@ public static class WebApplicationExtensions
         app.MapProfissionaisEndpoints();
         app.MapServicosEndpoints();
         app.MapDisponibilidadeEndpoints();
+        app.MapProfessionalServiceAssignmentsEndpoints();
+        app.MapBookingsEndpoints();
         return app;
     }
 

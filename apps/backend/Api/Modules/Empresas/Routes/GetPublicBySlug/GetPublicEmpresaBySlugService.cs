@@ -31,6 +31,7 @@ public class GetPublicEmpresaBySlugService : IGetPublicEmpresaBySlugService
 
         return new GetPublicEmpresaBySlugResponse
         {
+            Id = empresa.Id,
             Nome = empresa.Nome,
             Slug = empresa.Slug ?? string.Empty,
             Descricao = empresa.Descricao ?? string.Empty,
@@ -40,11 +41,13 @@ public class GetPublicEmpresaBySlugService : IGetPublicEmpresaBySlugService
             ResumoEndereco = empresa.ResumoEndereco ?? string.Empty,
             Profissionais = profissionais.Select(profissional => new GetPublicEmpresaProfissionalResponse
             {
+                Id = profissional.Id,
                 Nome = profissional.Nome,
                 Especialidade = profissional.Especialidade
             }).ToList(),
             Servicos = servicos.Select(servico => new GetPublicEmpresaServicoResponse
             {
+                Id = servico.Id,
                 Nome = servico.Nome,
                 DuracaoMinutos = servico.DuracaoMinutos,
                 PrecoBase = servico.PrecoBase

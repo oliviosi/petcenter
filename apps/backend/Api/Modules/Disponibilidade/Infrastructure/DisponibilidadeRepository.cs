@@ -26,6 +26,20 @@ public class DisponibilidadeRepository : IDisponibilidadeRepository
             .ThenBy(d => d.HoraInicio)
             .ToListAsync();
 
+    public async Task<List<DisponibilidadeProfissional>> ListByProfissionaisAsync(IEnumerable<Guid> profissionalIds)
+    {
+        var ids = profissionalIds.Distinct().ToArray();
+        if (ids.Length == 0)
+            return [];
+
+        return await _db.DisponibilidadesProfissionais.AsNoTracking()
+            .Where(d => ids.Contains(d.ProfissionalId))
+            .OrderBy(d => d.ProfissionalId)
+            .ThenBy(d => d.DiaSemana)
+            .ThenBy(d => d.HoraInicio)
+            .ToListAsync();
+    }
+
     public async Task UpdateAsync(DisponibilidadeProfissional disponibilidade)
     {
         _db.DisponibilidadesProfissionais.Update(disponibilidade);

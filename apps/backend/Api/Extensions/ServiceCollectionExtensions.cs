@@ -1,5 +1,10 @@
 using Api.Modules.Auth.Routes.Login;
 using Api.Modules.Auth.Routes.Me;
+using Api.Modules.Bookings.Infrastructure;
+using Api.Modules.Bookings.Routes.ConfirmFromEvent;
+using Api.Modules.Bookings.Routes.Create;
+using Api.Modules.Bookings.Routes.GetSlots;
+using Api.Modules.Bookings.Routes.RejectFromEvent;
 using Api.Modules.Disponibilidade.Infrastructure;
 using Api.Modules.Disponibilidade.Routes.Create;
 using Api.Modules.Disponibilidade.Routes.Delete;
@@ -10,6 +15,10 @@ using Api.Modules.Empresas.Routes.GetPublicBySlug;
 using Api.Modules.Empresas.Routes.GetPublicProfile;
 using Api.Modules.Empresas.Routes.ListPublic;
 using Api.Modules.Empresas.Routes.UpdatePublicProfile;
+using Api.Modules.ProfessionalServiceAssignments.Infrastructure;
+using Api.Modules.ProfessionalServiceAssignments.Routes.Create;
+using Api.Modules.ProfessionalServiceAssignments.Routes.Delete;
+using Api.Modules.ProfessionalServiceAssignments.Routes.List;
 using Api.Modules.Profissionais.Infrastructure;
 using Api.Modules.Profissionais.Routes.Ativar;
 using Api.Modules.Profissionais.Routes.Create;
@@ -31,6 +40,8 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddModuleServices(this IServiceCollection services)
     {
+        services.AddSingleton<TimeProvider>(TimeProvider.System);
+
         // Auth / core
         services.AddScoped<IEmpresaRepository, EmpresaRepository>();
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
@@ -64,6 +75,22 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IListDisponibilidadeService, ListDisponibilidadeService>();
         services.AddScoped<IDeleteDisponibilidadeService, DeleteDisponibilidadeService>();
         services.AddScoped<IUpdateDisponibilidadeService, UpdateDisponibilidadeService>();
+
+        // Professional-service assignments
+        services.AddScoped<IProfessionalServiceAssignmentRepository, ProfessionalServiceAssignmentRepository>();
+        services.AddScoped<ICreateProfessionalServiceAssignmentService, CreateProfessionalServiceAssignmentService>();
+        services.AddScoped<IListProfessionalServiceAssignmentsService, ListProfessionalServiceAssignmentsService>();
+        services.AddScoped<IDeleteProfessionalServiceAssignmentService, DeleteProfessionalServiceAssignmentService>();
+
+        // Bookings
+        services.AddScoped<IBookingRepository, BookingRepository>();
+        services.AddScoped<IInboxEntryRepository, InboxEntryRepository>();
+        services.AddScoped<IBookingEventPublisher, LoggingBookingEventPublisher>();
+        services.AddScoped<IBookingAvailabilityService, BookingAvailabilityService>();
+        services.AddScoped<IGetPublicSlotsService, GetPublicSlotsService>();
+        services.AddScoped<ICreateBookingService, CreateBookingService>();
+        services.AddScoped<IConfirmBookingFromEventService, ConfirmBookingFromEventService>();
+        services.AddScoped<IRejectBookingFromEventService, RejectBookingFromEventService>();
 
         return services;
     }

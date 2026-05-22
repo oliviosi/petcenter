@@ -3,11 +3,11 @@ Define public petshop catalog browsing, filtering, and slug-based detail lookup 
 
 ## Requirements
 ### Requirement: Clients can browse a public catalog of petshops
-The system SHALL provide an unauthenticated endpoint that lists publicly visible petshops in a simple catalog format.
+The system SHALL provide an unauthenticated endpoint that lists publicly visible petshops in a simple catalog format, including the stable identifier required for public slot lookup.
 
 #### Scenario: Public catalog is requested
 - **WHEN** a client requests the public petshop catalog without filters
-- **THEN** the system returns listed petshops that are active and public
+- **THEN** the system returns listed petshops that are active and public, including the stable identifier needed for slot lookup
 
 ### Requirement: Clients can filter the public catalog by basic attributes
 The system SHALL allow clients to filter the public petshop catalog by petshop name, city, neighborhood, and offered service.

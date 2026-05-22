@@ -13,6 +13,10 @@ public class EmpresaRepository : IEmpresaRepository
     public async Task<Empresa?> GetByIdAsync(Guid id) =>
         await _db.Empresas.FirstOrDefaultAsync(e => e.Id == id);
 
+    public async Task<Empresa?> GetPublicByIdAsync(Guid id) =>
+        await _db.Empresas.AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Id == id && e.Ativo && e.Publica);
+
     public async Task<Empresa?> GetBySlugAsync(string slug)
     {
         var slugNormalizado = slug.Trim().ToLowerInvariant();

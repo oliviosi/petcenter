@@ -31,6 +31,18 @@ public class ServicoRepository : IServicoRepository
             .OrderBy(s => s.Nome)
             .ToListAsync();
 
+    public async Task<List<Servico>> ListByIdsAsync(Guid empresaId, IEnumerable<Guid> ids)
+    {
+        var serviceIds = ids.Distinct().ToArray();
+        if (serviceIds.Length == 0)
+            return [];
+
+        return await _db.Servicos.AsNoTracking()
+            .Where(s => s.EmpresaId == empresaId && serviceIds.Contains(s.Id))
+            .OrderBy(s => s.Nome)
+            .ToListAsync();
+    }
+
     public async Task UpdateAsync(Servico servico)
     {
         _db.Servicos.Update(servico);

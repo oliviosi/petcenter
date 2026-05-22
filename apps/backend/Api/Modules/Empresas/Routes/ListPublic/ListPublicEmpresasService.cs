@@ -14,6 +14,7 @@ public class ListPublicEmpresasService : IListPublicEmpresasService
 
         return empresas.Select(empresa => new ListPublicEmpresasResponse
         {
+            Id = empresa.Id,
             Nome = empresa.Nome,
             Slug = empresa.Slug ?? string.Empty,
             Descricao = empresa.Descricao ?? string.Empty,

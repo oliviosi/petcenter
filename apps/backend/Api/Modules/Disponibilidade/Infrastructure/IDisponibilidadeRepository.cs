@@ -7,6 +7,7 @@ public interface IDisponibilidadeRepository
     Task AddAsync(DisponibilidadeProfissional disponibilidade);
     Task<DisponibilidadeProfissional?> GetByIdAsync(Guid id, Guid profissionalId);
     Task<List<DisponibilidadeProfissional>> ListByProfissionalAsync(Guid profissionalId);
+    Task<List<DisponibilidadeProfissional>> ListByProfissionaisAsync(IEnumerable<Guid> profissionalIds);
     Task UpdateAsync(DisponibilidadeProfissional disponibilidade);
     Task DeleteAsync(DisponibilidadeProfissional disponibilidade);
 }

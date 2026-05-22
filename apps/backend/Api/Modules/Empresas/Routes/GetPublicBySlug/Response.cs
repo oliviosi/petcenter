@@ -2,6 +2,7 @@ namespace Api.Modules.Empresas.Routes.GetPublicBySlug;
 
 public class GetPublicEmpresaBySlugResponse
 {
+    public Guid Id { get; set; }
     public string Nome { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
     public string Descricao { get; set; } = string.Empty;
@@ -15,12 +16,14 @@ public class GetPublicEmpresaBySlugResponse
 
 public class GetPublicEmpresaProfissionalResponse
 {
+    public Guid Id { get; set; }
     public string Nome { get; set; } = string.Empty;
     public string? Especialidade { get; set; }
 }
 
 public class GetPublicEmpresaServicoResponse
 {
+    public Guid Id { get; set; }
     public string Nome { get; set; } = string.Empty;
     public int DuracaoMinutos { get; set; }
     public decimal PrecoBase { get; set; }
