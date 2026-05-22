@@ -1,4 +1,5 @@
 using Api.Modules.Bookings.Routes.Create;
+using Api.Modules.Bookings.Routes.CheckStatus;
 using Api.Modules.Bookings.Routes.CheckFeedbackEligibility;
 using Api.Modules.Bookings.Routes.Cancel;
 using Api.Modules.Bookings.Routes.Complete;
@@ -52,6 +53,23 @@ public static class BookingsEndpoints
             return Results.Created($"/bookings/{response.Id}", response);
         })
         .WithName("CreateBooking");
+
+        bookingsGroup.MapPost("/{id:guid}/status", async (
+            Guid id,
+            CheckBookingStatusRequest request,
+            IValidator<CheckBookingStatusRequest> validator,
+            ICheckBookingStatusService service) =>
+        {
+            request.BookingId = id;
+
+            var validation = await validator.ValidateAsync(request);
+            if (!validation.IsValid)
+                return Results.ValidationProblem(validation.ToDictionary());
+
+            var response = await service.HandleAsync(request);
+            return Results.Ok(response);
+        })
+        .WithName("CheckBookingStatus");
 
         bookingsGroup.MapPost("/{id:guid}/feedback/eligibility", async (
             Guid id,

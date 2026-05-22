@@ -78,6 +78,7 @@ public class CheckBookingFeedbackEligibilityServiceTests
             "11 97777-0000",
             "Nina",
             "Gato",
+            TestData.CreateProtectedBookingStatusToken(),
             TestData.CreateProtectedFeedbackToken(rawToken),
             TestData.ToUtc(new DateOnly(2026, 1, 5), new TimeOnly(9, 0)),
             TestData.ToUtc(new DateOnly(2026, 1, 5), new TimeOnly(9, 30)));

@@ -122,6 +122,7 @@ public class CancelBookingServiceTests
             "11 98888-0000",
             "Luna",
             "Cachorro",
+            TestData.CreateProtectedBookingStatusToken(),
             TestData.CreateProtectedFeedbackToken(),
             TestData.ToUtc(new DateOnly(2026, 1, 5), new TimeOnly(9, 0)),
             TestData.ToUtc(new DateOnly(2026, 1, 5), new TimeOnly(9, 45)));

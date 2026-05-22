@@ -17,6 +17,7 @@ public class CreateBookingService : ICreateBookingService
     private readonly IBookingAvailabilityService _availabilityService;
     private readonly IBookingRepository _bookingRepository;
     private readonly IBookingEventPublisher _eventPublisher;
+    private readonly IBookingStatusAccessTokenService _bookingStatusAccessTokenService;
     private readonly IBookingFeedbackAccessTokenService _feedbackAccessTokenService;
 
     public CreateBookingService(
@@ -26,6 +27,7 @@ public class CreateBookingService : ICreateBookingService
         IBookingAvailabilityService availabilityService,
         IBookingRepository bookingRepository,
         IBookingEventPublisher eventPublisher,
+        IBookingStatusAccessTokenService bookingStatusAccessTokenService,
         IBookingFeedbackAccessTokenService feedbackAccessTokenService)
     {
         _empresaRepository = empresaRepository;
@@ -34,6 +36,7 @@ public class CreateBookingService : ICreateBookingService
         _availabilityService = availabilityService;
         _bookingRepository = bookingRepository;
         _eventPublisher = eventPublisher;
+        _bookingStatusAccessTokenService = bookingStatusAccessTokenService;
         _feedbackAccessTokenService = feedbackAccessTokenService;
     }
 
@@ -68,6 +71,7 @@ public class CreateBookingService : ICreateBookingService
         if (!availableSlots.Any(slot => slot.SlotStart == requestedStart && slot.SlotEnd == requestedEnd))
             throw new BookingSlotUnavailableException();
 
+        var bookingStatusAccessToken = _bookingStatusAccessTokenService.GenerateToken();
         var feedbackAccessToken = _feedbackAccessTokenService.GenerateToken();
 
         var booking = new Booking(
@@ -78,6 +82,7 @@ public class CreateBookingService : ICreateBookingService
             request.OwnerContact,
             request.PetName,
             request.PetSpecies,
+            _bookingStatusAccessTokenService.ProtectToken(bookingStatusAccessToken),
             _feedbackAccessTokenService.ProtectToken(feedbackAccessToken),
             requestedStart,
             requestedEnd);
@@ -107,6 +112,7 @@ public class CreateBookingService : ICreateBookingService
             OwnerContact = booking.OwnerContact,
             PetName = booking.PetName,
             PetSpecies = booking.PetSpecies,
+            BookingStatusAccessToken = bookingStatusAccessToken,
             FeedbackAccessToken = feedbackAccessToken,
             RequestedAt = booking.RequestedAt,
             SlotStart = booking.SlotStart,

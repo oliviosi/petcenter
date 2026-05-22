@@ -23,6 +23,7 @@ public class Booking
     public string? CancellationReason { get; private set; }
     public DateTime? NoShowAt { get; private set; }
     public string? NoShowReason { get; private set; }
+    public string BookingStatusAccessTokenHash { get; private set; } = string.Empty;
     public string FeedbackAccessTokenHash { get; private set; } = string.Empty;
     public DateTime? FeedbackSubmittedAt { get; private set; }
 
@@ -36,6 +37,7 @@ public class Booking
         string ownerContact,
         string petName,
         string petSpecies,
+        string bookingStatusAccessTokenHash,
         string feedbackAccessTokenHash,
         DateTime slotStart,
         DateTime slotEnd)
@@ -57,6 +59,7 @@ public class Booking
         DefinirOwnerContact(ownerContact);
         DefinirPetName(petName);
         DefinirPetSpecies(petSpecies);
+        DefinirBookingStatusAccessTokenHash(bookingStatusAccessTokenHash);
         DefinirFeedbackAccessTokenHash(feedbackAccessTokenHash);
         DefinirSlot(slotStart, slotEnd);
     }
@@ -191,6 +194,14 @@ public class Booking
             throw new ArgumentException("Espécie do pet é obrigatória.");
 
         PetSpecies = petSpecies.Trim();
+    }
+
+    private void DefinirBookingStatusAccessTokenHash(string bookingStatusAccessTokenHash)
+    {
+        if (string.IsNullOrWhiteSpace(bookingStatusAccessTokenHash))
+            throw new ArgumentException("Hash do token de status é obrigatório.");
+
+        BookingStatusAccessTokenHash = bookingStatusAccessTokenHash.Trim();
     }
 
     private void DefinirFeedbackAccessTokenHash(string feedbackAccessTokenHash)

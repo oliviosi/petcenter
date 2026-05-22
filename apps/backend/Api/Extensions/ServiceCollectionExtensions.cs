@@ -1,6 +1,7 @@
 using Api.Modules.Auth.Routes.Login;
 using Api.Modules.Auth.Routes.Me;
 using Api.Modules.Bookings.Infrastructure;
+using Api.Modules.Bookings.Routes.CheckStatus;
 using Api.Modules.Bookings.Routes.ConfirmFromEvent;
 using Api.Modules.Bookings.Routes.Cancel;
 using Api.Modules.Bookings.Routes.Complete;
@@ -94,9 +95,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IInboxEntryRepository, InboxEntryRepository>();
         services.AddScoped<IBookingEventPublisher, LoggingBookingEventPublisher>();
         services.AddScoped<IBookingAvailabilityService, BookingAvailabilityService>();
+        services.AddScoped<IBookingStatusAccessTokenService, BookingStatusAccessTokenService>();
         services.AddScoped<IBookingFeedbackAccessTokenService, BookingFeedbackAccessTokenService>();
         services.AddScoped<IGetPublicSlotsService, GetPublicSlotsService>();
         services.AddScoped<ICreateBookingService, CreateBookingService>();
+        services.AddScoped<ICheckBookingStatusService, CheckBookingStatusService>();
         services.AddScoped<ICheckBookingFeedbackEligibilityService, CheckBookingFeedbackEligibilityService>();
         services.AddScoped<ISubmitBookingFeedbackService, SubmitBookingFeedbackService>();
         services.AddScoped<IListBookingsService, ListBookingsService>();

@@ -50,6 +50,12 @@ public class BookingFeedbackTokenInvalidException : UnauthorizedException
         : base("Token de feedback inválido.") { }
 }
 
+public class BookingStatusTokenInvalidException : UnauthorizedException
+{
+    public BookingStatusTokenInvalidException()
+        : base("Token de status inválido.") { }
+}
+
 public class BookingFeedbackAlreadySubmittedException : ConflictException
 {
     public BookingFeedbackAlreadySubmittedException(Guid bookingId)

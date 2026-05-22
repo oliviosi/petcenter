@@ -162,6 +162,7 @@ public class ListBookingsServiceTests
             "11 99999-0000",
             "Nina",
             "Cachorro",
+            TestData.CreateProtectedBookingStatusToken(),
             TestData.CreateProtectedFeedbackToken(),
             TestData.ToUtc(date, startTime),
             TestData.ToUtc(date, startTime.AddMinutes(30)));

@@ -12,6 +12,7 @@ namespace Api.Tests.Support;
 
 public static class TestData
 {
+    public const string DefaultBookingStatusAccessToken = "booking-status-token-tests";
     public const string DefaultFeedbackAccessToken = "feedback-token-tests";
 
     public static AppDbContext CreateDbContext(string? databaseName = null)
@@ -63,6 +64,7 @@ public static class TestData
                 "11 98888-0000",
                 "Toto",
                 "Cachorro",
+                CreateProtectedBookingStatusToken(),
                 CreateProtectedFeedbackToken(),
                 ToUtc(availabilityDate, new TimeOnly(9, 30)),
                 ToUtc(availabilityDate, new TimeOnly(10, 0)));
@@ -85,6 +87,9 @@ public static class TestData
 
     public static DateTime ToUtc(DateOnly date, TimeOnly time) =>
         DateTime.SpecifyKind(date.ToDateTime(time), DateTimeKind.Utc);
+
+    public static string CreateProtectedBookingStatusToken(string? rawToken = null) =>
+        new BookingStatusAccessTokenService().ProtectToken(rawToken ?? DefaultBookingStatusAccessToken);
 
     public static string CreateProtectedFeedbackToken(string? rawToken = null) =>
         new BookingFeedbackAccessTokenService().ProtectToken(rawToken ?? DefaultFeedbackAccessToken);
