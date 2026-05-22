@@ -1,7 +1,5 @@
-## Purpose
-Define public petshop catalog browsing, filtering, and slug-based detail lookup requirements.
+## MODIFIED Requirements
 
-## Requirements
 ### Requirement: Clients can browse a public catalog of petshops
 The system SHALL provide an unauthenticated endpoint that lists publicly visible petshops in a simple catalog format, including the stable identifier required for public slot lookup and the public petshop rating summary when available.
 

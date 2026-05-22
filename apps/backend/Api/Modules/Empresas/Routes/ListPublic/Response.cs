@@ -10,4 +10,6 @@ public class ListPublicEmpresasResponse
     public string Bairro { get; set; } = string.Empty;
     public string ResumoContato { get; set; } = string.Empty;
     public string ResumoEndereco { get; set; } = string.Empty;
+    public decimal? AverageRating { get; set; }
+    public int? FeedbackCount { get; set; }
 }

@@ -26,6 +26,7 @@ public class GetPublicEmpresaBySlugService : IGetPublicEmpresaBySlugService
         var empresa = await _empresaRepo.GetPublicBySlugAsync(slug)
             ?? throw new EmpresaPublicaNotFoundException(slug);
 
+        var ratingSummary = await _empresaRepo.GetPublicRatingSummaryAsync(empresa.Id);
         var profissionais = await _profissionalRepo.ListAtivosByEmpresaAsync(empresa.Id);
         var servicos = await _servicoRepo.ListAtivosByEmpresaAsync(empresa.Id);
 
@@ -39,6 +40,8 @@ public class GetPublicEmpresaBySlugService : IGetPublicEmpresaBySlugService
             Bairro = empresa.Bairro ?? string.Empty,
             ResumoContato = empresa.ResumoContato ?? string.Empty,
             ResumoEndereco = empresa.ResumoEndereco ?? string.Empty,
+            AverageRating = ratingSummary?.AverageRating,
+            FeedbackCount = ratingSummary?.FeedbackCount,
             Profissionais = profissionais.Select(profissional => new GetPublicEmpresaProfissionalResponse
             {
                 Id = profissional.Id,

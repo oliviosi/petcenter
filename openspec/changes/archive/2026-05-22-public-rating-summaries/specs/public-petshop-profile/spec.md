@@ -1,7 +1,5 @@
-## Purpose
-Define public petshop profile requirements for catalog discovery and public detail pages.
+## MODIFIED Requirements
 
-## Requirements
 ### Requirement: Petshops expose a public profile for catalog discovery
 The system SHALL maintain a public catalog profile for each petshop that is sufficient for simple browsing, public detail pages, and the transition into slot lookup, including the public rating summary when available.
 

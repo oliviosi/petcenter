@@ -67,6 +67,39 @@ public class EmpresaRepository : IEmpresaRepository
             .ToListAsync();
     }
 
+    public async Task<EmpresaPublicRatingSummary?> GetPublicRatingSummaryAsync(Guid empresaId)
+    {
+        var summaries = await GetPublicRatingSummariesAsync([empresaId]);
+        return summaries.GetValueOrDefault(empresaId);
+    }
+
+    public async Task<Dictionary<Guid, EmpresaPublicRatingSummary>> GetPublicRatingSummariesAsync(IEnumerable<Guid> empresaIds)
+    {
+        var ids = empresaIds.Distinct().ToArray();
+        if (ids.Length == 0)
+            return [];
+
+        var summaries = await _db.BookingFeedbacks.AsNoTracking()
+            .Where(feedback => ids.Contains(feedback.EmpresaId))
+            .GroupBy(feedback => feedback.EmpresaId)
+            .Select(group => new
+            {
+                EmpresaId = group.Key,
+                AverageRating = group.Average(feedback => (decimal)feedback.PetshopRating),
+                FeedbackCount = group.Count()
+            })
+            .ToListAsync();
+
+        return summaries.ToDictionary(
+            summary => summary.EmpresaId,
+            summary => new EmpresaPublicRatingSummary
+            {
+                EmpresaId = summary.EmpresaId,
+                AverageRating = decimal.Round(summary.AverageRating, 2, MidpointRounding.AwayFromZero),
+                FeedbackCount = summary.FeedbackCount
+            });
+    }
+
     public async Task UpdateAsync(Empresa empresa)
     {
         _db.Empresas.Update(empresa);
