@@ -17,6 +17,8 @@ public class Booking
     public DateTime? ConfirmedAt { get; private set; }
     public DateTime? RejectedAt { get; private set; }
     public string? RejectionReason { get; private set; }
+    public DateTime? CompletedAt { get; private set; }
+    public decimal? FinalChargedPrice { get; private set; }
 
     private Booking() { }
 
@@ -60,6 +62,8 @@ public class Booking
         ConfirmedAt = NormalizeUtc(confirmedAt);
         RejectedAt = null;
         RejectionReason = null;
+        CompletedAt = null;
+        FinalChargedPrice = null;
     }
 
     public void Reject(string reason, DateTime rejectedAt)
@@ -73,6 +77,26 @@ public class Booking
         State = BookingStates.Rejected;
         RejectedAt = NormalizeUtc(rejectedAt);
         RejectionReason = reason.Trim();
+        CompletedAt = null;
+        FinalChargedPrice = null;
+    }
+
+    public void Complete(decimal finalChargedPrice, DateTime completedAt)
+    {
+        if (State != BookingStates.Confirmed)
+            throw new BookingInvalidStateTransitionException(State, BookingStates.Completed);
+
+        DefinirFinalChargedPrice(finalChargedPrice);
+        State = BookingStates.Completed;
+        CompletedAt = NormalizeUtc(completedAt);
+    }
+
+    private void DefinirFinalChargedPrice(decimal finalChargedPrice)
+    {
+        if (finalChargedPrice < 0)
+            throw new BookingInvalidFinalChargedPriceException();
+
+        FinalChargedPrice = finalChargedPrice;
     }
 
     private void DefinirOwnerContact(string ownerContact)

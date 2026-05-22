@@ -19,6 +19,34 @@ public class BookingRepository : IBookingRepository
     public async Task<Booking?> GetByIdAsync(Guid id) =>
         await _db.Bookings.FirstOrDefaultAsync(b => b.Id == id);
 
+    public async Task<List<Booking>> ListByEmpresaAsync(
+        Guid empresaId,
+        DateTime? slotStartFrom = null,
+        DateTime? slotStartToExclusive = null,
+        string? state = null,
+        Guid? professionalId = null)
+    {
+        var query = _db.Bookings.AsNoTracking()
+            .Where(b => b.EmpresaId == empresaId);
+
+        if (slotStartFrom.HasValue)
+            query = query.Where(b => b.SlotStart >= slotStartFrom.Value);
+
+        if (slotStartToExclusive.HasValue)
+            query = query.Where(b => b.SlotStart < slotStartToExclusive.Value);
+
+        if (!string.IsNullOrWhiteSpace(state))
+            query = query.Where(b => b.State == state);
+
+        if (professionalId.HasValue)
+            query = query.Where(b => b.ProfessionalId == professionalId.Value);
+
+        return await query
+            .OrderBy(b => b.SlotStart)
+            .ThenBy(b => b.Id)
+            .ToListAsync();
+    }
+
     public async Task<List<Booking>> ListConfirmedOverlappingAsync(
         Guid empresaId,
         IEnumerable<Guid> professionalIds,
@@ -33,7 +61,7 @@ public class BookingRepository : IBookingRepository
             .Where(b =>
                 b.EmpresaId == empresaId
                 && ids.Contains(b.ProfessionalId)
-                && b.State == BookingStates.Confirmed
+                && (b.State == BookingStates.Confirmed || b.State == BookingStates.Completed)
                 && b.SlotStart < intervalEnd
                 && b.SlotEnd > intervalStart)
             .OrderBy(b => b.SlotStart)

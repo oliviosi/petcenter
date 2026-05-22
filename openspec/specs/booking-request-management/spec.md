@@ -28,7 +28,7 @@ The system SHALL publish `booking.requested` only after persisting the booking r
 - **THEN** the system persists the booking in `requested` state before publishing the corresponding `booking.requested` event
 
 ### Requirement: Booking confirmation remains asynchronous
-The system SHALL keep a booking in `requested` state until it receives `booking.confirmed` or `booking.rejected`, and it MUST NOT mark the slot as confirmed before the confirmation event arrives.
+The system SHALL keep a booking in `requested` state until it receives `booking.confirmed` or `booking.rejected`, and it MUST NOT mark the slot as confirmed before the confirmation event arrives. After a booking reaches `confirmed`, tenant operational flows may later transition it to `completed`.
 
 #### Scenario: Booking is confirmed
 - **WHEN** the system receives `booking.confirmed` for an existing requested booking

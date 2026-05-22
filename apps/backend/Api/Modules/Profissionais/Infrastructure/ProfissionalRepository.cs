@@ -31,6 +31,18 @@ public class ProfissionalRepository : IProfissionalRepository
             .OrderBy(p => p.Nome)
             .ToListAsync();
 
+    public async Task<List<Profissional>> ListByIdsAsync(Guid empresaId, IEnumerable<Guid> ids)
+    {
+        var professionalIds = ids.Distinct().ToArray();
+        if (professionalIds.Length == 0)
+            return [];
+
+        return await _db.Profissionais.AsNoTracking()
+            .Where(p => p.EmpresaId == empresaId && professionalIds.Contains(p.Id))
+            .OrderBy(p => p.Nome)
+            .ToListAsync();
+    }
+
     public async Task UpdateAsync(Profissional profissional)
     {
         _db.Profissionais.Update(profissional);

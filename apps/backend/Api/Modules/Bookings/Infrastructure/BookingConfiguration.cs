@@ -28,6 +28,8 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(b => b.ConfirmedAt);
         builder.Property(b => b.RejectedAt);
         builder.Property(b => b.RejectionReason).HasMaxLength(500);
+        builder.Property(b => b.CompletedAt);
+        builder.Property(b => b.FinalChargedPrice).HasPrecision(10, 2);
 
         builder.HasIndex(b => new { b.EmpresaId, b.ProfessionalId, b.SlotStart, b.State });
         builder.HasIndex(b => new { b.EmpresaId, b.ServiceId, b.SlotStart });

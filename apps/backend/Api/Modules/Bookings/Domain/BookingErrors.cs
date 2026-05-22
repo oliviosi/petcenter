@@ -8,6 +8,12 @@ public class BookingNotFoundException : NotFoundException
         : base($"Reserva '{id}' não encontrada.") { }
 }
 
+public class BookingForbiddenException : ForbiddenException
+{
+    public BookingForbiddenException()
+        : base("Acesso à reserva não permitido.") { }
+}
+
 public class BookingSlotUnavailableException : DomainException
 {
     public BookingSlotUnavailableException()
@@ -30,6 +36,12 @@ public class BookingInvalidStateTransitionException : DomainException
 {
     public BookingInvalidStateTransitionException(string currentState, string targetState)
         : base($"A transição de '{currentState}' para '{targetState}' não é válida.") { }
+}
+
+public class BookingInvalidFinalChargedPriceException : DomainException
+{
+    public BookingInvalidFinalChargedPriceException()
+        : base("Preço final deve ser maior ou igual a zero.") { }
 }
 
 public class PublicSlotsIntervalOutOfRangeException : DomainException

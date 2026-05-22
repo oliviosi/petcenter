@@ -1,7 +1,12 @@
 using Api.Modules.Bookings.Routes.Create;
+using Api.Modules.Bookings.Routes.Complete;
+using Api.Modules.Bookings.Routes.GetById;
 using Api.Modules.Bookings.Routes.GetSlots;
+using Api.Modules.Bookings.Routes.List;
+using Api.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Modules.Bookings.Routes;
 
@@ -44,6 +49,65 @@ public static class BookingsEndpoints
         })
         .WithName("CreateBooking");
 
+        bookingsGroup.MapGet("/", async (
+            [AsParameters] ListBookingsRequest request,
+            HttpContext httpContext,
+            IValidator<ListBookingsRequest> validator,
+            IListBookingsService service) =>
+        {
+            request.EmpresaId = ExtractEmpresaId(httpContext);
+
+            var validation = await validator.ValidateAsync(request);
+            if (!validation.IsValid)
+                return Results.ValidationProblem(validation.ToDictionary());
+
+            var response = await service.HandleAsync(request);
+            return Results.Ok(response);
+        })
+        .WithName("ListBookings")
+        .RequireAuthorization();
+
+        bookingsGroup.MapGet("/{id:guid}", async (
+            Guid id,
+            HttpContext httpContext,
+            IGetBookingByIdService service) =>
+        {
+            var empresaId = ExtractEmpresaId(httpContext);
+            var response = await service.HandleAsync(id, empresaId);
+            return Results.Ok(response);
+        })
+        .WithName("GetBookingById")
+        .RequireAuthorization();
+
+        bookingsGroup.MapPost("/{id:guid}/complete", async (
+            Guid id,
+            CompleteBookingRequest request,
+            HttpContext httpContext,
+            IValidator<CompleteBookingRequest> validator,
+            ICompleteBookingService service) =>
+        {
+            request.BookingId = id;
+            request.EmpresaId = ExtractEmpresaId(httpContext);
+
+            var validation = await validator.ValidateAsync(request);
+            if (!validation.IsValid)
+                return Results.ValidationProblem(validation.ToDictionary());
+
+            var response = await service.HandleAsync(request);
+            return Results.Ok(response);
+        })
+        .WithName("CompleteBooking")
+        .RequireAuthorization();
+
         return app;
+    }
+
+    private static Guid ExtractEmpresaId(HttpContext httpContext)
+    {
+        var claim = httpContext.User.FindFirstValue("empresa_id");
+        if (!Guid.TryParse(claim, out var empresaId))
+            throw new UnauthorizedException("Token inválido.");
+
+        return empresaId;
     }
 }
