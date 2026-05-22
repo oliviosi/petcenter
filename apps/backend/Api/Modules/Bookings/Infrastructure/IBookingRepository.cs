@@ -6,6 +6,7 @@ public interface IBookingRepository
 {
     Task AddAsync(Booking booking);
     Task<Booking?> GetByIdAsync(Guid id);
+    Task<BookingFeedback?> GetFeedbackByBookingIdAsync(Guid bookingId);
     Task<List<Booking>> ListByEmpresaAsync(
         Guid empresaId,
         DateTime? slotStartFrom = null,
@@ -13,5 +14,6 @@ public interface IBookingRepository
         string? state = null,
         Guid? professionalId = null);
     Task<List<Booking>> ListConfirmedOverlappingAsync(Guid empresaId, IEnumerable<Guid> professionalIds, DateTime intervalStart, DateTime intervalEnd);
+    Task AddFeedbackAsync(Booking booking, BookingFeedback feedback);
     Task UpdateAsync(Booking booking);
 }

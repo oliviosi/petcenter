@@ -20,6 +20,7 @@ public class BookingLifecycleEventTests
             "11 98888-0000",
             "Luna",
             "Cachorro",
+            TestData.CreateProtectedFeedbackToken(),
             DateTime.SpecifyKind(new DateTime(2026, 1, 5, 9, 0, 0), DateTimeKind.Utc),
             DateTime.SpecifyKind(new DateTime(2026, 1, 5, 9, 30, 0), DateTimeKind.Utc));
         db.Bookings.Add(booking);
@@ -58,6 +59,7 @@ public class BookingLifecycleEventTests
             "11 98888-0000",
             "Luna",
             "Cachorro",
+            TestData.CreateProtectedFeedbackToken(),
             DateTime.SpecifyKind(new DateTime(2026, 1, 5, 9, 0, 0), DateTimeKind.Utc),
             DateTime.SpecifyKind(new DateTime(2026, 1, 5, 9, 30, 0), DateTimeKind.Utc));
         db.Bookings.Add(booking);

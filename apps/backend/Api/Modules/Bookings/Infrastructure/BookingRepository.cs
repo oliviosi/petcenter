@@ -19,6 +19,9 @@ public class BookingRepository : IBookingRepository
     public async Task<Booking?> GetByIdAsync(Guid id) =>
         await _db.Bookings.FirstOrDefaultAsync(b => b.Id == id);
 
+    public async Task<BookingFeedback?> GetFeedbackByBookingIdAsync(Guid bookingId) =>
+        await _db.BookingFeedbacks.FirstOrDefaultAsync(feedback => feedback.BookingId == bookingId);
+
     public async Task<List<Booking>> ListByEmpresaAsync(
         Guid empresaId,
         DateTime? slotStartFrom = null,
@@ -66,6 +69,13 @@ public class BookingRepository : IBookingRepository
                 && b.SlotEnd > intervalStart)
             .OrderBy(b => b.SlotStart)
             .ToListAsync();
+    }
+
+    public async Task AddFeedbackAsync(Booking booking, BookingFeedback feedback)
+    {
+        _db.Bookings.Update(booking);
+        _db.BookingFeedbacks.Add(feedback);
+        await _db.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(Booking booking)

@@ -11,6 +11,7 @@ public class CreateBookingResponse
     public string OwnerContact { get; set; } = string.Empty;
     public string PetName { get; set; } = string.Empty;
     public string PetSpecies { get; set; } = string.Empty;
+    public string FeedbackAccessToken { get; set; } = string.Empty;
     public DateTime RequestedAt { get; set; }
     public DateTime SlotStart { get; set; }
     public DateTime SlotEnd { get; set; }

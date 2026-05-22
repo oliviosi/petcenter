@@ -19,6 +19,7 @@ public class CreateBookingServiceTests
         var availabilityDate = new DateOnly(2026, 1, 5);
         var scenario = TestData.SeedPublicScenario(db, availabilityDate);
         var publisher = new FakeBookingEventPublisher();
+        var tokenService = new BookingFeedbackAccessTokenService();
 
         var service = new CreateBookingService(
             new EmpresaRepository(db),
@@ -32,7 +33,8 @@ public class CreateBookingServiceTests
                 new DisponibilidadeRepository(db),
                 new BookingRepository(db)),
             new BookingRepository(db),
-            publisher);
+            publisher,
+            tokenService);
 
         var response = await service.HandleAsync(new CreateBookingRequest
         {
@@ -47,8 +49,14 @@ public class CreateBookingServiceTests
         });
 
         Assert.Equal(BookingStates.Requested, response.State);
+        Assert.False(string.IsNullOrWhiteSpace(response.FeedbackAccessToken));
         Assert.Single(publisher.PublishedMessages);
         Assert.Equal(response.Id, publisher.PublishedMessages[0].BookingId);
+
+        var persisted = await db.Bookings.FindAsync(response.Id);
+        Assert.NotNull(persisted);
+        Assert.NotEqual(response.FeedbackAccessToken, persisted!.FeedbackAccessTokenHash);
+        Assert.True(tokenService.VerifyToken(response.FeedbackAccessToken, persisted.FeedbackAccessTokenHash));
     }
 
     [Fact]
@@ -70,7 +78,8 @@ public class CreateBookingServiceTests
                 new DisponibilidadeRepository(db),
                 new BookingRepository(db)),
             new BookingRepository(db),
-            new FakeBookingEventPublisher());
+            new FakeBookingEventPublisher(),
+            new BookingFeedbackAccessTokenService());
 
         await Assert.ThrowsAsync<BookingSlotUnavailableException>(() => service.HandleAsync(new CreateBookingRequest
         {

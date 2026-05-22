@@ -44,6 +44,30 @@ public class BookingInvalidFinalChargedPriceException : DomainException
         : base("Preço final deve ser maior ou igual a zero.") { }
 }
 
+public class BookingFeedbackTokenInvalidException : UnauthorizedException
+{
+    public BookingFeedbackTokenInvalidException()
+        : base("Token de feedback inválido.") { }
+}
+
+public class BookingFeedbackAlreadySubmittedException : ConflictException
+{
+    public BookingFeedbackAlreadySubmittedException(Guid bookingId)
+        : base($"Feedback já enviado para a reserva '{bookingId}'.") { }
+}
+
+public class BookingFeedbackNotEligibleException : DomainException
+{
+    public BookingFeedbackNotEligibleException()
+        : base("A reserva informada ainda não está elegível para feedback.") { }
+}
+
+public class BookingFeedbackRatingOutOfRangeException : DomainException
+{
+    public BookingFeedbackRatingOutOfRangeException()
+        : base("As notas devem estar entre 1 e 5.") { }
+}
+
 public class PublicSlotsIntervalOutOfRangeException : DomainException
 {
     public PublicSlotsIntervalOutOfRangeException(DateOnly maxDate)

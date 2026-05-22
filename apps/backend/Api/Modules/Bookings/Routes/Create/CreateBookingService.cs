@@ -17,6 +17,7 @@ public class CreateBookingService : ICreateBookingService
     private readonly IBookingAvailabilityService _availabilityService;
     private readonly IBookingRepository _bookingRepository;
     private readonly IBookingEventPublisher _eventPublisher;
+    private readonly IBookingFeedbackAccessTokenService _feedbackAccessTokenService;
 
     public CreateBookingService(
         IEmpresaRepository empresaRepository,
@@ -24,7 +25,8 @@ public class CreateBookingService : ICreateBookingService
         IServicoRepository serviceRepository,
         IBookingAvailabilityService availabilityService,
         IBookingRepository bookingRepository,
-        IBookingEventPublisher eventPublisher)
+        IBookingEventPublisher eventPublisher,
+        IBookingFeedbackAccessTokenService feedbackAccessTokenService)
     {
         _empresaRepository = empresaRepository;
         _professionalRepository = professionalRepository;
@@ -32,6 +34,7 @@ public class CreateBookingService : ICreateBookingService
         _availabilityService = availabilityService;
         _bookingRepository = bookingRepository;
         _eventPublisher = eventPublisher;
+        _feedbackAccessTokenService = feedbackAccessTokenService;
     }
 
     public async Task<CreateBookingResponse> HandleAsync(CreateBookingRequest request)
@@ -65,6 +68,8 @@ public class CreateBookingService : ICreateBookingService
         if (!availableSlots.Any(slot => slot.SlotStart == requestedStart && slot.SlotEnd == requestedEnd))
             throw new BookingSlotUnavailableException();
 
+        var feedbackAccessToken = _feedbackAccessTokenService.GenerateToken();
+
         var booking = new Booking(
             petshop.Id,
             professional.Id,
@@ -73,6 +78,7 @@ public class CreateBookingService : ICreateBookingService
             request.OwnerContact,
             request.PetName,
             request.PetSpecies,
+            _feedbackAccessTokenService.ProtectToken(feedbackAccessToken),
             requestedStart,
             requestedEnd);
 
@@ -101,6 +107,7 @@ public class CreateBookingService : ICreateBookingService
             OwnerContact = booking.OwnerContact,
             PetName = booking.PetName,
             PetSpecies = booking.PetSpecies,
+            FeedbackAccessToken = feedbackAccessToken,
             RequestedAt = booking.RequestedAt,
             SlotStart = booking.SlotStart,
             SlotEnd = booking.SlotEnd

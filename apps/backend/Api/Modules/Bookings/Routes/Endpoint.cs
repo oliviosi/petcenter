@@ -1,8 +1,10 @@
 using Api.Modules.Bookings.Routes.Create;
+using Api.Modules.Bookings.Routes.CheckFeedbackEligibility;
 using Api.Modules.Bookings.Routes.Complete;
 using Api.Modules.Bookings.Routes.GetById;
 using Api.Modules.Bookings.Routes.GetSlots;
 using Api.Modules.Bookings.Routes.List;
+using Api.Modules.Bookings.Routes.SubmitFeedback;
 using Api.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
@@ -48,6 +50,40 @@ public static class BookingsEndpoints
             return Results.Created($"/bookings/{response.Id}", response);
         })
         .WithName("CreateBooking");
+
+        bookingsGroup.MapPost("/{id:guid}/feedback/eligibility", async (
+            Guid id,
+            CheckBookingFeedbackEligibilityRequest request,
+            IValidator<CheckBookingFeedbackEligibilityRequest> validator,
+            ICheckBookingFeedbackEligibilityService service) =>
+        {
+            request.BookingId = id;
+
+            var validation = await validator.ValidateAsync(request);
+            if (!validation.IsValid)
+                return Results.ValidationProblem(validation.ToDictionary());
+
+            var response = await service.HandleAsync(request);
+            return Results.Ok(response);
+        })
+        .WithName("CheckBookingFeedbackEligibility");
+
+        bookingsGroup.MapPost("/{id:guid}/feedback", async (
+            Guid id,
+            SubmitBookingFeedbackRequest request,
+            IValidator<SubmitBookingFeedbackRequest> validator,
+            ISubmitBookingFeedbackService service) =>
+        {
+            request.BookingId = id;
+
+            var validation = await validator.ValidateAsync(request);
+            if (!validation.IsValid)
+                return Results.ValidationProblem(validation.ToDictionary());
+
+            var response = await service.HandleAsync(request);
+            return Results.Ok(response);
+        })
+        .WithName("SubmitBookingFeedback");
 
         bookingsGroup.MapGet("/", async (
             [AsParameters] ListBookingsRequest request,

@@ -1,5 +1,6 @@
 using Api.Infrastructure.Persistence;
 using Api.Modules.Bookings.Domain;
+using Api.Modules.Bookings.Infrastructure;
 using Api.Modules.Disponibilidade.Domain;
 using Api.Modules.Empresas.Domain;
 using Api.Modules.ProfessionalServiceAssignments.Domain;
@@ -11,6 +12,8 @@ namespace Api.Tests.Support;
 
 public static class TestData
 {
+    public const string DefaultFeedbackAccessToken = "feedback-token-tests";
+
     public static AppDbContext CreateDbContext(string? databaseName = null)
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -60,6 +63,7 @@ public static class TestData
                 "11 98888-0000",
                 "Toto",
                 "Cachorro",
+                CreateProtectedFeedbackToken(),
                 ToUtc(availabilityDate, new TimeOnly(9, 30)),
                 ToUtc(availabilityDate, new TimeOnly(10, 0)));
             confirmedBooking.Confirm(ToUtc(availabilityDate, new TimeOnly(8, 0)));
@@ -81,6 +85,9 @@ public static class TestData
 
     public static DateTime ToUtc(DateOnly date, TimeOnly time) =>
         DateTime.SpecifyKind(date.ToDateTime(time), DateTimeKind.Utc);
+
+    public static string CreateProtectedFeedbackToken(string? rawToken = null) =>
+        new BookingFeedbackAccessTokenService().ProtectToken(rawToken ?? DefaultFeedbackAccessToken);
 }
 
 public class SeededScenario

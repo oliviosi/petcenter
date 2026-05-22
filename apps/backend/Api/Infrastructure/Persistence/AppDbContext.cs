@@ -27,6 +27,7 @@ public class AppDbContext : DbContext
     public DbSet<DisponibilidadeProfissional> DisponibilidadesProfissionais => Set<DisponibilidadeProfissional>();
     public DbSet<ProfessionalServiceAssignment> ProfessionalServiceAssignments => Set<ProfessionalServiceAssignment>();
     public DbSet<Booking> Bookings => Set<Booking>();
+    public DbSet<BookingFeedback> BookingFeedbacks => Set<BookingFeedback>();
     public DbSet<InboxEntry> InboxEntries => Set<InboxEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -38,6 +39,7 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new DisponibilidadeConfiguration());
         modelBuilder.ApplyConfiguration(new ProfessionalServiceAssignmentConfiguration());
         modelBuilder.ApplyConfiguration(new BookingConfiguration());
+        modelBuilder.ApplyConfiguration(new BookingFeedbackConfiguration());
         modelBuilder.ApplyConfiguration(new InboxEntryConfiguration());
     }
 }

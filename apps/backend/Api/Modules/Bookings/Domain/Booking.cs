@@ -19,6 +19,8 @@ public class Booking
     public string? RejectionReason { get; private set; }
     public DateTime? CompletedAt { get; private set; }
     public decimal? FinalChargedPrice { get; private set; }
+    public string FeedbackAccessTokenHash { get; private set; } = string.Empty;
+    public DateTime? FeedbackSubmittedAt { get; private set; }
 
     private Booking() { }
 
@@ -30,6 +32,7 @@ public class Booking
         string ownerContact,
         string petName,
         string petSpecies,
+        string feedbackAccessTokenHash,
         DateTime slotStart,
         DateTime slotEnd)
     {
@@ -50,6 +53,7 @@ public class Booking
         DefinirOwnerContact(ownerContact);
         DefinirPetName(petName);
         DefinirPetSpecies(petSpecies);
+        DefinirFeedbackAccessTokenHash(feedbackAccessTokenHash);
         DefinirSlot(slotStart, slotEnd);
     }
 
@@ -91,6 +95,20 @@ public class Booking
         CompletedAt = NormalizeUtc(completedAt);
     }
 
+    public bool CanReceiveFeedback() =>
+        State == BookingStates.Completed && !FeedbackSubmittedAt.HasValue;
+
+    public void RegistrarFeedbackEnviado(DateTime feedbackSubmittedAt)
+    {
+        if (State != BookingStates.Completed)
+            throw new BookingFeedbackNotEligibleException();
+
+        if (FeedbackSubmittedAt.HasValue)
+            throw new BookingFeedbackAlreadySubmittedException(Id);
+
+        FeedbackSubmittedAt = NormalizeUtc(feedbackSubmittedAt);
+    }
+
     private void DefinirFinalChargedPrice(decimal finalChargedPrice)
     {
         if (finalChargedPrice < 0)
@@ -121,6 +139,14 @@ public class Booking
             throw new ArgumentException("Espécie do pet é obrigatória.");
 
         PetSpecies = petSpecies.Trim();
+    }
+
+    private void DefinirFeedbackAccessTokenHash(string feedbackAccessTokenHash)
+    {
+        if (string.IsNullOrWhiteSpace(feedbackAccessTokenHash))
+            throw new ArgumentException("Hash do token de feedback é obrigatório.");
+
+        FeedbackAccessTokenHash = feedbackAccessTokenHash.Trim();
     }
 
     private void DefinirSlot(DateTime slotStart, DateTime slotEnd)
