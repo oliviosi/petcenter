@@ -28,10 +28,10 @@ public class ConfirmBookingFromEventService : IConfirmBookingFromEventService
             ?? throw new BookingNotFoundException(message.BookingId);
 
         if (booking.State == BookingStates.Requested)
+        {
             booking.Confirm(NormalizeUtc(message.ConfirmedAt));
-
-        if (booking.State == BookingStates.Confirmed)
             await _bookingRepository.UpdateAsync(booking);
+        }
 
         await _inboxRepository.AddAsync(new InboxEntry(
             message.MessageId,

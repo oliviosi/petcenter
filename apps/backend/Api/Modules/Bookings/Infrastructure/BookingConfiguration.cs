@@ -30,6 +30,10 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(b => b.RejectionReason).HasMaxLength(500);
         builder.Property(b => b.CompletedAt);
         builder.Property(b => b.FinalChargedPrice).HasPrecision(10, 2);
+        builder.Property(b => b.CancelledAt);
+        builder.Property(b => b.CancellationReason).HasMaxLength(500);
+        builder.Property(b => b.NoShowAt);
+        builder.Property(b => b.NoShowReason).HasMaxLength(500);
         builder.Property(b => b.FeedbackAccessTokenHash).IsRequired().HasMaxLength(100);
         builder.Property(b => b.FeedbackSubmittedAt);
 

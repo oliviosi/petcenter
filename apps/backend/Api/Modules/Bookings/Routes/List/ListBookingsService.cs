@@ -97,6 +97,20 @@ public class ListBookingsService : IListBookingsService
                         CompletedAt = booking.CompletedAt.Value,
                         FinalChargedPrice = booking.FinalChargedPrice.Value
                     }
+                    : null,
+                Cancellation = booking.CancelledAt.HasValue && !string.IsNullOrWhiteSpace(booking.CancellationReason)
+                    ? new ListBookingsCancellationResponse
+                    {
+                       CancelledAt = booking.CancelledAt.Value,
+                       Reason = booking.CancellationReason
+                    }
+                    : null,
+                NoShow = booking.NoShowAt.HasValue && !string.IsNullOrWhiteSpace(booking.NoShowReason)
+                    ? new ListBookingsNoShowResponse
+                    {
+                       NoShowAt = booking.NoShowAt.Value,
+                       Reason = booking.NoShowReason
+                    }
                     : null
             };
         }).ToList();

@@ -19,6 +19,10 @@ public class Booking
     public string? RejectionReason { get; private set; }
     public DateTime? CompletedAt { get; private set; }
     public decimal? FinalChargedPrice { get; private set; }
+    public DateTime? CancelledAt { get; private set; }
+    public string? CancellationReason { get; private set; }
+    public DateTime? NoShowAt { get; private set; }
+    public string? NoShowReason { get; private set; }
     public string FeedbackAccessTokenHash { get; private set; } = string.Empty;
     public DateTime? FeedbackSubmittedAt { get; private set; }
 
@@ -68,6 +72,10 @@ public class Booking
         RejectionReason = null;
         CompletedAt = null;
         FinalChargedPrice = null;
+        CancelledAt = null;
+        CancellationReason = null;
+        NoShowAt = null;
+        NoShowReason = null;
     }
 
     public void Reject(string reason, DateTime rejectedAt)
@@ -83,6 +91,46 @@ public class Booking
         RejectionReason = reason.Trim();
         CompletedAt = null;
         FinalChargedPrice = null;
+        CancelledAt = null;
+        CancellationReason = null;
+        NoShowAt = null;
+        NoShowReason = null;
+    }
+
+    public void Cancel(string reason, DateTime cancelledAt)
+    {
+        if (State != BookingStates.Requested && State != BookingStates.Confirmed)
+            throw new BookingInvalidStateTransitionException(State, BookingStates.Cancelled);
+
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new ArgumentException("Motivo do cancelamento é obrigatório.");
+
+        State = BookingStates.Cancelled;
+        CancelledAt = NormalizeUtc(cancelledAt);
+        CancellationReason = reason.Trim();
+        RejectedAt = null;
+        RejectionReason = null;
+        CompletedAt = null;
+        FinalChargedPrice = null;
+        NoShowAt = null;
+        NoShowReason = null;
+    }
+
+    public void MarkNoShow(string reason, DateTime noShowAt)
+    {
+        if (State != BookingStates.Confirmed)
+            throw new BookingInvalidStateTransitionException(State, BookingStates.NoShow);
+
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new ArgumentException("Motivo do não comparecimento é obrigatório.");
+
+        State = BookingStates.NoShow;
+        NoShowAt = NormalizeUtc(noShowAt);
+        NoShowReason = reason.Trim();
+        CompletedAt = null;
+        FinalChargedPrice = null;
+        CancelledAt = null;
+        CancellationReason = null;
     }
 
     public void Complete(decimal finalChargedPrice, DateTime completedAt)
@@ -93,6 +141,10 @@ public class Booking
         DefinirFinalChargedPrice(finalChargedPrice);
         State = BookingStates.Completed;
         CompletedAt = NormalizeUtc(completedAt);
+        CancelledAt = null;
+        CancellationReason = null;
+        NoShowAt = null;
+        NoShowReason = null;
     }
 
     public bool CanReceiveFeedback() =>

@@ -2,12 +2,14 @@ using Api.Modules.Auth.Routes.Login;
 using Api.Modules.Auth.Routes.Me;
 using Api.Modules.Bookings.Infrastructure;
 using Api.Modules.Bookings.Routes.ConfirmFromEvent;
+using Api.Modules.Bookings.Routes.Cancel;
 using Api.Modules.Bookings.Routes.Complete;
 using Api.Modules.Bookings.Routes.Create;
 using Api.Modules.Bookings.Routes.CheckFeedbackEligibility;
 using Api.Modules.Bookings.Routes.GetById;
 using Api.Modules.Bookings.Routes.GetSlots;
 using Api.Modules.Bookings.Routes.List;
+using Api.Modules.Bookings.Routes.NoShow;
 using Api.Modules.Bookings.Routes.RejectFromEvent;
 using Api.Modules.Bookings.Routes.SubmitFeedback;
 using Api.Modules.Disponibilidade.Infrastructure;
@@ -100,6 +102,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IListBookingsService, ListBookingsService>();
         services.AddScoped<IGetBookingByIdService, GetBookingByIdService>();
         services.AddScoped<ICompleteBookingService, CompleteBookingService>();
+        services.AddScoped<ICancelBookingService, CancelBookingService>();
+        services.AddScoped<INoShowBookingService, NoShowBookingService>();
         services.AddScoped<IConfirmBookingFromEventService, ConfirmBookingFromEventService>();
         services.AddScoped<IRejectBookingFromEventService, RejectBookingFromEventService>();
 

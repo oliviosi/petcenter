@@ -1,9 +1,11 @@
 using Api.Modules.Bookings.Routes.Create;
 using Api.Modules.Bookings.Routes.CheckFeedbackEligibility;
+using Api.Modules.Bookings.Routes.Cancel;
 using Api.Modules.Bookings.Routes.Complete;
 using Api.Modules.Bookings.Routes.GetById;
 using Api.Modules.Bookings.Routes.GetSlots;
 using Api.Modules.Bookings.Routes.List;
+using Api.Modules.Bookings.Routes.NoShow;
 using Api.Modules.Bookings.Routes.SubmitFeedback;
 using Api.Exceptions;
 using FluentValidation;
@@ -133,6 +135,46 @@ public static class BookingsEndpoints
             return Results.Ok(response);
         })
         .WithName("CompleteBooking")
+        .RequireAuthorization();
+
+        bookingsGroup.MapPost("/{id:guid}/cancel", async (
+            Guid id,
+            CancelBookingRequest request,
+            HttpContext httpContext,
+            IValidator<CancelBookingRequest> validator,
+            ICancelBookingService service) =>
+        {
+            request.BookingId = id;
+            request.EmpresaId = ExtractEmpresaId(httpContext);
+
+            var validation = await validator.ValidateAsync(request);
+            if (!validation.IsValid)
+                return Results.ValidationProblem(validation.ToDictionary());
+
+            var response = await service.HandleAsync(request);
+            return Results.Ok(response);
+        })
+        .WithName("CancelBooking")
+        .RequireAuthorization();
+
+        bookingsGroup.MapPost("/{id:guid}/no-show", async (
+            Guid id,
+            NoShowBookingRequest request,
+            HttpContext httpContext,
+            IValidator<NoShowBookingRequest> validator,
+            INoShowBookingService service) =>
+        {
+            request.BookingId = id;
+            request.EmpresaId = ExtractEmpresaId(httpContext);
+
+            var validation = await validator.ValidateAsync(request);
+            if (!validation.IsValid)
+                return Results.ValidationProblem(validation.ToDictionary());
+
+            var response = await service.HandleAsync(request);
+            return Results.Ok(response);
+        })
+        .WithName("NoShowBooking")
         .RequireAuthorization();
 
         return app;

@@ -14,6 +14,8 @@ public class ListBookingsResponse
     public ListBookingsPetResponse Pet { get; set; } = new();
     public ListBookingsRejectionResponse? Rejection { get; set; }
     public ListBookingsCompletionResponse? Completion { get; set; }
+    public ListBookingsCancellationResponse? Cancellation { get; set; }
+    public ListBookingsNoShowResponse? NoShow { get; set; }
 }
 
 public class ListBookingsProfessionalResponse
@@ -47,4 +49,16 @@ public class ListBookingsCompletionResponse
 {
     public DateTime CompletedAt { get; set; }
     public decimal FinalChargedPrice { get; set; }
+}
+
+public class ListBookingsCancellationResponse
+{
+    public DateTime CancelledAt { get; set; }
+    public string Reason { get; set; } = string.Empty;
+}
+
+public class ListBookingsNoShowResponse
+{
+    public DateTime NoShowAt { get; set; }
+    public string Reason { get; set; } = string.Empty;
 }

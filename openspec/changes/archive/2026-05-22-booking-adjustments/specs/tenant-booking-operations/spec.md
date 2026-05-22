@@ -1,7 +1,5 @@
-## Purpose
-Define tenant-bound booking operational visibility requirements.
+## MODIFIED Requirements
 
-## Requirements
 ### Requirement: Tenant users can list bookings inside their authenticated scope
 The system SHALL allow authenticated tenant users to list bookings belonging only to their authenticated `Empresa`, including operational outcomes such as cancellation and no-show.
 

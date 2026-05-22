@@ -10,7 +10,9 @@ public class ListBookingsRequestValidator : AbstractValidator<ListBookingsReques
         BookingStates.Requested,
         BookingStates.Confirmed,
         BookingStates.Rejected,
-        BookingStates.Completed
+        BookingStates.Completed,
+        BookingStates.Cancelled,
+        BookingStates.NoShow
     ];
 
     public ListBookingsRequestValidator()

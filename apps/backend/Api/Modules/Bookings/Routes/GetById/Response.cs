@@ -15,6 +15,8 @@ public class GetBookingByIdResponse
     public GetBookingByIdPetResponse Pet { get; set; } = new();
     public GetBookingByIdRejectionResponse? Rejection { get; set; }
     public GetBookingByIdCompletionResponse? Completion { get; set; }
+    public GetBookingByIdCancellationResponse? Cancellation { get; set; }
+    public GetBookingByIdNoShowResponse? NoShow { get; set; }
 }
 
 public class GetBookingByIdProfessionalResponse
@@ -49,4 +51,16 @@ public class GetBookingByIdCompletionResponse
 {
     public DateTime CompletedAt { get; set; }
     public decimal FinalChargedPrice { get; set; }
+}
+
+public class GetBookingByIdCancellationResponse
+{
+    public DateTime CancelledAt { get; set; }
+    public string Reason { get; set; } = string.Empty;
+}
+
+public class GetBookingByIdNoShowResponse
+{
+    public DateTime NoShowAt { get; set; }
+    public string Reason { get; set; } = string.Empty;
 }

@@ -88,6 +88,66 @@ public class ListBookingsServiceTests
         Assert.Equal(75m, item.Completion!.FinalChargedPrice);
     }
 
+    [Fact]
+    public async Task HandleAsync_ShouldReturnCancellationAndNoShowMetadata()
+    {
+        using var db = TestData.CreateDbContext();
+
+        var empresa = new Empresa("Pet Center Alpha");
+        var profissional = new Profissional(empresa.Id, "Dra. Ana", "Banho");
+        var servico = new Servico(empresa.Id, "Banho", 30, 50m);
+
+        var cancelledBooking = CreateBooking(
+            empresa.Id,
+            profissional.Id,
+            servico.Id,
+            new DateOnly(2026, 1, 5),
+            new TimeOnly(9, 0));
+        cancelledBooking.Cancel("Cliente pediu cancelamento.", TestData.ToUtc(new DateOnly(2026, 1, 5), new TimeOnly(8, 0)));
+
+        var noShowBooking = CreateBooking(
+            empresa.Id,
+            profissional.Id,
+            servico.Id,
+            new DateOnly(2026, 1, 5),
+            new TimeOnly(10, 0));
+        noShowBooking.Confirm(TestData.ToUtc(new DateOnly(2026, 1, 5), new TimeOnly(9, 30)));
+        noShowBooking.MarkNoShow("Cliente não compareceu.", TestData.ToUtc(new DateOnly(2026, 1, 5), new TimeOnly(10, 15)));
+
+        db.Empresas.Add(empresa);
+        db.Profissionais.Add(profissional);
+        db.Servicos.Add(servico);
+        db.Bookings.AddRange(cancelledBooking, noShowBooking);
+        await db.SaveChangesAsync();
+
+        var sut = new ListBookingsService(
+            new BookingRepository(db),
+            new ProfissionalRepository(db),
+            new ServicoRepository(db));
+
+        var cancelledResponse = Assert.Single(await sut.HandleAsync(new ListBookingsRequest
+        {
+            EmpresaId = empresa.Id,
+            State = BookingStates.Cancelled
+        }));
+
+        Assert.Equal(BookingStates.Cancelled, cancelledResponse.State);
+        Assert.NotNull(cancelledResponse.Cancellation);
+        Assert.Equal("Cliente pediu cancelamento.", cancelledResponse.Cancellation!.Reason);
+        Assert.Null(cancelledResponse.NoShow);
+
+        var noShowResponse = Assert.Single(await sut.HandleAsync(new ListBookingsRequest
+        {
+            EmpresaId = empresa.Id,
+            State = BookingStates.NoShow
+        }));
+
+        Assert.Equal(BookingStates.NoShow, noShowResponse.State);
+        Assert.NotNull(noShowResponse.NoShow);
+        Assert.Equal("Cliente não compareceu.", noShowResponse.NoShow!.Reason);
+        Assert.Null(noShowResponse.Cancellation);
+    }
+
     private static Booking CreateBooking(
         Guid empresaId,
         Guid professionalId,
