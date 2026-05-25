@@ -195,6 +195,46 @@ export interface AdminCurrentUser {
   };
 }
 
+export interface AdminProfessional {
+  id: string;
+  companyId: string;
+  name: string;
+  specialty: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface AdminService {
+  id: string;
+  companyId: string;
+  name: string;
+  durationMinutes: number;
+  basePrice: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface AdminProfessionalServiceAssignment {
+  assignmentId: string;
+  companyId: string;
+  professionalId: string;
+  serviceId: string;
+  serviceName: string;
+  serviceDurationMinutes: number;
+  basePrice: number;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface AdminProfessionalAvailability {
+  id: string;
+  professionalId: string;
+  weekday: number;
+  startTime: string;
+  endTime: string;
+  createdAt: string;
+}
+
 export type AdminBookingState =
   | "requested"
   | "confirmed"
@@ -303,9 +343,24 @@ export interface AdminBookingMutationSuccess {
   redirectTo: string;
 }
 
+export interface AdminMutationError<FieldName extends string = string> {
+  success: false;
+  message: string;
+  fieldErrors?: Partial<Record<FieldName, string>>;
+}
+
+export interface AdminMutationSuccess {
+  success: true;
+  message: string;
+}
+
 export type AdminBookingMutationResult<FieldName extends string = string> =
   | AdminBookingMutationSuccess
   | AdminBookingMutationError<FieldName>;
+
+export type AdminMutationResult<FieldName extends string = string> =
+  | AdminMutationSuccess
+  | AdminMutationError<FieldName>;
 
 export type SubmitAdminCompleteBookingAction = (
   values: CompleteAdminBookingValues,

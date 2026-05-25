@@ -9,6 +9,10 @@ import type {
   AdminBookingRejection,
   AdminBookingService,
   AdminCurrentUser,
+  AdminProfessional,
+  AdminProfessionalAvailability,
+  AdminProfessionalServiceAssignment,
+  AdminService,
   AdminSessionSummary,
   ApiError,
   CreatePublicBookingFeedbackPayload,
@@ -221,11 +225,29 @@ function readNumber(record: JsonRecord, ...keys: string[]) {
   return 0;
 }
 
+function readBoolean(record: JsonRecord, ...keys: string[]) {
+  const value = readValue(record, ...keys);
+
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    return value.toLowerCase() === "true";
+  }
+
+  return false;
+}
+
 function readNullableObject(record: JsonRecord, ...keys: string[]) {
   const value = readValue(record, ...keys);
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as JsonRecord)
     : null;
+}
+
+function readArray(value: unknown) {
+  return Array.isArray(value) ? value : [];
 }
 
 function mapAdminBookingProfessional(value: unknown): AdminBookingProfessional {
@@ -376,6 +398,94 @@ function mapAdminCurrentUser(value: unknown): AdminCurrentUser {
       id: readString(companyRecord, "id", "Id"),
       name: readString(companyRecord, "name", "Name", "nome", "Nome"),
     },
+  };
+}
+
+function mapAdminProfessional(value: unknown): AdminProfessional {
+  const record = toRecord(value);
+
+  return {
+    id: readString(record, "id", "Id"),
+    companyId: readString(record, "companyId", "CompanyId", "empresaId", "EmpresaId"),
+    name: readString(record, "name", "Name", "nome", "Nome"),
+    specialty: readNullableString(
+      record,
+      "specialty",
+      "Specialty",
+      "especialidade",
+      "Especialidade",
+    ),
+    isActive: readBoolean(record, "isActive", "IsActive", "ativo", "Ativo"),
+    createdAt: readString(record, "createdAt", "CreatedAt", "criadoEm", "CriadoEm"),
+  };
+}
+
+function mapAdminService(value: unknown): AdminService {
+  const record = toRecord(value);
+
+  return {
+    id: readString(record, "id", "Id"),
+    companyId: readString(record, "companyId", "CompanyId", "empresaId", "EmpresaId"),
+    name: readString(record, "name", "Name", "nome", "Nome"),
+    durationMinutes: readNumber(
+      record,
+      "durationMinutes",
+      "DurationMinutes",
+      "duracaoMinutos",
+      "DuracaoMinutos",
+    ),
+    basePrice: readNumber(record, "basePrice", "BasePrice", "precoBase", "PrecoBase"),
+    isActive: readBoolean(record, "isActive", "IsActive", "ativo", "Ativo"),
+    createdAt: readString(record, "createdAt", "CreatedAt", "criadoEm", "CriadoEm"),
+  };
+}
+
+function mapAdminProfessionalServiceAssignment(
+  value: unknown,
+): AdminProfessionalServiceAssignment {
+  const record = toRecord(value);
+
+  return {
+    assignmentId: readString(record, "assignmentId", "AssignmentId", "id", "Id"),
+    companyId: readString(record, "companyId", "CompanyId", "empresaId", "EmpresaId"),
+    professionalId: readString(
+      record,
+      "professionalId",
+      "ProfessionalId",
+      "profissionalId",
+      "ProfissionalId",
+    ),
+    serviceId: readString(record, "serviceId", "ServiceId", "servicoId", "ServicoId"),
+    serviceName: readString(record, "serviceName", "ServiceName", "nomeServico", "NomeServico"),
+    serviceDurationMinutes: readNumber(
+      record,
+      "serviceDurationMinutes",
+      "ServiceDurationMinutes",
+      "duracaoServicoMinutos",
+      "DuracaoServicoMinutos",
+    ),
+    basePrice: readNumber(record, "basePrice", "BasePrice", "precoBase", "PrecoBase"),
+    active: readBoolean(record, "active", "Active", "ativo", "Ativo"),
+    createdAt: readString(record, "createdAt", "CreatedAt", "criadoEm", "CriadoEm"),
+  };
+}
+
+function mapAdminProfessionalAvailability(value: unknown): AdminProfessionalAvailability {
+  const record = toRecord(value);
+
+  return {
+    id: readString(record, "id", "Id"),
+    professionalId: readString(
+      record,
+      "professionalId",
+      "ProfessionalId",
+      "profissionalId",
+      "ProfissionalId",
+    ),
+    weekday: readNumber(record, "weekday", "Weekday", "diaSemana", "DiaSemana"),
+    startTime: readString(record, "startTime", "StartTime", "horaInicio", "HoraInicio"),
+    endTime: readString(record, "endTime", "EndTime", "horaFim", "HoraFim"),
+    createdAt: readString(record, "createdAt", "CreatedAt", "criadoEm", "CriadoEm"),
   };
 }
 
@@ -531,6 +641,267 @@ export const api = {
     });
 
     return mapAdminCurrentUser(response);
+  },
+
+  async listAdminProfessionals(token: string) {
+    const response = await request<unknown[]>("/professionals", {
+      method: "GET",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
+
+    return readArray(response).map(mapAdminProfessional);
+  },
+
+  async createAdminProfessional(
+    payload: {
+      name: string;
+      specialty?: string;
+    },
+    token: string,
+  ) {
+    const response = await request<unknown>("/professionals", {
+      method: "POST",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+      body: JSON.stringify({
+        Nome: payload.name,
+        Especialidade: payload.specialty || undefined,
+      }),
+    });
+
+    return mapAdminProfessional(response);
+  },
+
+  async getAdminProfessionalById(id: string, token: string) {
+    const response = await request<unknown>(`/professionals/${id}`, {
+      method: "GET",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
+
+    return mapAdminProfessional(response);
+  },
+
+  async updateAdminProfessional(
+    id: string,
+    payload: {
+      name: string;
+      specialty?: string;
+    },
+    token: string,
+  ) {
+    const response = await request<unknown>(`/professionals/${id}`, {
+      method: "PUT",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+      body: JSON.stringify({
+        Nome: payload.name,
+        Especialidade: payload.specialty || undefined,
+      }),
+    });
+
+    return mapAdminProfessional(response);
+  },
+
+  activateAdminProfessional(id: string, token: string) {
+    return request<void>(`/professionals/${id}/activate`, {
+      method: "POST",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
+  },
+
+  deactivateAdminProfessional(id: string, token: string) {
+    return request<void>(`/professionals/${id}/deactivate`, {
+      method: "POST",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
+  },
+
+  async listAdminServices(token: string) {
+    const response = await request<unknown[]>("/services", {
+      method: "GET",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
+
+    return readArray(response).map(mapAdminService);
+  },
+
+  async createAdminService(
+    payload: {
+      name: string;
+      durationMinutes: number;
+      basePrice: number;
+    },
+    token: string,
+  ) {
+    const response = await request<unknown>("/services", {
+      method: "POST",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+      body: JSON.stringify({
+        Nome: payload.name,
+        DuracaoMinutos: payload.durationMinutes,
+        PrecoBase: payload.basePrice,
+      }),
+    });
+
+    return mapAdminService(response);
+  },
+
+  async updateAdminService(
+    id: string,
+    payload: {
+      name: string;
+      durationMinutes: number;
+      basePrice: number;
+    },
+    token: string,
+  ) {
+    const response = await request<unknown>(`/services/${id}`, {
+      method: "PUT",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+      body: JSON.stringify({
+        Nome: payload.name,
+        DuracaoMinutos: payload.durationMinutes,
+        PrecoBase: payload.basePrice,
+      }),
+    });
+
+    return mapAdminService(response);
+  },
+
+  activateAdminService(id: string, token: string) {
+    return request<void>(`/services/${id}/activate`, {
+      method: "POST",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
+  },
+
+  deactivateAdminService(id: string, token: string) {
+    return request<void>(`/services/${id}/deactivate`, {
+      method: "POST",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
+  },
+
+  async listAdminProfessionalServices(professionalId: string, token: string) {
+    const response = await request<unknown[]>(`/professionals/${professionalId}/services`, {
+      method: "GET",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
+
+    return readArray(response).map(mapAdminProfessionalServiceAssignment);
+  },
+
+  async createAdminProfessionalServiceAssignment(
+    professionalId: string,
+    payload: {
+      serviceId: string;
+    },
+    token: string,
+  ) {
+    const response = await request<unknown>(`/professionals/${professionalId}/services`, {
+      method: "POST",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+      body: JSON.stringify({
+        ServiceId: payload.serviceId,
+      }),
+    });
+
+    return mapAdminProfessionalServiceAssignment(response);
+  },
+
+  deleteAdminProfessionalServiceAssignment(
+    professionalId: string,
+    serviceId: string,
+    token: string,
+  ) {
+    return request<void>(`/professionals/${professionalId}/services/${serviceId}`, {
+      method: "DELETE",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
+  },
+
+  async listAdminProfessionalAvailability(professionalId: string, token: string) {
+    const response = await request<unknown[]>(`/professionals/${professionalId}/availability`, {
+      method: "GET",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
+
+    return readArray(response).map(mapAdminProfessionalAvailability);
+  },
+
+  async createAdminProfessionalAvailability(
+    professionalId: string,
+    payload: {
+      weekday: number;
+      startTime: string;
+      endTime: string;
+    },
+    token: string,
+  ) {
+    const response = await request<unknown>(`/professionals/${professionalId}/availability`, {
+      method: "POST",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+      body: JSON.stringify({
+        DiaSemana: payload.weekday,
+        HoraInicio: payload.startTime,
+        HoraFim: payload.endTime,
+      }),
+    });
+
+    return mapAdminProfessionalAvailability(response);
+  },
+
+  async updateAdminProfessionalAvailability(
+    professionalId: string,
+    availabilityId: string,
+    payload: {
+      weekday: number;
+      startTime: string;
+      endTime: string;
+    },
+    token: string,
+  ) {
+    const response = await request<unknown>(
+      `/professionals/${professionalId}/availability/${availabilityId}`,
+      {
+        method: "PUT",
+        cache: "no-store",
+        headers: buildAuthHeaders(token),
+        body: JSON.stringify({
+          DiaSemana: payload.weekday,
+          HoraInicio: payload.startTime,
+          HoraFim: payload.endTime,
+        }),
+      },
+    );
+
+    return mapAdminProfessionalAvailability(response);
+  },
+
+  deleteAdminProfessionalAvailability(
+    professionalId: string,
+    availabilityId: string,
+    token: string,
+  ) {
+    return request<void>(`/professionals/${professionalId}/availability/${availabilityId}`, {
+      method: "DELETE",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
   },
 
   async listAdminBookings(filters: Partial<AdminBookingFilters>, token: string) {

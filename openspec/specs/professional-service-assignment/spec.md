@@ -3,18 +3,18 @@ Define tenant-bound professional-service assignment requirements.
 
 ## Requirements
 ### Requirement: Tenant users can manage professional-service assignments
-The system SHALL allow authenticated tenant users to create, list, and delete assignments between professionals and services belonging to their authenticated `Empresa`.
+The system SHALL allow authenticated tenant users to create, list, and delete assignments between professionals and services belonging to their authenticated `Empresa`, and SHALL expose those flows through the professional setup flow in the tenant admin console.
 
 #### Scenario: Assignment is created
-- **WHEN** an authenticated tenant user assigns one of the tenant's active services to one of the tenant's active professionals
+- **WHEN** an authenticated tenant user assigns one of the tenant's active services to one of the tenant's active professionals from the admin console
 - **THEN** the system stores the professional-service assignment inside the authenticated tenant scope
 
 #### Scenario: Assignments are listed for a professional
-- **WHEN** an authenticated tenant user requests the assigned services for one of the tenant's professionals
+- **WHEN** an authenticated tenant user requests the assigned services for one of the tenant's professionals from the admin console
 - **THEN** the system returns only services assigned to that professional inside the authenticated tenant scope
 
 #### Scenario: Assignment is removed
-- **WHEN** an authenticated tenant user removes one of the tenant's existing professional-service assignments
+- **WHEN** an authenticated tenant user removes one of the tenant's existing professional-service assignments from the admin console
 - **THEN** the system deletes that assignment and keeps the professional and service records unchanged
 
 ### Requirement: Assignment operations verify ownership and active state

@@ -6,5 +6,12 @@
   "/(public)/petshops/[slug]/page": "app/(public)/petshops/[slug]/page.js",
   "/(public)/petshops/page": "app/(public)/petshops/page.js",
   "/_global-error/page": "app/_global-error/page.js",
-  "/_not-found/page": "app/_not-found/page.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/admin/(dashboard)/bookings/[id]/page": "app/admin/(dashboard)/bookings/[id]/page.js",
+  "/admin/(dashboard)/bookings/page": "app/admin/(dashboard)/bookings/page.js",
+  "/admin/(dashboard)/professionals/[id]/page": "app/admin/(dashboard)/professionals/[id]/page.js",
+  "/admin/(dashboard)/professionals/page": "app/admin/(dashboard)/professionals/page.js",
+  "/admin/(dashboard)/services/page": "app/admin/(dashboard)/services/page.js",
+  "/admin/login/page": "app/admin/login/page.js",
+  "/admin/page": "app/admin/page.js"
 }

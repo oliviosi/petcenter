@@ -1,13 +1,11 @@
 import { cn } from "@/lib/utils";
 
-interface CardProps {
-  children: React.ReactNode;
-  className?: string;
-}
+type CardProps = React.HTMLAttributes<HTMLDivElement>;
 
-export function Card({ children, className }: CardProps) {
+export function Card({ children, className, ...props }: CardProps) {
   return (
     <div
+      {...props}
       className={cn(
         "rounded-2xl border border-stroke-soft bg-surface-card shadow-soft",
         className,

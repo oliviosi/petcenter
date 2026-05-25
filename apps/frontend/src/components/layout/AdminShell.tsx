@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { CalendarRange, LogOut, PawPrint } from "lucide-react";
+import { LogOut, PawPrint } from "lucide-react";
 import { logoutAdminAction } from "@/app/admin/login/actions";
+import { AdminNavigation } from "@/components/layout/AdminNavigation";
 import { Button } from "@/components/ui/Button";
 
 interface AdminShellProps {
@@ -39,15 +39,7 @@ export function AdminShell({
               <p className="mt-1 text-sm text-content-secondary">{userEmail}</p>
             </div>
 
-            <nav className="space-y-2">
-              <Link
-                href="/admin/bookings"
-                className="flex items-center gap-3 rounded-2xl bg-surface-brand-soft px-4 py-3 text-sm font-medium text-content-brand transition hover:opacity-90"
-              >
-                <CalendarRange className="h-4 w-4" />
-                Reservas
-              </Link>
-            </nav>
+            <AdminNavigation />
           </div>
 
           <form action={logoutAdminAction}>
@@ -78,6 +70,10 @@ export function AdminShell({
             </Button>
           </form>
         </header>
+
+        <div className="border-b border-stroke-soft bg-surface-card px-4 py-3 lg:hidden">
+          <AdminNavigation mobile />
+        </div>
 
         <main className="min-w-0 flex-1">{children}</main>
       </div>

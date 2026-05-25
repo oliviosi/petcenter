@@ -1,6 +1,6 @@
 # petcenter frontend
 
-Aplicação web do petcenter com fluxo público de reservas e o primeiro dashboard autenticado para operação do petshop.
+Aplicação web do petcenter com fluxo público de reservas e console autenticado do petshop para operação diária e setup de agenda.
 
 ## Requisitos
 
@@ -21,9 +21,9 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ### Sessão admin
 
-- O dashboard em `/admin/*` autentica via `POST /auth/login`.
+- O console em `/admin/*` autentica via `POST /auth/login`.
 - O frontend salva `{ token, userId, empresaId }` em um cookie `httpOnly` seguro para manter o bearer token fora da URL e fora do JavaScript do navegador.
-- Toda chamada autenticada do dashboard envia `Authorization: Bearer <token>` e depende do backend para aplicar o escopo da `Empresa`.
+- Toda chamada autenticada do console envia `Authorization: Bearer <token>` e depende do backend para aplicar o escopo da `Empresa`.
 
 ## Executando localmente
 
@@ -75,11 +75,28 @@ npm run test
 - `/bookings/[bookingId]` — status público da reserva
 - `/bookings/[bookingId]/feedback` — feedback público vinculado à reserva
 
-## Dashboard autenticado disponível
+## Console admin autenticado disponível
 
 - `/admin/login` — entrada dedicada para operadores do petshop
 - `/admin/bookings` — fila operacional com visão padrão de hoje + próximas reservas
 - `/admin/bookings/[id]` — detalhe operacional com contexto completo e ações
+- `/admin/professionals` — cadastro, edição e ativação/desativação de profissionais
+- `/admin/professionals/[id]` — hub operacional do profissional com perfil, serviços atribuídos e disponibilidade semanal
+- `/admin/services` — catálogo operacional de serviços com duração, preço base e status ativo/inativo
+
+### Setup de agenda no console
+
+- O fluxo de setup foi centralizado no shell autenticado já usado para reservas.
+- Profissionais e serviços reutilizam a mesma sessão JWT em cookie `httpOnly`; não existe lógica duplicada de escopo multi-tenant no cliente.
+- O backend continua sendo a única fonte de verdade para o escopo da `Empresa`, para ativação/desativação e para validações de atribuição/disponibilidade.
+- A página `/admin/professionals/[id]` concentra:
+  - edição do perfil operacional
+  - atribuição e remoção de serviços ativos
+  - cadastro, edição e exclusão de janelas recorrentes de disponibilidade semanal
+- Profissionais ou serviços inativos saem do fluxo operacional relevante:
+  - profissionais inativos deixam de participar da vitrine pública
+  - serviços inativos deixam de aparecer no catálogo público e nas opções de atribuição
+- A primeira versão do setup mantém a disponibilidade simples: dia da semana + hora inicial + hora final.
 
 ### Comportamento da fila de reservas
 
@@ -117,4 +134,11 @@ npm run test
 cd apps/frontend
 npm run test
 npm run build
+```
+
+Se o runner padrão do Vitest apresentar instabilidade no ambiente local, rode os testes em série com:
+
+```bash
+cd apps/frontend
+npx vitest run --pool threads --maxWorkers=1
 ```

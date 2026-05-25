@@ -3,18 +3,18 @@ Define tenant-bound professional management requirements.
 
 ## Requirements
 ### Requirement: Tenant users can manage professionals
-The system SHALL allow authenticated tenant users to create, list, update, activate, and deactivate professionals belonging to their authenticated `Empresa`.
+The system SHALL allow authenticated tenant users to create, list, update, activate, and deactivate professionals belonging to their authenticated `Empresa`, and SHALL expose those flows through the tenant admin console.
 
 #### Scenario: Professional is created
-- **WHEN** an authenticated tenant user submits valid professional data
+- **WHEN** an authenticated tenant user submits valid professional data from the admin console
 - **THEN** the system creates a professional associated with the authenticated `Empresa`
 
 #### Scenario: Professionals are listed
-- **WHEN** an authenticated tenant user requests the professional list
+- **WHEN** an authenticated tenant user requests the professional list from the admin console
 - **THEN** the system returns only professionals associated with the authenticated `Empresa`
 
 #### Scenario: Professional is deactivated
-- **WHEN** an authenticated tenant user deactivates one of the tenant's professionals
+- **WHEN** an authenticated tenant user deactivates one of the tenant's professionals from the admin console
 - **THEN** the system preserves the professional record and marks it as inactive
 
 ### Requirement: Professional operations reject cross-tenant access
