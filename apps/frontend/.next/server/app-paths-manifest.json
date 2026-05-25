@@ -1,0 +1,9 @@
+{
+  "/(public)/bookings/[bookingId]/page": "app/(public)/bookings/[bookingId]/page.js",
+  "/(public)/page": "app/(public)/page.js",
+  "/(public)/petshops/[slug]/book/page": "app/(public)/petshops/[slug]/book/page.js",
+  "/(public)/petshops/[slug]/page": "app/(public)/petshops/[slug]/page.js",
+  "/(public)/petshops/page": "app/(public)/petshops/page.js",
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js"
+}

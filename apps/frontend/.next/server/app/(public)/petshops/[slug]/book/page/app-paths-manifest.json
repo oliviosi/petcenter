@@ -1,0 +1,3 @@
+{
+  "/(public)/petshops/[slug]/book/page": "app/(public)/petshops/[slug]/book/page.js"
+}

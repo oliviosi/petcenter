@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../src/components/providers/AppProviders.tsx"],"sourcesContent":["\"use client\";\r\n\r\ninterface AppProvidersProps {\r\n  children: React.ReactNode;\r\n}\r\n\r\nexport function AppProviders({ children }: AppProvidersProps) {\r\n  return children;\r\n}\r\n"],"names":[],"mappings":"uCAMO,SAAS,EAAa,UAAE,CAAQ,CAAqB,EAC1D,OAAO,CACT"}

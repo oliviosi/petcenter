@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,55578,t=>{"use strict";function o({children:t}){return t}t.s(["AppProviders",()=>o])}]);

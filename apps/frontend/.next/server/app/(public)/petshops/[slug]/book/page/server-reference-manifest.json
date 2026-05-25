@@ -1,0 +1,20 @@
+{
+  "node": {
+    "40585b5394312bd196949e0b75ac2fcd3c5a0ee444": {
+      "workers": {
+        "app/(public)/petshops/[slug]/book/page": {
+          "moduleId": 59803,
+          "async": false,
+          "exportedName": "submitBookingAction",
+          "filename": "src/app/(public)/petshops/[slug]/book/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(public)/petshops/[slug]/book/page": "rsc"
+      },
+      "exportedName": "submitBookingAction",
+      "filename": "src/app/(public)/petshops/[slug]/book/actions.ts"
+    }
+  },
+  "edge": {}
+}
