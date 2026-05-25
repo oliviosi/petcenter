@@ -33,6 +33,7 @@ export async function getBookingSession(bookingId: string) {
   try {
     const parsed = JSON.parse(rawValue) as BookingStatusSessionSummary & {
       statusToken: string;
+      feedbackAccessToken?: string;
     };
 
     if (!parsed.statusToken) {

@@ -1,6 +1,9 @@
 import type {
   ApiError,
+  CreatePublicBookingFeedbackPayload,
   CreatePublicBookingPayload,
+  PublicBookingFeedback,
+  PublicBookingFeedbackEligibility,
   PublicBookingSlot,
   PublicBookingStatus,
   PublicPetshopDetail,
@@ -250,6 +253,7 @@ export const api = {
       id: string;
       state: string;
       bookingStatusAccessToken: string;
+      feedbackAccessToken: string;
     }>("/bookings", {
       method: "POST",
       body: JSON.stringify(payload),
@@ -263,6 +267,33 @@ export const api = {
       body: JSON.stringify({
         statusAccessToken,
       }),
+      cache: "no-store",
+    });
+  },
+
+  checkBookingFeedbackEligibility(
+    bookingId: string,
+    feedbackAccessToken: string,
+  ) {
+    return request<PublicBookingFeedbackEligibility>(
+      `/bookings/${bookingId}/feedback/eligibility`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          feedbackAccessToken,
+        }),
+        cache: "no-store",
+      },
+    );
+  },
+
+  submitBookingFeedback(
+    bookingId: string,
+    payload: CreatePublicBookingFeedbackPayload,
+  ) {
+    return request<PublicBookingFeedback>(`/bookings/${bookingId}/feedback`, {
+      method: "POST",
+      body: JSON.stringify(payload),
       cache: "no-store",
     });
   },

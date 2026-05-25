@@ -61,4 +61,46 @@ describe("BookingStatusCard", () => {
       screen.getByText("Não há capacidade operacional neste horário."),
     ).toBeInTheDocument();
   });
+
+  it("shows the feedback call-to-action for completed bookings with token", () => {
+    render(
+      <BookingStatusCard
+        booking={{
+          ...booking,
+          state: "completed",
+          completion: {
+            completedAt: "2026-01-10T12:00:00Z",
+          },
+        }}
+        sessionSummary={{
+          ...sessionSummary,
+          feedbackAccessToken: "feedback-token",
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Feedback do atendimento")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Avaliar atendimento" }),
+    ).toHaveAttribute("href", `/bookings/${booking.id}/feedback`);
+  });
+
+  it("explains when completed feedback is unavailable in the current browser", () => {
+    render(
+      <BookingStatusCard
+        booking={{
+          ...booking,
+          state: "completed",
+          completion: {
+            completedAt: "2026-01-10T12:00:00Z",
+          },
+        }}
+        sessionSummary={sessionSummary}
+      />,
+    );
+
+    expect(
+      screen.getByText(/só fica disponível no mesmo navegador/i),
+    ).toBeInTheDocument();
+  });
 });

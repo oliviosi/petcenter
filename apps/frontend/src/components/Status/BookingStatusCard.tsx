@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { formatDateTimeRange, formatDateTimeValue } from "@/lib/format";
 import type { BookingStatusSessionSummary, PublicBookingStatus } from "@/types";
@@ -59,6 +60,10 @@ export function BookingStatusCard({
   sessionSummary,
 }: BookingStatusCardProps) {
   const config = statusConfig[booking.state];
+  const feedbackHref =
+    booking.state === "completed" && sessionSummary?.feedbackAccessToken
+      ? `/bookings/${booking.id}/feedback`
+      : null;
 
   return (
     <Card className="flex flex-col gap-6 p-8">
@@ -132,6 +137,33 @@ export function BookingStatusCard({
         <p className="text-sm text-content-secondary">
           Concluída em {formatDateTimeValue(booking.completion.completedAt)}.
         </p>
+      ) : null}
+      {booking.state === "completed" ? (
+        <div className="rounded-2xl bg-surface-muted p-5">
+          <p className="text-sm font-medium text-content-primary">
+            Feedback do atendimento
+          </p>
+          {feedbackHref ? (
+            <div className="mt-2 space-y-4">
+              <p className="text-sm text-content-secondary">
+                Se quiser, você já pode avaliar o atendimento do profissional e
+                a experiência com o petshop neste mesmo navegador.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button href={feedbackHref}>Avaliar atendimento</Button>
+                <Button href="/petshops" variant="secondary">
+                  Ver outros petshops
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <p className="mt-2 text-sm text-content-secondary">
+              O feedback desta reserva só fica disponível no mesmo navegador em
+              que a solicitação foi criada. Se você iniciou a reserva em outro
+              dispositivo, abra o acompanhamento por lá para continuar.
+            </p>
+          )}
+        </div>
       ) : null}
       {booking.noShow ? (
         <p className="text-sm text-content-secondary">

@@ -1,4 +1,5 @@
 import type { BookingSubmissionValues } from "@/lib/validations/booking";
+import type { BookingFeedbackSubmissionValues } from "@/lib/validations/bookingFeedback";
 
 export interface ApiError {
   title: string;
@@ -98,6 +99,7 @@ export interface PublicBookingStatus {
 
 export interface BookingStatusSessionSummary {
   statusToken: string;
+  feedbackAccessToken?: string;
   petshopSlug: string;
   petshopName: string;
   serviceName: string;
@@ -105,6 +107,27 @@ export interface BookingStatusSessionSummary {
   ownerContact: string;
   petName: string;
   petSpecies: string;
+}
+
+export interface PublicBookingFeedbackEligibility {
+  bookingId: string;
+  canSubmit: boolean;
+  reason: string | null;
+}
+
+export interface CreatePublicBookingFeedbackPayload {
+  feedbackAccessToken: string;
+  professionalRating: number;
+  petshopRating: number;
+  comment?: string;
+}
+
+export interface PublicBookingFeedback {
+  bookingId: string;
+  professionalRating: number;
+  petshopRating: number;
+  comment: string | null;
+  submittedAt: string;
 }
 
 export interface SubmitBookingActionError {
@@ -125,3 +148,28 @@ export type SubmitBookingActionResult =
 export type SubmitBookingAction = (
   values: BookingSubmissionValues,
 ) => Promise<SubmitBookingActionResult>;
+
+export interface SubmitBookingFeedbackActionError {
+  success: false;
+  code:
+    | "validation"
+    | "invalid-token"
+    | "already-submitted"
+    | "ineligible"
+    | "unexpected";
+  message: string;
+  fieldErrors?: Partial<Record<keyof BookingFeedbackSubmissionValues, string>>;
+}
+
+export interface SubmitBookingFeedbackActionSuccess {
+  success: true;
+  feedback: PublicBookingFeedback;
+}
+
+export type SubmitBookingFeedbackActionResult =
+  | SubmitBookingFeedbackActionSuccess
+  | SubmitBookingFeedbackActionError;
+
+export type SubmitBookingFeedbackAction = (
+  values: BookingFeedbackSubmissionValues,
+) => Promise<SubmitBookingFeedbackActionResult>;

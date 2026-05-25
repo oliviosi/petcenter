@@ -1,4 +1,5 @@
 {
+  "/(public)/bookings/[bookingId]/feedback/page": "/bookings/[bookingId]/feedback",
   "/(public)/bookings/[bookingId]/page": "/bookings/[bookingId]",
   "/(public)/page": "/",
   "/(public)/petshops/[slug]/book/page": "/petshops/[slug]/book",

@@ -30,6 +30,14 @@
       "namedRegex": "^/bookings/(?<nxtPbookingId>[^/]+?)(?:/)?$"
     },
     {
+      "page": "/bookings/[bookingId]/feedback",
+      "regex": "^/bookings/([^/]+?)/feedback(?:/)?$",
+      "routeKeys": {
+        "nxtPbookingId": "nxtPbookingId"
+      },
+      "namedRegex": "^/bookings/(?<nxtPbookingId>[^/]+?)/feedback(?:/)?$"
+    },
+    {
       "page": "/petshops/[slug]",
       "regex": "^/petshops/([^/]+?)(?:/)?$",
       "routeKeys": {

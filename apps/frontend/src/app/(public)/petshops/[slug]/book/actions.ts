@@ -43,6 +43,7 @@ export async function submitBookingAction(
 
     await setBookingSession(response.id, {
       statusToken: response.bookingStatusAccessToken,
+      feedbackAccessToken: response.feedbackAccessToken,
       petshopSlug: parsedValues.data.petshopSlug,
       petshopName: parsedValues.data.petshopName,
       serviceName: parsedValues.data.serviceName,
