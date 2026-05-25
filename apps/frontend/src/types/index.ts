@@ -1,3 +1,9 @@
+import type { AdminLoginValues } from "@/lib/validations/adminLogin";
+import type {
+  CancelAdminBookingValues,
+  CompleteAdminBookingValues,
+  NoShowAdminBookingValues,
+} from "@/lib/validations/adminBookingAction";
 import type { BookingSubmissionValues } from "@/lib/validations/booking";
 import type { BookingFeedbackSubmissionValues } from "@/lib/validations/bookingFeedback";
 
@@ -173,3 +179,148 @@ export type SubmitBookingFeedbackActionResult =
 export type SubmitBookingFeedbackAction = (
   values: BookingFeedbackSubmissionValues,
 ) => Promise<SubmitBookingFeedbackActionResult>;
+
+export interface AdminSessionSummary {
+  token: string;
+  userId: string;
+  empresaId: string;
+}
+
+export interface AdminCurrentUser {
+  userId: string;
+  email: string;
+  company: {
+    id: string;
+    name: string;
+  };
+}
+
+export type AdminBookingState =
+  | "requested"
+  | "confirmed"
+  | "rejected"
+  | "cancelled"
+  | "completed"
+  | "no-show";
+
+export interface AdminBookingProfessional {
+  id: string;
+  name: string;
+  specialty: string | null;
+}
+
+export interface AdminBookingService {
+  id: string;
+  name: string;
+  durationMinutes: number;
+  basePrice: number;
+}
+
+export interface AdminBookingPet {
+  clientId?: string;
+  name: string;
+  species: string;
+}
+
+export interface AdminBookingRejection {
+  rejectedAt: string;
+  reason: string;
+}
+
+export interface AdminBookingCompletion {
+  completedAt: string;
+  finalChargedPrice: number;
+}
+
+export interface AdminBookingCancellation {
+  cancelledAt: string;
+  reason: string;
+}
+
+export interface AdminBookingNoShow {
+  noShowAt: string;
+  reason: string;
+}
+
+export interface AdminBookingListItem {
+  id: string;
+  state: AdminBookingState;
+  requestedAt: string;
+  confirmedAt: string | null;
+  slotStart: string;
+  slotEnd: string;
+  ownerContact: string;
+  professional: AdminBookingProfessional;
+  service: AdminBookingService;
+  pet: AdminBookingPet;
+  rejection: AdminBookingRejection | null;
+  completion: AdminBookingCompletion | null;
+  cancellation: AdminBookingCancellation | null;
+  noShow: AdminBookingNoShow | null;
+}
+
+export interface AdminBookingDetail extends AdminBookingListItem {
+  empresaId: string;
+  pet: AdminBookingPet & {
+    clientId: string;
+  };
+}
+
+export interface AdminBookingFilters {
+  startDate: string;
+  endDate: string;
+  state: AdminBookingState | "";
+  professionalId: string;
+}
+
+export interface SubmitAdminLoginActionError {
+  success: false;
+  message: string;
+  fieldErrors?: Partial<Record<keyof AdminLoginValues, string>>;
+}
+
+export interface SubmitAdminLoginActionSuccess {
+  success: true;
+  redirectTo: string;
+}
+
+export type SubmitAdminLoginActionResult =
+  | SubmitAdminLoginActionSuccess
+  | SubmitAdminLoginActionError;
+
+export type SubmitAdminLoginAction = (
+  values: AdminLoginValues,
+) => Promise<SubmitAdminLoginActionResult>;
+
+export interface AdminBookingMutationError<FieldName extends string = string> {
+  success: false;
+  message: string;
+  fieldErrors?: Partial<Record<FieldName, string>>;
+}
+
+export interface AdminBookingMutationSuccess {
+  success: true;
+  redirectTo: string;
+}
+
+export type AdminBookingMutationResult<FieldName extends string = string> =
+  | AdminBookingMutationSuccess
+  | AdminBookingMutationError<FieldName>;
+
+export type SubmitAdminCompleteBookingAction = (
+  values: CompleteAdminBookingValues,
+) => Promise<
+  AdminBookingMutationResult<Extract<keyof CompleteAdminBookingValues, string>>
+>;
+
+export type SubmitAdminCancelBookingAction = (
+  values: CancelAdminBookingValues,
+) => Promise<
+  AdminBookingMutationResult<Extract<keyof CancelAdminBookingValues, string>>
+>;
+
+export type SubmitAdminNoShowBookingAction = (
+  values: NoShowAdminBookingValues,
+) => Promise<
+  AdminBookingMutationResult<Extract<keyof NoShowAdminBookingValues, string>>
+>;

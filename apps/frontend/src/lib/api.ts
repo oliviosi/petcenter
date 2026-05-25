@@ -1,4 +1,15 @@
 import type {
+  AdminBookingCancellation,
+  AdminBookingCompletion,
+  AdminBookingDetail,
+  AdminBookingFilters,
+  AdminBookingListItem,
+  AdminBookingNoShow,
+  AdminBookingProfessional,
+  AdminBookingRejection,
+  AdminBookingService,
+  AdminCurrentUser,
+  AdminSessionSummary,
   ApiError,
   CreatePublicBookingFeedbackPayload,
   CreatePublicBookingPayload,
@@ -168,6 +179,210 @@ function mapPetshopDetail(item: {
   };
 }
 
+type JsonRecord = Record<string, unknown>;
+
+function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as JsonRecord)
+    : {};
+}
+
+function readValue(record: JsonRecord, ...keys: string[]) {
+  for (const key of keys) {
+    if (key in record) {
+      return record[key];
+    }
+  }
+
+  return undefined;
+}
+
+function readString(record: JsonRecord, ...keys: string[]) {
+  const value = readValue(record, ...keys);
+  return typeof value === "string" ? value : "";
+}
+
+function readNullableString(record: JsonRecord, ...keys: string[]) {
+  const value = readValue(record, ...keys);
+  return typeof value === "string" ? value : null;
+}
+
+function readNumber(record: JsonRecord, ...keys: string[]) {
+  const value = readValue(record, ...keys);
+
+  if (typeof value === "number") {
+    return value;
+  }
+
+  if (typeof value === "string" && value.trim() && !Number.isNaN(Number(value))) {
+    return Number(value);
+  }
+
+  return 0;
+}
+
+function readNullableObject(record: JsonRecord, ...keys: string[]) {
+  const value = readValue(record, ...keys);
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as JsonRecord)
+    : null;
+}
+
+function mapAdminBookingProfessional(value: unknown): AdminBookingProfessional {
+  const record = toRecord(value);
+
+  return {
+    id: readString(record, "id", "Id"),
+    name: readString(record, "name", "Name", "nome", "Nome"),
+    specialty: readNullableString(
+      record,
+      "specialty",
+      "Specialty",
+      "especialidade",
+      "Especialidade",
+    ),
+  };
+}
+
+function mapAdminBookingService(value: unknown): AdminBookingService {
+  const record = toRecord(value);
+
+  return {
+    id: readString(record, "id", "Id"),
+    name: readString(record, "name", "Name", "nome", "Nome"),
+    durationMinutes: readNumber(
+      record,
+      "durationMinutes",
+      "DurationMinutes",
+      "duracaoMinutos",
+      "DuracaoMinutos",
+    ),
+    basePrice: readNumber(record, "basePrice", "BasePrice", "precoBase", "PrecoBase"),
+  };
+}
+
+function mapAdminBookingRejection(value: unknown): AdminBookingRejection | null {
+  const record = toRecord(value);
+  const rejectedAt = readString(record, "rejectedAt", "RejectedAt");
+  const reason = readString(record, "reason", "Reason");
+
+  return rejectedAt && reason ? { rejectedAt, reason } : null;
+}
+
+function mapAdminBookingCompletion(value: unknown): AdminBookingCompletion | null {
+  const record = toRecord(value);
+  const completedAt = readString(record, "completedAt", "CompletedAt");
+
+  return completedAt
+    ? {
+        completedAt,
+        finalChargedPrice: readNumber(
+          record,
+          "finalChargedPrice",
+          "FinalChargedPrice",
+        ),
+      }
+    : null;
+}
+
+function mapAdminBookingCancellation(value: unknown): AdminBookingCancellation | null {
+  const record = toRecord(value);
+  const cancelledAt = readString(record, "cancelledAt", "CancelledAt");
+  const reason = readString(
+    record,
+    "reason",
+    "Reason",
+    "cancellationReason",
+    "CancellationReason",
+  );
+
+  return cancelledAt && reason ? { cancelledAt, reason } : null;
+}
+
+function mapAdminBookingNoShow(value: unknown): AdminBookingNoShow | null {
+  const record = toRecord(value);
+  const noShowAt = readString(record, "noShowAt", "NoShowAt");
+  const reason = readString(record, "reason", "Reason", "noShowReason", "NoShowReason");
+
+  return noShowAt && reason ? { noShowAt, reason } : null;
+}
+
+function mapAdminBookingListItem(value: unknown): AdminBookingListItem {
+  const record = toRecord(value);
+  const petRecord = toRecord(readValue(record, "pet", "Pet"));
+
+  return {
+    id: readString(record, "id", "Id"),
+    state: readString(record, "state", "State") as AdminBookingListItem["state"],
+    requestedAt: readString(record, "requestedAt", "RequestedAt"),
+    confirmedAt: readNullableString(record, "confirmedAt", "ConfirmedAt"),
+    slotStart: readString(record, "slotStart", "SlotStart"),
+    slotEnd: readString(record, "slotEnd", "SlotEnd"),
+    ownerContact: readString(record, "ownerContact", "OwnerContact"),
+    professional: mapAdminBookingProfessional(
+      readValue(record, "professional", "Professional"),
+    ),
+    service: mapAdminBookingService(readValue(record, "service", "Service")),
+    pet: {
+      name: readString(petRecord, "name", "Name", "nome", "Nome"),
+      species: readString(petRecord, "species", "Species", "especie", "Especie"),
+    },
+    rejection: mapAdminBookingRejection(
+      readNullableObject(record, "rejection", "Rejection"),
+    ),
+    completion: mapAdminBookingCompletion(
+      readNullableObject(record, "completion", "Completion"),
+    ),
+    cancellation: mapAdminBookingCancellation(
+      readNullableObject(record, "cancellation", "Cancellation"),
+    ),
+    noShow: mapAdminBookingNoShow(readNullableObject(record, "noShow", "NoShow")),
+  };
+}
+
+function mapAdminBookingDetail(value: unknown): AdminBookingDetail {
+  const record = toRecord(value);
+  const petRecord = toRecord(readValue(record, "pet", "Pet"));
+
+  return {
+    ...mapAdminBookingListItem(record),
+    empresaId: readString(record, "empresaId", "EmpresaId"),
+    pet: {
+      clientId: readString(petRecord, "clientId", "ClientId"),
+      name: readString(petRecord, "name", "Name", "nome", "Nome"),
+      species: readString(petRecord, "species", "Species", "especie", "Especie"),
+    },
+  };
+}
+
+function mapAdminLoginResponse(value: unknown): AdminSessionSummary {
+  const record = toRecord(value);
+
+  return {
+    token: readString(record, "token", "Token"),
+    userId: readString(record, "userId", "UserId"),
+    empresaId: readString(record, "empresaId", "EmpresaId"),
+  };
+}
+
+function mapAdminCurrentUser(value: unknown): AdminCurrentUser {
+  const record = toRecord(value);
+  const companyRecord = toRecord(readValue(record, "empresa", "Empresa"));
+
+  return {
+    userId: readString(record, "userId", "UserId"),
+    email: readString(record, "email", "Email"),
+    company: {
+      id: readString(companyRecord, "id", "Id"),
+      name: readString(companyRecord, "name", "Name", "nome", "Nome"),
+    },
+  };
+}
+
+function buildAuthHeaders(token?: string): HeadersInit | undefined {
+  return token ? { Authorization: `Bearer ${token}` } : undefined;
+}
+
 export const api = {
   async listPublicPetshops(filters: PublicPetshopFilters) {
     const response = await request<
@@ -295,6 +510,97 @@ export const api = {
       method: "POST",
       body: JSON.stringify(payload),
       cache: "no-store",
+    });
+  },
+
+  async login(payload: { email: string; password: string }) {
+    const response = await request<unknown>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    });
+
+    return mapAdminLoginResponse(response);
+  },
+
+  async getAdminMe(token: string) {
+    const response = await request<unknown>("/auth/me", {
+      method: "GET",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
+
+    return mapAdminCurrentUser(response);
+  },
+
+  async listAdminBookings(filters: Partial<AdminBookingFilters>, token: string) {
+    const response = await request<unknown[]>("/bookings", {
+      method: "GET",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+      params: {
+        startDate: filters.startDate || undefined,
+        endDate: filters.endDate || undefined,
+        state: filters.state || undefined,
+        professionalId: filters.professionalId || undefined,
+      },
+    });
+
+    return response.map(mapAdminBookingListItem);
+  },
+
+  async getAdminBookingById(id: string, token: string) {
+    const response = await request<unknown>(`/bookings/${id}`, {
+      method: "GET",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
+
+    return mapAdminBookingDetail(response);
+  },
+
+  completeAdminBooking(
+    id: string,
+    payload: {
+      finalChargedPrice: number | null;
+    },
+    token: string,
+  ) {
+    return request<unknown>(`/bookings/${id}/complete`, {
+      method: "POST",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+      body: JSON.stringify(payload),
+    });
+  },
+
+  cancelAdminBooking(
+    id: string,
+    payload: {
+      reason: string;
+    },
+    token: string,
+  ) {
+    return request<unknown>(`/bookings/${id}/cancel`, {
+      method: "POST",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+      body: JSON.stringify(payload),
+    });
+  },
+
+  noShowAdminBooking(
+    id: string,
+    payload: {
+      reason: string;
+    },
+    token: string,
+  ) {
+    return request<unknown>(`/bookings/${id}/no-show`, {
+      method: "POST",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+      body: JSON.stringify(payload),
     });
   },
 };
