@@ -100,4 +100,50 @@ public class CreateBookingServiceTests
             PetSpecies = "Gato"
         }));
     }
+
+    [Fact]
+    public async Task HandleAsync_ShouldSurfacePublishFailuresAfterPersistingBooking()
+    {
+        using var db = TestData.CreateDbContext();
+        var availabilityDate = new DateOnly(2026, 1, 5);
+        var scenario = TestData.SeedPublicScenario(db, availabilityDate);
+        var publisher = new FakeBookingEventPublisher
+        {
+            ExceptionToThrow = new InvalidOperationException("RabbitMQ indisponível.")
+        };
+
+        var service = new CreateBookingService(
+            new EmpresaRepository(db),
+            new ProfissionalRepository(db),
+            new ServicoRepository(db),
+            new BookingAvailabilityService(
+                new EmpresaRepository(db),
+                new ProfissionalRepository(db),
+                new ServicoRepository(db),
+                new ProfessionalServiceAssignmentRepository(db),
+                new DisponibilidadeRepository(db),
+                new BookingRepository(db)),
+            new BookingRepository(db),
+            publisher,
+            new BookingStatusAccessTokenService(),
+            new BookingFeedbackAccessTokenService());
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.HandleAsync(new CreateBookingRequest
+        {
+            PetshopId = scenario.Empresa.Id,
+            ProfessionalId = scenario.Professional.Id,
+            ServiceId = scenario.Service.Id,
+            SlotStart = TestData.ToUtc(availabilityDate, new TimeOnly(9, 0)),
+            SlotEnd = TestData.ToUtc(availabilityDate, new TimeOnly(9, 30)),
+            OwnerContact = "11 97777-0000",
+            PetName = "Nina",
+            PetSpecies = "Gato"
+        }));
+
+        Assert.Equal("RabbitMQ indisponível.", exception.Message);
+        Assert.Empty(publisher.PublishedMessages);
+
+        var persisted = Assert.Single(db.Bookings);
+        Assert.Equal(BookingStates.Requested, persisted.State);
+    }
 }

@@ -93,7 +93,8 @@ public static class ServiceCollectionExtensions
         // Bookings
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IInboxEntryRepository, InboxEntryRepository>();
-        services.AddScoped<IBookingEventPublisher, LoggingBookingEventPublisher>();
+        services.AddSingleton<IBookingRabbitMqConnectionFactory, BookingRabbitMqConnectionFactory>();
+        services.AddSingleton<IBookingEventPublisher, RabbitMqBookingEventPublisher>();
         services.AddScoped<IBookingAvailabilityService, BookingAvailabilityService>();
         services.AddScoped<IBookingStatusAccessTokenService, BookingStatusAccessTokenService>();
         services.AddScoped<IBookingFeedbackAccessTokenService, BookingFeedbackAccessTokenService>();
@@ -109,6 +110,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INoShowBookingService, NoShowBookingService>();
         services.AddScoped<IConfirmBookingFromEventService, ConfirmBookingFromEventService>();
         services.AddScoped<IRejectBookingFromEventService, RejectBookingFromEventService>();
+        services.AddHostedService<BookingQueueConsumerService>();
 
         return services;
     }

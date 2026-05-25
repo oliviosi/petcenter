@@ -2,6 +2,7 @@ using Api.Configurations;
 using Api.Extensions;
 using Api.Infrastructure.Persistence;
 using Api.Middlewares;
+using Api.Modules.Bookings.Infrastructure;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +55,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 builder.Services.Configure<DatabaseOptions>(builder.Configuration.GetSection("Database"));
+builder.Services.AddOptions<BookingQueueOptions>()
+    .Bind(builder.Configuration.GetSection(BookingQueueOptions.SectionName))
+    .ValidateDataAnnotations()
+    .Validate(options => options.Port > 0, "RabbitMq:Bookings:Port deve ser maior que zero.")
+    .ValidateOnStart();
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
 if (string.IsNullOrWhiteSpace(connectionString))
