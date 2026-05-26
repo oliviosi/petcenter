@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { PublicProfilePageClient } from "@/components/AdminProfile/PublicProfilePageClient";
 
 const refresh = vi.fn();
+const writeText = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -28,9 +29,15 @@ const baseProfile = {
 describe("PublicProfilePageClient", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.NEXT_PUBLIC_APP_URL = "https://petcenter.test";
+    Object.assign(navigator, {
+      clipboard: {
+        writeText,
+      },
+    });
   });
 
-  it("shows publication guidance and storefront cues", async () => {
+  it("shows unavailable link guidance when the storefront slug is missing", async () => {
     render(
       <PublicProfilePageClient
         profile={baseProfile}
@@ -42,8 +49,13 @@ describe("PublicProfilePageClient", () => {
     );
 
     expect(screen.getByText("Vitrine fora da experiencia publica principal")).toBeInTheDocument();
-    expect(screen.getByText("/petshops/[slug]")).toBeInTheDocument();
+    expect(screen.getByText("Defina um slug para gerar o link canonico")).toBeInTheDocument();
+    expect(
+      screen.getByText("Defina um slug para montar o link publico completo."),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Indisponivel")).toBeInTheDocument();
     expect(screen.getByText("Oculta")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Copiar link" })).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: /Publicar vitrine/i }));
 
@@ -75,6 +87,28 @@ describe("PublicProfilePageClient", () => {
       ).toBeInTheDocument();
       expect(updatePublicProfileAction).not.toHaveBeenCalled();
     });
+  });
+
+  it("shows preview state when the slug exists but the storefront is not yet public", () => {
+    render(
+      <PublicProfilePageClient
+        profile={{
+          ...baseProfile,
+          slug: "pet-center-vila",
+          isPublished: false,
+        }}
+        updatePublicProfileAction={vi.fn(async () => ({
+          success: true,
+          message: "ok",
+        }))}
+      />,
+    );
+
+    expect(screen.getByText("Preview")).toBeInTheDocument();
+    expect(screen.getByText("Link previsto antes da publicacao")).toBeInTheDocument();
+    expect(screen.getByText("https://petcenter.test/petshops/pet-center-vila")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Copiar link" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Abrir vitrine" })).not.toBeInTheDocument();
   });
 
   it("surfaces slug conflicts returned by the server action", async () => {
@@ -151,5 +185,36 @@ describe("PublicProfilePageClient", () => {
       ).toBeInTheDocument();
       expect(refresh).toHaveBeenCalled();
     });
+  });
+
+  it("allows copying the active canonical storefront link", async () => {
+    render(
+      <PublicProfilePageClient
+        profile={{
+          ...baseProfile,
+          slug: "pet-center-vila",
+          description: "Banho e tosa com atendimento humanizado.",
+          city: "São Paulo",
+          neighborhood: "Vila Mariana",
+          contactSummary: "WhatsApp (11) 99999-9999",
+          addressSummary: "Rua Exemplo, 123",
+          isPublished: true,
+        }}
+        updatePublicProfileAction={vi.fn(async () => ({
+          success: true,
+          message: "ok",
+        }))}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Copiar link" }));
+
+    expect(writeText).toHaveBeenCalledWith("https://petcenter.test/petshops/pet-center-vila");
+    expect(screen.getByRole("link", { name: "Abrir vitrine" })).toHaveAttribute(
+      "href",
+      "https://petcenter.test/petshops/pet-center-vila",
+    );
+    expect(screen.getByText("Ativo para compartilhamento")).toBeInTheDocument();
+    expect(screen.getByText("Link copiado para compartilhar com clientes.")).toBeInTheDocument();
   });
 });

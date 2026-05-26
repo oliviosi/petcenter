@@ -17,7 +17,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 `API_BASE_URL` aponta para a API .NET.  
-`NEXT_PUBLIC_APP_URL` é opcional e pode ser usado por integrações futuras.
+`NEXT_PUBLIC_APP_URL` define a origem pública canônica usada para compor links da vitrine do petshop no console admin.
 
 ### Sessão admin
 
@@ -88,7 +88,7 @@ npm run test
 - `/admin/bookings` — fila operacional com visão padrão de hoje + próximas reservas
 - `/admin/bookings/[id]` — detalhe operacional com contexto completo e ações
 - `/admin/feedback` — console operacional de reputação com resumo do petshop, médias por profissional e lista filtrável de avaliações com atalho para a reserva
-- `/admin/profile` — vitrine pública do petshop com slug, textos, cidade/bairro e estado de publicação
+- `/admin/profile` — vitrine pública do petshop com slug, textos, cidade/bairro, estado de publicação e link canônico de compartilhamento
 - `/admin/professionals` — cadastro, edição e ativação/desativação de profissionais
 - `/admin/professionals/[id]` — hub operacional do profissional com perfil, serviços atribuídos e disponibilidade semanal
 - `/admin/services` — catálogo operacional de serviços com duração, preço base e status ativo/inativo
@@ -107,6 +107,7 @@ npm run test
   - descrição, cidade e bairro usados na vitrine pública e no catálogo secundário
   - resumos de contato e endereço exibidos na vitrine
   - estado guiado de publicação, com checklist dos campos obrigatórios
+  - link canônico derivado de `NEXT_PUBLIC_APP_URL + /petshops/[slug]`, com estados ativo, preview e indisponível
 - Profissionais ou serviços inativos saem do fluxo operacional relevante:
   - profissionais inativos deixam de participar da vitrine pública
   - serviços inativos deixam de aparecer no catálogo público e nas opções de atribuição
@@ -148,6 +149,7 @@ npm run test
   `feedbackAccessToken` ainda está disponível no contexto salvo do navegador.
 - O dashboard admin não replica nenhuma lógica de escopo por empresa no cliente; ele apenas propaga o JWT da sessão e depende do backend para garantir o isolamento multi-tenant.
 - Publicar a vitrine em `/admin/profile` exige slug, descrição, cidade, bairro, resumo de contato e resumo de endereço válidos; conflitos de slug e erros de validação retornados pelo backend são exibidos diretamente no formulário.
+- O link da vitrine só libera ações de copiar/abrir quando o storefront está público e com slug válido; antes disso, o console mostra o link previsto ou explica o que falta para disponibilizá-lo.
 
 ## Validação sugerida
 

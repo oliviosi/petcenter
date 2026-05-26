@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, CircleAlert, Eye, EyeOff, ExternalLink, Store } from "lucide-react";
+import { CheckCircle2, CircleAlert, Copy, Eye, EyeOff, ExternalLink, Store } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { SetupNotice } from "@/components/AdminSetup/SetupNotice";
@@ -28,6 +28,16 @@ interface PublicProfilePageClientProps {
 interface FeedbackState {
   tone: "success" | "danger";
   message: string;
+}
+
+interface StorefrontLinkState {
+  kind: "active" | "preview" | "unavailable";
+  badge: {
+    tone: "success" | "warning" | "neutral";
+    label: string;
+  };
+  title: string;
+  description: string;
 }
 
 const publicationRequirements = [
@@ -64,6 +74,7 @@ export function PublicProfilePageClient({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
+  const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const {
     control,
     register,
@@ -84,11 +95,27 @@ export function PublicProfilePageClient({
   const values = watch();
   const normalizedSlug = values.slug.trim().toLowerCase();
   const storefrontPath = normalizedSlug ? `/petshops/${normalizedSlug}` : "/petshops/[slug]";
+  const publicAppOrigin = useMemo(() => {
+    const configuredOrigin = process.env.NEXT_PUBLIC_APP_URL?.trim();
+
+    if (configuredOrigin) {
+      return configuredOrigin.replace(/\/$/, "");
+    }
+
+    if (typeof window !== "undefined") {
+      return window.location.origin;
+    }
+
+    return "";
+  }, []);
   const missingRequirements = useMemo(
     () =>
       publicationRequirements.filter(({ field }) => !values[field].trim()).map(({ label }) => label),
     [values],
   );
+  const canonicalStorefrontLink = normalizedSlug
+    ? `${publicAppOrigin}${storefrontPath}`
+    : null;
 
   const publicationState = values.isPublished
     ? missingRequirements.length === 0
@@ -119,6 +146,44 @@ export function PublicProfilePageClient({
             "Enquanto estiver oculta, a loja nao pode compartilhar a propria pagina publica com clientes. Voce pode preparar os dados com calma antes de publicar.",
         },
       };
+
+  const storefrontLinkState: StorefrontLinkState = !normalizedSlug
+    ? {
+      kind: "unavailable",
+      badge: { tone: "neutral", label: "Indisponivel" },
+      title: "Defina um slug para gerar o link canonico",
+      description:
+        "O link principal da vitrine so pode ser exibido quando a loja tiver um slug valido para a rota publica.",
+      }
+    : values.isPublished && missingRequirements.length === 0
+      ? {
+        kind: "active",
+        badge: { tone: "success", label: "Ativo para compartilhamento" },
+        title: "Link pronto para distribuir aos clientes",
+        description:
+          "A vitrine ja esta publica e este e o link canonico que o petshop pode copiar ou abrir agora.",
+      }
+      : {
+        kind: "preview",
+        badge: { tone: "warning", label: "Preview" },
+        title: "Link previsto antes da publicacao",
+        description: values.isPublished
+          ? "O caminho ja esta definido, mas a vitrine ainda precisa concluir os requisitos obrigatorios antes de ficar acessivel."
+          : "O caminho ja esta definido, mas a vitrine continua oculta. Publique a loja quando quiser liberar o acesso externo.",
+      };
+
+  async function handleCopyStorefrontLink() {
+    if (storefrontLinkState.kind !== "active" || !canonicalStorefrontLink) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(canonicalStorefrontLink);
+      setCopyFeedback("Link copiado para compartilhar com clientes.");
+    } catch {
+      setCopyFeedback("Nao foi possivel copiar o link automaticamente.");
+    }
+  }
 
   async function handleFormSubmit(formValues: AdminPublicProfileValues) {
     setFeedback(null);
@@ -343,15 +408,38 @@ export function PublicProfilePageClient({
                 <div className="flex items-center gap-2 text-content-secondary">
                   <ExternalLink className="h-4 w-4" />
                   <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
-                    Caminho público
+                    Link canonico da vitrine
+                  </p>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <Badge tone={storefrontLinkState.badge.tone}>{storefrontLinkState.badge.label}</Badge>
+                  <p className="text-sm font-medium text-content-primary">
+                    {storefrontLinkState.title}
                   </p>
                 </div>
                 <p className="mt-2 break-all font-medium text-content-primary">
-                  {storefrontPath}
+                  {canonicalStorefrontLink ?? "Defina um slug para montar o link publico completo."}
                 </p>
                 <p className="mt-2 text-sm text-content-secondary">
-                  Este caminho e o link principal que o petshop pode compartilhar com clientes para abrir a propria vitrine publica.
+                  {storefrontLinkState.description}
                 </p>
+
+                {storefrontLinkState.kind === "active" && canonicalStorefrontLink ? (
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <Button type="button" size="sm" onClick={handleCopyStorefrontLink}>
+                      <Copy className="h-4 w-4" />
+                      Copiar link
+                    </Button>
+                    <Button href={canonicalStorefrontLink} variant="secondary" size="sm">
+                      <ExternalLink className="h-4 w-4" />
+                      Abrir vitrine
+                    </Button>
+                  </div>
+                ) : null}
+
+                {copyFeedback ? (
+                  <p className="mt-3 text-sm text-content-secondary">{copyFeedback}</p>
+                ) : null}
               </div>
 
               <p>
