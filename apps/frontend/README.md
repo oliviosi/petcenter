@@ -66,6 +66,13 @@ npm run build
 npm run test
 ```
 
+## Fundação visual premium
+
+- A base visual compartilhada usa amarelo quente como cor principal (`#F6BE04`) com hover mais fechado e roxo editorial como acento (`#690E88`).
+- O fundo principal do app usa `#F8F8F8`, enquanto cards e painéis continuam brancos para reforçar hierarquia sem pesar nas sombras.
+- A tipografia combina `Inter` para UI e leitura densa com `Poppins` para títulos, branding e momentos de destaque.
+- Shell público, shell admin, botões, cards, badges, campos e páginas representativas seguem a mesma linguagem clean, arredondada e mais premium.
+
 ## Fluxo público disponível
 
 - `/` — entrada pública com CTA para descoberta

@@ -27,23 +27,22 @@ const highlights = [
 export default function HomePage() {
   return (
     <PageWrapper
-      title="Reserve com clareza para o seu pet"
-      description="Descubra petshops, confira disponibilidade e acompanhe a solicitação sem depender de login."
+      title="Agendamentos com mais elegância, clareza e confiança"
+      description="Descubra petshops, compare serviços e acompanhe a solicitação do seu pet em uma experiência mais premium, mas ainda simples de usar."
       centerContent
     >
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <Card className="flex flex-col gap-6 bg-surface-card p-8">
+        <Card className="flex flex-col gap-8 p-8 sm:p-10">
           <div className="space-y-3">
-            <span className="inline-flex w-fit rounded-full bg-surface-brand-soft px-3 py-1 text-sm font-medium text-content-brand">
-              Jornada pública de reservas
+            <span className="inline-flex w-fit rounded-full bg-accent-soft px-3 py-1 text-sm font-medium text-content-accent">
+              Jornada pública refinada
             </span>
-            <h2 className="max-w-2xl text-4xl font-semibold tracking-tight text-content-primary">
-              Descubra serviços e solicite atendimento com transparência.
+            <h2 className="font-heading max-w-2xl text-4xl font-semibold tracking-tight text-content-primary sm:text-5xl">
+              Descubra serviços e solicite atendimento com uma experiência mais cuidadosa.
             </h2>
-            <p className="max-w-2xl text-base text-content-secondary">
-              O petcenter ajuda você a encontrar o petshop certo e enviar uma
-              solicitação de reserva com dados essenciais do responsável e do
-              pet.
+            <p className="max-w-2xl text-base leading-7 text-content-secondary">
+              O petcenter ajuda você a encontrar o petshop certo e enviar uma solicitação
+              de reserva com clareza, contexto e comunicação mais profissional em cada etapa.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -60,12 +59,12 @@ export default function HomePage() {
           </div>
         </Card>
 
-        <Card className="grid gap-4 bg-surface-emphasis p-8 text-content-inverse">
+        <Card className="grid gap-5 bg-surface-emphasis p-8 text-content-inverse">
           <div className="space-y-2">
-            <p className="text-sm font-medium text-content-inverse/80">
-              Como funciona
-            </p>
-            <h2 className="text-2xl font-semibold">Solicitação assíncrona</h2>
+            <p className="text-sm font-medium text-content-inverse/80">Como funciona</p>
+            <h2 className="font-heading text-3xl font-semibold">
+              Solicitação assíncrona com mensagens claras
+            </h2>
           </div>
           <ol className="space-y-4 text-sm text-content-inverse/80">
             <li>1. Escolha um petshop e confira os serviços disponíveis.</li>
@@ -81,13 +80,11 @@ export default function HomePage() {
       <div className="grid gap-6 lg:grid-cols-3">
         {highlights.map(({ title, description, icon: Icon }) => (
           <Card key={title} className="flex h-full flex-col gap-4 p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-brand-soft text-content-brand">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-soft text-content-accent">
               <Icon className="h-6 w-6" />
             </div>
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-content-primary">
-                {title}
-              </h3>
+              <h3 className="font-heading text-xl font-semibold text-content-primary">{title}</h3>
               <p className="text-sm text-content-secondary">{description}</p>
             </div>
           </Card>

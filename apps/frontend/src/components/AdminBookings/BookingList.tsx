@@ -54,7 +54,7 @@ export function BookingList({
         return (
           <li key={booking.id}>
             <Link href={`/admin/bookings/${booking.id}`} className="block">
-              <Card className="p-6 transition hover:border-stroke-strong hover:shadow-card">
+              <Card className="p-6 transition duration-200 hover:-translate-y-0.5 hover:border-stroke-strong hover:shadow-card">
                 <div className="flex flex-col gap-5">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="space-y-3">
@@ -66,7 +66,7 @@ export function BookingList({
                       </div>
 
                       <div className="space-y-1">
-                        <h2 className="text-lg font-semibold text-content-primary">
+                        <h2 className="font-heading text-2xl font-semibold text-content-primary">
                           {booking.pet.name} • {booking.service.name}
                         </h2>
                         <p className="text-sm text-content-secondary">
@@ -75,7 +75,7 @@ export function BookingList({
                       </div>
                     </div>
 
-                    <span className="inline-flex items-center gap-2 text-sm font-medium text-content-brand">
+                    <span className="inline-flex items-center gap-2 text-sm font-medium text-content-accent">
                       Ver detalhes
                       <ArrowRight className="h-4 w-4" />
                     </span>
@@ -123,7 +123,7 @@ export function BookingList({
                   </div>
 
                   {terminalSummary ? (
-                    <div className="rounded-2xl bg-surface-muted px-4 py-3">
+                    <div className="rounded-2xl bg-surface-brand-soft px-4 py-3">
                       <p className="text-sm font-medium text-content-primary">
                         {terminalSummary.title}
                       </p>

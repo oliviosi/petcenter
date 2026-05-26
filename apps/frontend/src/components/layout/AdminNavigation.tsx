@@ -52,11 +52,11 @@ export function AdminNavigation({ mobile = false }: AdminNavigationProps) {
             href={item.href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition",
+              "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition duration-200",
               mobile && "min-w-max",
               isActive
-                ? "bg-surface-brand-soft text-content-brand"
-                : "text-content-secondary hover:bg-surface-muted hover:text-content-primary",
+                ? "border border-stroke-brand bg-surface-brand-soft text-content-primary shadow-soft"
+                : "border border-transparent text-content-secondary hover:bg-surface-muted hover:text-content-primary",
             )}
           >
             <Icon className="h-4 w-4" />

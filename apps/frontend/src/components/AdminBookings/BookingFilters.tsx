@@ -69,12 +69,14 @@ export function BookingFilters({
   }
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 md:p-7">
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium text-content-primary">
-              <CalendarRange className="h-4 w-4 text-content-brand" />
+              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-accent-soft text-content-accent">
+                <CalendarRange className="h-4 w-4" />
+              </span>
               Filtros operacionais
             </div>
             <p className="max-w-3xl text-sm text-content-secondary">

@@ -18,10 +18,10 @@ export function PetshopDetailHero({ petshop }: PetshopDetailHeroProps) {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-3">
             <Badge tone="brand">Atendimento público</Badge>
-            <h1 className="text-3xl font-semibold text-content-primary">
+            <h1 className="font-heading text-4xl font-semibold tracking-tight text-content-primary">
               {petshop.name}
             </h1>
-            <p className="max-w-3xl text-sm text-content-secondary">
+            <p className="max-w-3xl text-base leading-7 text-content-secondary">
               {petshop.description}
             </p>
           </div>
@@ -64,7 +64,7 @@ export function PetshopDetailHero({ petshop }: PetshopDetailHeroProps) {
           <p className="text-sm font-medium text-content-secondary">
             Próximo passo
           </p>
-          <h2 className="text-2xl font-semibold text-content-primary">
+          <h2 className="font-heading text-3xl font-semibold text-content-primary">
             Solicitar reserva
           </h2>
           <p className="text-sm text-content-secondary">
@@ -74,8 +74,8 @@ export function PetshopDetailHero({ petshop }: PetshopDetailHeroProps) {
         </div>
 
         {featuredService ? (
-          <div className="rounded-2xl bg-surface-brand-soft p-4">
-            <p className="text-sm font-medium text-content-brand">
+          <div className="rounded-2xl bg-accent-soft p-4">
+            <p className="text-sm font-medium text-content-accent">
               Serviço em destaque
             </p>
             <p className="mt-2 text-base font-semibold text-content-primary">

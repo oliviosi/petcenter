@@ -21,21 +21,28 @@ function FeedbackMetricCard({
   label,
   value,
   helper,
+  tone = "brand",
 }: {
   icon: typeof Building2;
   label: string;
   value: string;
   helper: string;
+  tone?: "brand" | "accent";
 }) {
+  const toneClasses =
+    tone === "accent"
+      ? "bg-accent-soft text-content-accent"
+      : "bg-surface-brand-soft text-content-brand";
+
   return (
     <Card className="p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
           <p className="text-sm font-medium text-content-secondary">{label}</p>
-          <p className="text-3xl font-semibold text-content-primary">{value}</p>
+          <p className="font-heading text-3xl font-semibold text-content-primary">{value}</p>
           <p className="text-sm text-content-muted">{helper}</p>
         </div>
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-brand-soft text-content-brand">
+        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${toneClasses}`}>
           <Icon className="h-5 w-5" />
         </div>
       </div>
@@ -51,7 +58,7 @@ function ProfessionalBreakdown({
   return (
     <Card className="p-6">
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold text-content-primary">
+        <h2 className="font-heading text-2xl font-semibold text-content-primary">
           Reputação por profissional
         </h2>
         <p className="text-sm text-content-secondary">
@@ -76,11 +83,11 @@ function ProfessionalBreakdown({
         <ul className="mt-6 space-y-3">
           {professionals.map((professional) => (
             <li key={professional.professionalId}>
-              <div className="rounded-2xl bg-surface-muted p-4">
+              <div className="rounded-2xl border border-stroke-soft bg-surface-muted p-4">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-content-primary">
+                      <p className="font-heading text-base font-semibold text-content-primary">
                         {professional.name}
                       </p>
                       <Badge tone={professional.isRated ? "success" : "neutral"}>
@@ -205,7 +212,7 @@ function FeedbackList({
 
               <div className="rounded-2xl bg-surface-muted p-4">
                 <div className="flex items-center gap-2 text-sm font-medium text-content-primary">
-                  <MessageSquare className="h-4 w-4 text-content-brand" />
+                  <MessageSquare className="h-4 w-4 text-content-accent" />
                   Comentário do cliente
                 </div>
                 <p className="mt-2 text-sm text-content-secondary">
@@ -251,6 +258,7 @@ export function FeedbackDashboard({
           label="Avaliações recebidas"
           value={String(summary.petshop.feedbackCount)}
           helper="Total de feedbacks vinculados às reservas da empresa."
+          tone="accent"
         />
         <FeedbackMetricCard
           icon={Star}
@@ -265,7 +273,9 @@ export function FeedbackDashboard({
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-content-primary">Feedback por reserva</h2>
+            <h2 className="font-heading text-2xl font-semibold text-content-primary">
+              Feedback por reserva
+            </h2>
             <p className="text-sm text-content-secondary">
               Consulte comentários, compare notas e volte para a reserva quando precisar investigar
               o contexto operacional.

@@ -14,9 +14,7 @@ export function PetshopCard({ petshop }: PetshopCardProps) {
     <Card className="flex h-full flex-col gap-5 p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-2">
-          <h2 className="text-xl font-semibold text-content-primary">
-            {petshop.name}
-          </h2>
+          <h2 className="font-heading text-2xl font-semibold text-content-primary">{petshop.name}</h2>
           <p className="text-sm text-content-secondary">{petshop.description}</p>
         </div>
         <Badge tone={petshop.averageRating ? "brand" : "neutral"}>
