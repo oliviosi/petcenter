@@ -96,9 +96,9 @@ export function PublicProfilePageClient({
           badge: { tone: "success" as const, label: "Publicada" },
           notice: {
             tone: "success" as const,
-            title: "Vitrine pronta para descoberta",
+            title: "Vitrine pronta para acesso publico",
             description:
-              "Com os campos obrigatórios preenchidos, o catálogo público já consegue usar seu slug e os resumos da loja.",
+              "Com os campos obrigatorios preenchidos, o petshop ja pode compartilhar o link publico da propria vitrine com seus clientes.",
           },
         }
       : {
@@ -107,16 +107,16 @@ export function PublicProfilePageClient({
             tone: "warning" as const,
             title: "Faltam campos para liberar a vitrine",
             description:
-              "Preencha os campos marcados para publicar a loja no catálogo e habilitar a página pública pelo slug escolhido.",
+              "Preencha os campos marcados para publicar a loja e habilitar o acesso direto pela pagina publica do slug escolhido.",
           },
         }
     : {
         badge: { tone: "neutral" as const, label: "Oculta" },
         notice: {
           tone: "info" as const,
-          title: "Vitrine fora do catálogo público",
+          title: "Vitrine fora da experiencia publica principal",
           description:
-            "Enquanto estiver oculta, a loja não aparece na descoberta pública. Você pode preparar os dados com calma antes de publicar.",
+            "Enquanto estiver oculta, a loja nao pode compartilhar a propria pagina publica com clientes. Voce pode preparar os dados com calma antes de publicar.",
         },
       };
 
@@ -170,8 +170,7 @@ export function PublicProfilePageClient({
                 Dados da vitrine pública
               </h2>
               <p className="text-sm text-content-secondary">
-                Ajuste como o petshop aparece no catálogo público e na página da loja. A
-                publicação usa exatamente estes campos.
+                Ajuste como o petshop aparece na propria vitrine publica e, quando necessario, no catalogo secundario. A publicacao usa exatamente estes campos.
               </p>
             </div>
 
@@ -181,8 +180,7 @@ export function PublicProfilePageClient({
                   Estado da vitrine
                 </p>
                 <p className="text-sm text-content-muted">
-                  Escolha se a loja fica disponível no catálogo público agora ou se continua
-                  oculta enquanto você prepara os textos.
+                  Escolha se a loja fica disponivel para acesso publico pelo proprio link agora ou se continua oculta enquanto voce prepara os textos.
                 </p>
               </div>
 
@@ -210,8 +208,7 @@ export function PublicProfilePageClient({
                             Manter oculta
                           </p>
                           <p className="text-sm text-content-secondary">
-                            Use esta opção para salvar rascunhos sem colocar o petshop na
-                            descoberta pública.
+                            Use esta opcao para salvar rascunhos sem liberar a vitrine publica da loja.
                           </p>
                         </div>
                       </div>
@@ -236,8 +233,7 @@ export function PublicProfilePageClient({
                             Publicar vitrine
                           </p>
                           <p className="text-sm text-content-secondary">
-                            A loja pode aparecer em <span className="font-medium">/petshops</span>{" "}
-                            e usar o slug salvo na página pública.
+                            A loja passa a ter uma pagina publica propria pelo slug salvo e pode continuar aparecendo em <span className="font-medium">/petshops</span> como descoberta secundaria.
                           </p>
                         </div>
                       </div>
@@ -354,14 +350,12 @@ export function PublicProfilePageClient({
                   {storefrontPath}
                 </p>
                 <p className="mt-2 text-sm text-content-secondary">
-                  Este caminho ajuda a equipe a validar como a loja será descoberta sem montar um
-                  preview completo.
+                  Este caminho e o link principal que o petshop pode compartilhar com clientes para abrir a propria vitrine publica.
                 </p>
               </div>
 
               <p>
-                Quando a vitrine estiver publicada, slug, cidade, bairro e resumos passam a
-                orientar a descoberta do petshop no catálogo público.
+                Quando a vitrine estiver publicada, slug e resumos passam a orientar o acesso direto da loja e tambem a eventual descoberta no catalogo secundario.
               </p>
             </div>
           </div>

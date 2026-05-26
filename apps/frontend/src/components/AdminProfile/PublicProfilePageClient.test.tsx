@@ -41,7 +41,7 @@ describe("PublicProfilePageClient", () => {
       />,
     );
 
-    expect(screen.getByText("Vitrine fora do catálogo público")).toBeInTheDocument();
+    expect(screen.getByText("Vitrine fora da experiencia publica principal")).toBeInTheDocument();
     expect(screen.getByText("/petshops/[slug]")).toBeInTheDocument();
     expect(screen.getByText("Oculta")).toBeInTheDocument();
 

@@ -75,9 +75,9 @@ npm run test
 
 ## Fluxo público disponível
 
-- `/` — entrada pública com CTA para descoberta
-- `/petshops` — catálogo público
-- `/petshops/[slug]` — detalhe do petshop
+- `/` — shell neutra que orienta a entrada para a vitrine pública correta
+- `/petshops` — catálogo público secundário
+- `/petshops/[slug]` — vitrine pública principal do petshop
 - `/petshops/[slug]/book` — solicitação de reserva
 - `/bookings/[bookingId]` — status público da reserva
 - `/bookings/[bookingId]/feedback` — feedback público vinculado à reserva
@@ -104,7 +104,7 @@ npm run test
   - cadastro, edição e exclusão de janelas recorrentes de disponibilidade semanal
 - A página `/admin/profile` concentra o perfil público usado pelo catálogo e pela página pública do petshop:
   - slug estável da loja
-  - descrição, cidade e bairro usados na descoberta pública
+  - descrição, cidade e bairro usados na vitrine pública e no catálogo secundário
   - resumos de contato e endereço exibidos na vitrine
   - estado guiado de publicação, com checklist dos campos obrigatórios
 - Profissionais ou serviços inativos saem do fluxo operacional relevante:

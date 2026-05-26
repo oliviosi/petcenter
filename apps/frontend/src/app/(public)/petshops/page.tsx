@@ -30,8 +30,8 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 
   return (
     <PageWrapper
-      title="Catálogo público de petshops"
-      description="Descubra opções, compare contexto de atendimento e avance para a solicitação de reserva."
+      title="Catalogo publico secundario"
+      description="Use esta area apenas quando precisar localizar uma loja manualmente. A jornada principal continua sendo abrir a vitrine publica do petshop pelo link compartilhado."
     >
       <CatalogFilters filters={filters} />
 

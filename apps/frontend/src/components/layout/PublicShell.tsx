@@ -25,7 +25,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
               href="/petshops"
               className="rounded-full border border-stroke-soft bg-surface-muted px-4 py-2 font-medium transition hover:border-stroke-strong hover:text-content-primary"
             >
-              Petshops
+              Catalogo secundario
             </Link>
           </nav>
         </div>
@@ -35,7 +35,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
 
       <footer className="border-t border-stroke-soft bg-surface-card">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-6 py-6 text-sm text-content-secondary sm:flex-row sm:items-center sm:justify-between">
-          <p>Descoberta pública com linguagem mais clara, elegante e orientada ao agendamento.</p>
+          <p>Entrada publica priorizando a vitrine de um petshop especifico antes do agendamento.</p>
           <div className="flex items-center gap-2 rounded-full bg-surface-muted px-4 py-2 text-content-muted">
             <Heart className="h-4 w-4" />
             <span>A confirmação acontece de forma assíncrona.</span>

@@ -44,6 +44,12 @@
           "exportedName": "logoutAdminAction",
           "filename": "src/app/admin/login/actions.ts"
         },
+        "app/admin/(dashboard)/feedback/page": {
+          "moduleId": 30816,
+          "async": false,
+          "exportedName": "logoutAdminAction",
+          "filename": "src/app/admin/login/actions.ts"
+        },
         "app/admin/(dashboard)/professionals/[id]/page": {
           "moduleId": 56703,
           "async": false,
@@ -78,6 +84,7 @@
       "layer": {
         "app/admin/(dashboard)/bookings/[id]/page": "rsc",
         "app/admin/(dashboard)/bookings/page": "rsc",
+        "app/admin/(dashboard)/feedback/page": "rsc",
         "app/admin/(dashboard)/professionals/[id]/page": "rsc",
         "app/admin/(dashboard)/professionals/page": "rsc",
         "app/admin/(dashboard)/profile/page": "rsc",
@@ -101,6 +108,12 @@
           "exportedName": "submitAdminLoginAction",
           "filename": "src/app/admin/login/actions.ts"
         },
+        "app/admin/(dashboard)/feedback/page": {
+          "moduleId": 30816,
+          "async": false,
+          "exportedName": "submitAdminLoginAction",
+          "filename": "src/app/admin/login/actions.ts"
+        },
         "app/admin/(dashboard)/professionals/[id]/page": {
           "moduleId": 56703,
           "async": false,
@@ -135,6 +148,7 @@
       "layer": {
         "app/admin/(dashboard)/bookings/[id]/page": "rsc",
         "app/admin/(dashboard)/bookings/page": "rsc",
+        "app/admin/(dashboard)/feedback/page": "rsc",
         "app/admin/(dashboard)/professionals/[id]/page": "rsc",
         "app/admin/(dashboard)/professionals/page": "rsc",
         "app/admin/(dashboard)/profile/page": "rsc",

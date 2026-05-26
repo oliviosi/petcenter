@@ -1,16 +1,16 @@
 ## Purpose
-Define public petshop catalog browsing, filtering, and slug-based detail lookup requirements.
+Define secondary public petshop catalog browsing, filtering, ordering, and slug-based detail lookup requirements.
 
 ## Requirements
 ### Requirement: Clients can browse a public catalog of petshops
-The system SHALL provide an unauthenticated endpoint that lists publicly visible petshops in a simple catalog format, including the stable identifier required for public slot lookup and the public petshop rating summary when available. The fields used to populate that catalog SHALL come from the tenant-maintained public storefront profile.
+The system SHALL keep the public petshop catalog as a secondary or optional discovery surface rather than the primary public booking shell, while still listing publicly visible petshops when that catalog is explicitly used. The fields used to populate that catalog SHALL come from the tenant-maintained public storefront profile.
 
-#### Scenario: Public catalog is requested
-- **WHEN** a client requests the public petshop catalog without filters
+#### Scenario: Secondary public catalog is requested
+- **WHEN** a client explicitly requests the public petshop catalog
 - **THEN** the system returns listed petshops that are active and public, including the stable identifier needed for slot lookup and any available public rating summary
 
 ### Requirement: Clients can filter the public catalog by basic attributes
-The system SHALL allow clients to filter the public petshop catalog by petshop name, city, neighborhood, offered service, and public rating threshold.
+The system SHALL allow clients to filter the secondary public petshop catalog by petshop name, city, neighborhood, offered service, and public rating threshold.
 
 #### Scenario: Catalog is filtered by city and service
 - **WHEN** a client requests the public petshop catalog with city and service filters

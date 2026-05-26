@@ -1,19 +1,19 @@
-import { ArrowRight, CalendarClock, HeartHandshake, Search } from "lucide-react";
+import { ArrowRight, CalendarClock, HeartHandshake, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 
 const highlights = [
   {
-    title: "Encontre o petshop ideal",
+    title: "Entre pela vitrine certa",
     description:
-      "Veja as opções disponíveis, compare localização, serviços e reputação sem precisar criar conta.",
-    icon: Search,
+      "Quando o petshop compartilhar o link oficial, o cliente já entra direto na loja certa sem precisar navegar por várias opções.",
+    icon: Link2,
   },
   {
-    title: "Solicite o melhor horário",
+    title: "Avance para o agendamento",
     description:
-      "Escolha serviço, profissional e horário disponível para enviar a solicitação da reserva do seu pet.",
+      "A vitrine pública já leva para serviços, profissionais e horários da unidade escolhida.",
     icon: CalendarClock,
   },
   {
@@ -27,34 +27,28 @@ const highlights = [
 export default function HomePage() {
   return (
     <PageWrapper
-      title="Agendamentos com mais elegância, clareza e confiança"
-      description="Descubra petshops, compare serviços e acompanhe a solicitação do seu pet em uma experiência mais premium, mas ainda simples de usar."
+      title="Cada petshop com sua propria entrada publica"
+      description="Use o link compartilhado pela loja para abrir a vitrine certa, consultar servicos e seguir para o agendamento sem depender de uma jornada de descoberta."
       centerContent
     >
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <Card className="flex flex-col gap-8 p-8 sm:p-10">
           <div className="space-y-3">
             <span className="inline-flex w-fit rounded-full bg-accent-soft px-3 py-1 text-sm font-medium text-content-accent">
-              Jornada pública refinada
+              Entrada publica por petshop
             </span>
             <h2 className="font-heading max-w-2xl text-4xl font-semibold tracking-tight text-content-primary sm:text-5xl">
-              Descubra serviços e solicite atendimento com uma experiência mais cuidadosa.
+              A experiencia principal comeca na vitrine do petshop, nao no catalogo.
             </h2>
             <p className="max-w-2xl text-base leading-7 text-content-secondary">
-              O petcenter ajuda você a encontrar o petshop certo e enviar uma solicitação
-              de reserva com clareza, contexto e comunicação mais profissional em cada etapa.
+              Quando o cliente recebe o link da loja, ele ja entra no contexto certo para ver
+              apresentacao, servicos, profissionais e dar continuidade a reserva do pet.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button href="/petshops">
-              Ver petshops
+            <Button href="/petshops" variant="secondary">
+              Abrir catalogo secundario
               <ArrowRight className="h-4 w-4" />
-            </Button>
-            <Button
-              href="/petshops?orderBy=rating&orderDirection=desc"
-              variant="secondary"
-            >
-              Explorar mais bem avaliados
             </Button>
           </div>
         </Card>
@@ -63,15 +57,14 @@ export default function HomePage() {
           <div className="space-y-2">
             <p className="text-sm font-medium text-content-inverse/80">Como funciona</p>
             <h2 className="font-heading text-3xl font-semibold">
-              Solicitação assíncrona com mensagens claras
+              Shell neutra para orientar a entrada correta
             </h2>
           </div>
           <ol className="space-y-4 text-sm text-content-inverse/80">
-            <li>1. Escolha um petshop e confira os serviços disponíveis.</li>
-            <li>2. Selecione um horário livre e envie os dados do seu pet.</li>
+            <li>1. O cliente abre o link recebido do petshop ou confirma a loja certa.</li>
+            <li>2. A vitrine publica apresenta servicos, profissionais e contexto da unidade.</li>
             <li>
-              3. Acompanhe o andamento depois do envio sem assumir confirmação
-              imediata.
+              3. O andamento da reserva continua assicrono, com status e feedback vinculados ao mesmo fluxo.
             </li>
           </ol>
         </Card>

@@ -102,6 +102,12 @@
       "namedRegex": "^/admin/bookings(?:/)?$"
     },
     {
+      "page": "/admin/feedback",
+      "regex": "^/admin/feedback(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/feedback(?:/)?$"
+    },
+    {
       "page": "/admin/login",
       "regex": "^/admin/login(?:/)?$",
       "routeKeys": {},

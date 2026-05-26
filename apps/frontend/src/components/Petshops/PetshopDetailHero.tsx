@@ -17,7 +17,7 @@ export function PetshopDetailHero({ petshop }: PetshopDetailHeroProps) {
       <Card className="flex flex-col gap-5 p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-3">
-            <Badge tone="brand">Atendimento público</Badge>
+            <Badge tone="brand">Vitrine publica principal</Badge>
             <h1 className="font-heading text-4xl font-semibold tracking-tight text-content-primary">
               {petshop.name}
             </h1>
@@ -62,21 +62,20 @@ export function PetshopDetailHero({ petshop }: PetshopDetailHeroProps) {
       <Card className="flex flex-col gap-5 p-8">
         <div className="space-y-2">
           <p className="text-sm font-medium text-content-secondary">
-            Próximo passo
+            Proximo passo
           </p>
           <h2 className="font-heading text-3xl font-semibold text-content-primary">
-            Solicitar reserva
+            Avancar para o agendamento
           </h2>
           <p className="text-sm text-content-secondary">
-            Escolha um serviço e veja os horários disponíveis para enviar a sua
-            solicitação.
+            A partir desta vitrine, o cliente segue para servicos, horarios e envio da solicitacao sem sair do contexto da loja.
           </p>
         </div>
 
         {featuredService ? (
           <div className="rounded-2xl bg-accent-soft p-4">
             <p className="text-sm font-medium text-content-accent">
-              Serviço em destaque
+              Servico em destaque
             </p>
             <p className="mt-2 text-base font-semibold text-content-primary">
               {featuredService.name}
@@ -96,7 +95,7 @@ export function PetshopDetailHero({ petshop }: PetshopDetailHeroProps) {
           }
           className="w-full"
         >
-          Ver horários disponíveis
+          Ver horarios disponiveis
           <ArrowRight className="h-4 w-4" />
         </Button>
       </Card>

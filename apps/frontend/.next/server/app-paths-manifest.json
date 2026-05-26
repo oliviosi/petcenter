@@ -9,6 +9,7 @@
   "/_not-found/page": "app/_not-found/page.js",
   "/admin/(dashboard)/bookings/[id]/page": "app/admin/(dashboard)/bookings/[id]/page.js",
   "/admin/(dashboard)/bookings/page": "app/admin/(dashboard)/bookings/page.js",
+  "/admin/(dashboard)/feedback/page": "app/admin/(dashboard)/feedback/page.js",
   "/admin/(dashboard)/professionals/[id]/page": "app/admin/(dashboard)/professionals/[id]/page.js",
   "/admin/(dashboard)/professionals/page": "app/admin/(dashboard)/professionals/page.js",
   "/admin/(dashboard)/profile/page": "app/admin/(dashboard)/profile/page.js",

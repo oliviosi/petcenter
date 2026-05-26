@@ -46,7 +46,7 @@ export function PetshopCard({ petshop }: PetshopCardProps) {
           {petshop.city} • {petshop.neighborhood}
         </div>
         <Button href={`/petshops/${petshop.slug}`}>
-          Ver detalhes
+          Abrir vitrine
           <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
