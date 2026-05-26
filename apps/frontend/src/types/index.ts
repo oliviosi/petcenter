@@ -325,6 +325,45 @@ export interface AdminBookingFilters {
   professionalId: string;
 }
 
+export interface AdminFeedbackPetshopSummary {
+  averageRating: number | null;
+  feedbackCount: number;
+  isRated: boolean;
+}
+
+export interface AdminFeedbackProfessionalSummary {
+  professionalId: string;
+  name: string;
+  specialty: string | null;
+  averageRating: number | null;
+  feedbackCount: number;
+  isRated: boolean;
+}
+
+export interface AdminFeedbackSummary {
+  petshop: AdminFeedbackPetshopSummary;
+  professionals: AdminFeedbackProfessionalSummary[];
+}
+
+export interface AdminFeedbackEntry {
+  bookingId: string;
+  professional: {
+    id: string;
+    name: string;
+    specialty: string | null;
+  };
+  petshopRating: number;
+  professionalRating: number;
+  comment: string | null;
+  submittedAt: string;
+}
+
+export interface AdminFeedbackFilters {
+  startDate: string;
+  endDate: string;
+  professionalId: string;
+}
+
 export interface SubmitAdminLoginActionError {
   success: false;
   message: string;

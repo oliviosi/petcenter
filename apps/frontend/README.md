@@ -80,6 +80,7 @@ npm run test
 - `/admin/login` — entrada dedicada para operadores do petshop
 - `/admin/bookings` — fila operacional com visão padrão de hoje + próximas reservas
 - `/admin/bookings/[id]` — detalhe operacional com contexto completo e ações
+- `/admin/feedback` — console operacional de reputação com resumo do petshop, médias por profissional e lista filtrável de avaliações com atalho para a reserva
 - `/admin/profile` — vitrine pública do petshop com slug, textos, cidade/bairro e estado de publicação
 - `/admin/professionals` — cadastro, edição e ativação/desativação de profissionais
 - `/admin/professionals/[id]` — hub operacional do profissional com perfil, serviços atribuídos e disponibilidade semanal
@@ -110,6 +111,12 @@ npm run test
 - Filtros permitem revisar estado, intervalo de datas e profissional.
 - Reservas rejeitadas continuam acessíveis pelo mesmo dashboard quando o estado e o período são ajustados.
 - Conclusão, cancelamento e não comparecimento exigem confirmação explícita antes da mutação.
+
+### Console de feedback no admin
+
+- A página `/admin/feedback` consome apenas endpoints autenticados do tenant e nunca envia `empresaId` no cliente.
+- O resumo destaca a reputação geral do petshop e a quebra por profissional com base em `BookingFeedback`.
+- A lista filtrável por período e profissional ajuda a conectar comentários e notas de volta ao detalhe operacional em `/admin/bookings/[id]`.
 
 ## Experiência de feedback público
 

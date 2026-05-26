@@ -22,6 +22,30 @@ public class BookingRepository : IBookingRepository
     public async Task<BookingFeedback?> GetFeedbackByBookingIdAsync(Guid bookingId) =>
         await _db.BookingFeedbacks.FirstOrDefaultAsync(feedback => feedback.BookingId == bookingId);
 
+    public async Task<List<BookingFeedback>> ListFeedbackByEmpresaAsync(
+        Guid empresaId,
+        DateTime? submittedFrom = null,
+        DateTime? submittedToExclusive = null,
+        Guid? professionalId = null)
+    {
+        var query = _db.BookingFeedbacks.AsNoTracking()
+            .Where(feedback => feedback.EmpresaId == empresaId);
+
+        if (submittedFrom.HasValue)
+            query = query.Where(feedback => feedback.SubmittedAt >= submittedFrom.Value);
+
+        if (submittedToExclusive.HasValue)
+            query = query.Where(feedback => feedback.SubmittedAt < submittedToExclusive.Value);
+
+        if (professionalId.HasValue)
+            query = query.Where(feedback => feedback.ProfessionalId == professionalId.Value);
+
+        return await query
+            .OrderByDescending(feedback => feedback.SubmittedAt)
+            .ThenByDescending(feedback => feedback.Id)
+            .ToListAsync();
+    }
+
     public async Task<List<Booking>> ListByEmpresaAsync(
         Guid empresaId,
         DateTime? slotStartFrom = null,

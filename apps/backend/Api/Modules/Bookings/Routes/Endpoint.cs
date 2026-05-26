@@ -4,8 +4,10 @@ using Api.Modules.Bookings.Routes.CheckFeedbackEligibility;
 using Api.Modules.Bookings.Routes.Cancel;
 using Api.Modules.Bookings.Routes.Complete;
 using Api.Modules.Bookings.Routes.GetById;
+using Api.Modules.Bookings.Routes.GetFeedbackSummary;
 using Api.Modules.Bookings.Routes.GetSlots;
 using Api.Modules.Bookings.Routes.List;
+using Api.Modules.Bookings.Routes.ListFeedback;
 using Api.Modules.Bookings.Routes.NoShow;
 using Api.Modules.Bookings.Routes.SubmitFeedback;
 using Api.Exceptions;
@@ -104,6 +106,33 @@ public static class BookingsEndpoints
             return Results.Ok(response);
         })
         .WithName("SubmitBookingFeedback");
+
+        bookingsGroup.MapGet("/feedback/summary", async (
+            HttpContext httpContext,
+            IGetBookingFeedbackSummaryService service) =>
+        {
+            var empresaId = ExtractEmpresaId(httpContext);
+            var response = await service.HandleAsync(empresaId);
+            return Results.Ok(response);
+        })
+        .WithName("GetBookingFeedbackSummary")
+        .RequireAuthorization();
+
+        bookingsGroup.MapGet("/feedback", async (
+            [AsParameters] ListBookingFeedbackRequest request,
+            HttpContext httpContext,
+            IValidator<ListBookingFeedbackRequest> validator,
+            IListBookingFeedbackService service) =>
+        {
+            var validation = await validator.ValidateAsync(request);
+            if (!validation.IsValid)
+                return Results.ValidationProblem(validation.ToDictionary());
+
+            var response = await service.HandleAsync(ExtractEmpresaId(httpContext), request);
+            return Results.Ok(response);
+        })
+        .WithName("ListBookingFeedback")
+        .RequireAuthorization();
 
         bookingsGroup.MapGet("/", async (
             [AsParameters] ListBookingsRequest request,

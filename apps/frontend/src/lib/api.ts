@@ -2,6 +2,11 @@ import type {
   AdminBookingCancellation,
   AdminBookingCompletion,
   AdminBookingDetail,
+  AdminFeedbackEntry,
+  AdminFeedbackFilters,
+  AdminFeedbackPetshopSummary,
+  AdminFeedbackProfessionalSummary,
+  AdminFeedbackSummary,
   AdminBookingFilters,
   AdminBookingListItem,
   AdminBookingNoShow,
@@ -226,6 +231,20 @@ function readNumber(record: JsonRecord, ...keys: string[]) {
   return 0;
 }
 
+function readNullableNumber(record: JsonRecord, ...keys: string[]) {
+  const value = readValue(record, ...keys);
+
+  if (typeof value === "number") {
+    return value;
+  }
+
+  if (typeof value === "string" && value.trim() && !Number.isNaN(Number(value))) {
+    return Number(value);
+  }
+
+  return null;
+}
+
 function readBoolean(record: JsonRecord, ...keys: string[]) {
   const value = readValue(record, ...keys);
 
@@ -264,6 +283,85 @@ function mapAdminBookingProfessional(value: unknown): AdminBookingProfessional {
       "especialidade",
       "Especialidade",
     ),
+  };
+}
+
+function mapAdminFeedbackPetshopSummary(value: unknown): AdminFeedbackPetshopSummary {
+  const record = toRecord(value);
+
+  return {
+    averageRating: readNullableNumber(record, "averageRating", "AverageRating"),
+    feedbackCount: readNumber(record, "feedbackCount", "FeedbackCount"),
+    isRated: readBoolean(record, "isRated", "IsRated"),
+  };
+}
+
+function mapAdminFeedbackProfessionalSummary(value: unknown): AdminFeedbackProfessionalSummary {
+  const record = toRecord(value);
+
+  return {
+    professionalId: readString(
+      record,
+      "professionalId",
+      "ProfessionalId",
+      "profissionalId",
+      "ProfissionalId",
+    ),
+    name: readString(record, "name", "Name", "nome", "Nome"),
+    specialty: readNullableString(
+      record,
+      "specialty",
+      "Specialty",
+      "especialidade",
+      "Especialidade",
+    ),
+    averageRating: readNullableNumber(record, "averageRating", "AverageRating"),
+    feedbackCount: readNumber(record, "feedbackCount", "FeedbackCount"),
+    isRated: readBoolean(record, "isRated", "IsRated"),
+  };
+}
+
+function mapAdminFeedbackSummary(value: unknown): AdminFeedbackSummary {
+  const record = toRecord(value);
+
+  return {
+    petshop: mapAdminFeedbackPetshopSummary(readValue(record, "petshop", "Petshop")),
+    professionals: readArray(readValue(record, "professionals", "Professionals")).map(
+      mapAdminFeedbackProfessionalSummary,
+    ),
+  };
+}
+
+function mapAdminFeedbackEntry(value: unknown): AdminFeedbackEntry {
+  const record = toRecord(value);
+
+  return {
+    bookingId: readString(record, "bookingId", "BookingId"),
+    professional: {
+      id: readString(
+        toRecord(readValue(record, "professional", "Professional")),
+        "id",
+        "Id",
+      ),
+      name: readString(
+        toRecord(readValue(record, "professional", "Professional")),
+        "name",
+        "Name",
+        "nome",
+        "Nome",
+      ),
+      specialty: readNullableString(
+        toRecord(readValue(record, "professional", "Professional")),
+        "specialty",
+        "Specialty",
+        "especialidade",
+        "Especialidade",
+      ),
+    },
+    petshopRating: readNumber(record, "petshopRating", "PetshopRating"),
+    professionalRating: readNumber(record, "professionalRating", "ProfessionalRating"),
+    comment: readNullableString(record, "comment", "Comment"),
+    submittedAt: readString(record, "submittedAt", "SubmittedAt"),
   };
 }
 
@@ -993,6 +1091,31 @@ export const api = {
     });
 
     return response.map(mapAdminBookingListItem);
+  },
+
+  async getAdminFeedbackSummary(token: string) {
+    const response = await request<unknown>("/bookings/feedback/summary", {
+      method: "GET",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
+
+    return mapAdminFeedbackSummary(response);
+  },
+
+  async listAdminFeedback(filters: Partial<AdminFeedbackFilters>, token: string) {
+    const response = await request<unknown[]>("/bookings/feedback", {
+      method: "GET",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+      params: {
+        startDate: filters.startDate || undefined,
+        endDate: filters.endDate || undefined,
+        professionalId: filters.professionalId || undefined,
+      },
+    });
+
+    return readArray(response).map(mapAdminFeedbackEntry);
   },
 
   async getAdminBookingById(id: string, token: string) {

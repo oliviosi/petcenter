@@ -7,6 +7,11 @@ public interface IBookingRepository
     Task AddAsync(Booking booking);
     Task<Booking?> GetByIdAsync(Guid id);
     Task<BookingFeedback?> GetFeedbackByBookingIdAsync(Guid bookingId);
+    Task<List<BookingFeedback>> ListFeedbackByEmpresaAsync(
+        Guid empresaId,
+        DateTime? submittedFrom = null,
+        DateTime? submittedToExclusive = null,
+        Guid? professionalId = null);
     Task<List<Booking>> ListByEmpresaAsync(
         Guid empresaId,
         DateTime? slotStartFrom = null,
