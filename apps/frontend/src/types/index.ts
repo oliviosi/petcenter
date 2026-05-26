@@ -52,6 +52,20 @@ export interface PublicPetshopDetail extends PublicPetshopSummary {
   services: PublicPetshopService[];
 }
 
+export type AdminCustomDomainStatus =
+  | "removed"
+  | "pending_setup"
+  | "verifying"
+  | "active"
+  | "failed";
+
+export interface AdminCustomDomain {
+  desiredDomain: string | null;
+  activeDomain: string | null;
+  status: AdminCustomDomainStatus;
+  failureMessage: string | null;
+}
+
 export interface BookingSearchFilters {
   serviceId: string;
   professionalId: string;
@@ -204,6 +218,7 @@ export interface AdminPublicProfile {
   neighborhood: string;
   contactSummary: string;
   addressSummary: string;
+  customDomain: AdminCustomDomain;
   isPublished: boolean;
 }
 

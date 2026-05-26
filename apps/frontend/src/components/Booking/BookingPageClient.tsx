@@ -25,6 +25,7 @@ interface BookingPageClientProps {
   filters: BookingSearchFilters;
   slots: PublicBookingSlot[];
   slotsError?: string | null;
+  bookingPath: string;
   submitBookingAction: SubmitBookingAction;
 }
 
@@ -33,6 +34,7 @@ export function BookingPageClient({
   filters,
   slots,
   slotsError,
+  bookingPath,
   submitBookingAction,
 }: BookingPageClientProps) {
   const router = useRouter();
@@ -168,7 +170,7 @@ export function BookingPageClient({
     });
 
     startTransition(() =>
-      router.replace(`/petshops/${petshop.slug}/book?${nextParams.toString()}`),
+      router.replace(`${bookingPath}?${nextParams.toString()}`),
     );
   }
 

@@ -8,10 +8,12 @@ import type {
   SubmitBookingAction,
 } from "@/types";
 
+const replace = vi.fn();
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
-    replace: vi.fn(),
+    replace,
     refresh: vi.fn(),
   }),
   useSearchParams: () => new URLSearchParams(),
@@ -53,6 +55,10 @@ const filters: BookingSearchFilters = {
 };
 
 describe("BookingPageClient", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("shows validation messages when the user submits without required data", async () => {
     const submitBookingAction: SubmitBookingAction = vi.fn(async () => ({
       success: true,
@@ -64,6 +70,7 @@ describe("BookingPageClient", () => {
         petshop={petshop}
         filters={filters}
         slots={[]}
+        bookingPath={`/petshops/${petshop.slug}/book`}
         submitBookingAction={submitBookingAction}
       />,
     );
@@ -102,6 +109,7 @@ describe("BookingPageClient", () => {
             slotEnd: "2026-01-10T11:00:00Z",
           },
         ]}
+        bookingPath={`/petshops/${petshop.slug}/book`}
         submitBookingAction={submitBookingAction}
       />,
     );
@@ -125,6 +133,29 @@ describe("BookingPageClient", () => {
       expect(
         screen.getByText("O horário informado não está disponível para reserva."),
       ).toBeInTheDocument();
+    });
+  });
+
+  it("keeps search navigation on the host-aware booking route when using a custom domain entry", async () => {
+    render(
+      <BookingPageClient
+        petshop={petshop}
+        filters={filters}
+        slots={[]}
+        bookingPath="/book"
+        submitBookingAction={vi.fn(async () => ({
+          success: true,
+          bookingId: "8baaf24a-c298-43be-9a71-6b644597fe15",
+        }))}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Buscar horários" }));
+
+    await waitFor(() => {
+      expect(replace).toHaveBeenCalledWith(
+        expect.stringContaining("/book?serviceId=3b461b0d-bb9b-4949-8d07-99b6eddb5759"),
+      );
     });
   });
 });

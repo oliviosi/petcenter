@@ -23,6 +23,12 @@ const baseProfile = {
   neighborhood: "",
   contactSummary: "",
   addressSummary: "",
+  customDomain: {
+    desiredDomain: null,
+    activeDomain: null,
+    status: "removed" as const,
+    failureMessage: null,
+  },
   isPublished: false,
 } as const;
 
@@ -37,7 +43,7 @@ describe("PublicProfilePageClient", () => {
     });
   });
 
-  it("shows unavailable link guidance when the storefront slug is missing", async () => {
+  it("shows unavailable guidance when there is no fallback slug or active custom domain", async () => {
     render(
       <PublicProfilePageClient
         profile={baseProfile}
@@ -49,12 +55,15 @@ describe("PublicProfilePageClient", () => {
     );
 
     expect(screen.getByText("Vitrine fora da experiencia publica principal")).toBeInTheDocument();
-    expect(screen.getByText("Defina um slug para gerar o link canonico")).toBeInTheDocument();
     expect(
-      screen.getByText("Defina um slug para montar o link publico completo."),
+      screen.getByText("Defina um slug ou ative um domínio para gerar o link canônico"),
     ).toBeInTheDocument();
-    expect(screen.getByText("Indisponivel")).toBeInTheDocument();
-    expect(screen.getByText("Oculta")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Defina um slug ou ative um domínio para montar o link público completo.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Fallback compartilhado")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Copiar link" })).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: /Publicar vitrine/i }));
@@ -89,13 +98,24 @@ describe("PublicProfilePageClient", () => {
     });
   });
 
-  it("shows preview state when the slug exists but the storefront is not yet public", () => {
+  it("keeps the shared-host fallback explicit while a custom domain is pending", () => {
     render(
       <PublicProfilePageClient
         profile={{
           ...baseProfile,
           slug: "pet-center-vila",
-          isPublished: false,
+          description: "Banho e tosa com atendimento humanizado.",
+          city: "São Paulo",
+          neighborhood: "Vila Mariana",
+          contactSummary: "WhatsApp (11) 99999-9999",
+          addressSummary: "Rua Exemplo, 123",
+          customDomain: {
+            desiredDomain: "agenda.petcenter-vila.com",
+            activeDomain: null,
+            status: "pending_setup",
+            failureMessage: null,
+          },
+          isPublished: true,
         }}
         updatePublicProfileAction={vi.fn(async () => ({
           success: true,
@@ -104,11 +124,12 @@ describe("PublicProfilePageClient", () => {
       />,
     );
 
-    expect(screen.getByText("Preview")).toBeInTheDocument();
-    expect(screen.getByText("Link previsto antes da publicacao")).toBeInTheDocument();
-    expect(screen.getByText("https://petcenter.test/petshops/pet-center-vila")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Copiar link" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Abrir vitrine" })).not.toBeInTheDocument();
+    expect(screen.getByText("Fallback ativo para compartilhamento")).toBeInTheDocument();
+    expect(screen.getByText("Compartilhe agora")).toBeInTheDocument();
+    expect(screen.getAllByText("https://petcenter.test/petshops/pet-center-vila")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("agenda.petcenter-vila.com")).toHaveLength(2);
+    expect(screen.getByText("CNAME")).toBeInTheDocument();
+    expect(screen.getByText("petcenter.test")).toBeInTheDocument();
   });
 
   it("surfaces slug conflicts returned by the server action", async () => {
@@ -139,9 +160,7 @@ describe("PublicProfilePageClient", () => {
     await userEvent.click(screen.getByRole("button", { name: "Salvar perfil público" }));
 
     await waitFor(() => {
-      expect(
-        screen.getAllByText("Slug 'pet-center-vila' já está em uso.")[0],
-      ).toBeInTheDocument();
+      expect(screen.getAllByText("Slug 'pet-center-vila' já está em uso.")[0]).toBeInTheDocument();
     });
   });
 
@@ -175,6 +194,7 @@ describe("PublicProfilePageClient", () => {
       expect(updatePublicProfileAction).toHaveBeenCalledWith(
         expect.objectContaining({
           city: "Santos",
+          desiredCustomDomain: "",
           isPublished: true,
         }),
       );
@@ -187,7 +207,7 @@ describe("PublicProfilePageClient", () => {
     });
   });
 
-  it("allows copying the active canonical storefront link", async () => {
+  it("allows copying the active canonical storefront link when the custom domain is active", async () => {
     render(
       <PublicProfilePageClient
         profile={{
@@ -198,6 +218,12 @@ describe("PublicProfilePageClient", () => {
           neighborhood: "Vila Mariana",
           contactSummary: "WhatsApp (11) 99999-9999",
           addressSummary: "Rua Exemplo, 123",
+          customDomain: {
+            desiredDomain: "agenda.petcenter-vila.com",
+            activeDomain: "agenda.petcenter-vila.com",
+            status: "active",
+            failureMessage: null,
+          },
           isPublished: true,
         }}
         updatePublicProfileAction={vi.fn(async () => ({
@@ -209,12 +235,12 @@ describe("PublicProfilePageClient", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Copiar link" }));
 
-    expect(writeText).toHaveBeenCalledWith("https://petcenter.test/petshops/pet-center-vila");
+    expect(writeText).toHaveBeenCalledWith("https://agenda.petcenter-vila.com");
     expect(screen.getByRole("link", { name: "Abrir vitrine" })).toHaveAttribute(
       "href",
-      "https://petcenter.test/petshops/pet-center-vila",
+      "https://agenda.petcenter-vila.com",
     );
-    expect(screen.getByText("Ativo para compartilhamento")).toBeInTheDocument();
+    expect(screen.getByText("Domínio canônico ativo")).toBeInTheDocument();
     expect(screen.getByText("Link copiado para compartilhar com clientes.")).toBeInTheDocument();
   });
 });

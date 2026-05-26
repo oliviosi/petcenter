@@ -31,5 +31,11 @@ public class UpdateEmpresaPublicProfileRequestValidator : AbstractValidator<Upda
         RuleFor(x => x.ResumoEndereco)
             .NotEmpty().When(x => x.Publica).WithMessage("Resumo de endereço é obrigatório quando a empresa estiver pública.")
             .MaximumLength(300).WithMessage("Resumo de endereço deve ter no máximo 300 caracteres.");
+
+        RuleFor(x => x.DominioPersonalizadoDesejado)
+            .MaximumLength(253).WithMessage("Domínio personalizado deve ter no máximo 253 caracteres.")
+            .Matches("^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$")
+            .When(x => !string.IsNullOrWhiteSpace(x.DominioPersonalizadoDesejado))
+            .WithMessage("Domínio personalizado deve conter um host válido, como agenda.petshop.com.");
     }
 }

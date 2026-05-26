@@ -1,16 +1,14 @@
+import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 import { addDays, formatISODate } from "@/lib/date";
 import { ApiRequestError, api } from "@/lib/api";
 import { BookingPageClient } from "@/components/Booking/BookingPageClient";
 import { PageWrapper } from "@/components/layout/PageWrapper";
-import { buildBookingPath } from "@/lib/storefront";
-import { submitBookingAction } from "./actions";
+import { buildBookingPath, normalizeHost } from "@/lib/storefront";
+import { submitBookingAction } from "@/app/(public)/petshops/[slug]/book/actions";
 import type { BookingSearchFilters, PublicBookingSlot } from "@/types";
-import { notFound } from "next/navigation";
 
-interface BookingPageProps {
-  params: Promise<{
-    slug: string;
-  }>;
+interface HostAwareBookingPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
@@ -24,15 +22,21 @@ function isGuid(value: string) {
   );
 }
 
-export default async function BookingPage({
-  params,
+export default async function HostAwareBookingPage({
   searchParams,
-}: BookingPageProps) {
-  const { slug } = await params;
+}: HostAwareBookingPageProps) {
+  const requestHeaders = await headers();
+  const requestHost = normalizeHost(
+    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "",
+  );
   const resolvedSearchParams = await searchParams;
 
+  if (!requestHost) {
+    notFound();
+  }
+
   try {
-    const petshop = await api.getPublicPetshopBySlug(slug);
+    const petshop = await api.getPublicPetshopByHost(requestHost);
 
     if (petshop.services.length === 0) {
       notFound();
@@ -81,7 +85,7 @@ export default async function BookingPage({
           filters={filters}
           slots={slots}
           slotsError={slotsError}
-          bookingPath={buildBookingPath(petshop.slug, "shared-host")}
+          bookingPath={buildBookingPath(petshop.slug, "custom-domain")}
           submitBookingAction={submitBookingAction}
         />
       </PageWrapper>

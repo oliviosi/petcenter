@@ -21,6 +21,7 @@ using Api.Modules.Disponibilidade.Routes.Delete;
 using Api.Modules.Disponibilidade.Routes.List;
 using Api.Modules.Disponibilidade.Routes.Update;
 using Api.Modules.Empresas.Infrastructure;
+using Api.Modules.Empresas.Routes.GetPublicByHost;
 using Api.Modules.Empresas.Routes.GetPublicBySlug;
 using Api.Modules.Empresas.Routes.GetPublicProfile;
 using Api.Modules.Empresas.Routes.ListPublic;
@@ -60,6 +61,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGetEmpresaPublicProfileService, GetEmpresaPublicProfileService>();
         services.AddScoped<IUpdateEmpresaPublicProfileService, UpdateEmpresaPublicProfileService>();
         services.AddScoped<IListPublicEmpresasService, ListPublicEmpresasService>();
+        services.AddScoped<IGetPublicEmpresaByHostService, GetPublicEmpresaByHostService>();
         services.AddScoped<IGetPublicEmpresaBySlugService, GetPublicEmpresaBySlugService>();
 
         // Profissionais

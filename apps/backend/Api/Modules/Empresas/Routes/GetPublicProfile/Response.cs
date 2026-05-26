@@ -10,5 +10,9 @@ public class GetEmpresaPublicProfileResponse
     public string? Bairro { get; set; }
     public string? ResumoContato { get; set; }
     public string? ResumoEndereco { get; set; }
+    public string? DominioPersonalizadoDesejado { get; set; }
+    public string? DominioPersonalizadoAtivo { get; set; }
+    public string DominioPersonalizadoStatus { get; set; } = "removed";
+    public string? DominioPersonalizadoUltimaFalha { get; set; }
     public bool Publica { get; set; }
 }

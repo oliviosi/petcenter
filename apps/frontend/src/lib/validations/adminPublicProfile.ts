@@ -34,6 +34,7 @@ const publicationRequiredFields = [
 ] as const;
 
 const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const customDomainRegex = /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
 
 export const adminPublicProfileSchema = z
   .object({
@@ -58,6 +59,13 @@ export const adminPublicProfileSchema = z
       .string()
       .trim()
       .max(300, "Resumo de endereço deve ter no máximo 300 caracteres."),
+    desiredCustomDomain: z
+      .string()
+      .trim()
+      .max(253, "Domínio personalizado deve ter no máximo 253 caracteres.")
+      .refine((value) => value.length === 0 || customDomainRegex.test(value), {
+        message: "Domínio personalizado deve conter um host válido, como agenda.petshop.com.",
+      }),
     isPublished: z.boolean(),
   })
   .superRefine((values, context) => {

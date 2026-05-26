@@ -1,4 +1,5 @@
 using Api.Exceptions;
+using Api.Modules.Empresas.Routes.GetPublicByHost;
 using Api.Modules.Empresas.Routes.GetPublicBySlug;
 using Api.Modules.Empresas.Routes.GetPublicProfile;
 using Api.Modules.Empresas.Routes.ListPublic;
@@ -57,6 +58,15 @@ public static class EmpresasEndpoints
             return Results.Ok(response);
         })
         .WithName("ListPublicEmpresas");
+
+        group.MapGet("/public/by-host", async (
+            [FromQuery] string host,
+            IGetPublicEmpresaByHostService service) =>
+        {
+            var response = await service.HandleAsync(host);
+            return Results.Ok(response);
+        })
+        .WithName("GetPublicEmpresaByHost");
 
         group.MapGet("/public/{slug}", async (
             string slug,

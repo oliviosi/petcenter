@@ -23,11 +23,30 @@ public class EmpresaRepository : IEmpresaRepository
         return await _db.Empresas.FirstOrDefaultAsync(e => e.Slug == slugNormalizado);
     }
 
+    public async Task<Empresa?> GetByCustomDomainAsync(string domain)
+    {
+        var domainNormalizado = NormalizeHost(domain);
+        return await _db.Empresas.FirstOrDefaultAsync(e =>
+            e.DominioPersonalizadoDesejado == domainNormalizado
+            || e.DominioPersonalizadoAtivo == domainNormalizado);
+    }
+
     public async Task<Empresa?> GetPublicBySlugAsync(string slug)
     {
         var slugNormalizado = slug.Trim().ToLowerInvariant();
         return await _db.Empresas.AsNoTracking()
             .FirstOrDefaultAsync(e => e.Ativo && e.Publica && e.Slug == slugNormalizado);
+    }
+
+    public async Task<Empresa?> GetPublicByHostAsync(string host)
+    {
+        var hostNormalizado = NormalizeHost(host);
+        return await _db.Empresas.AsNoTracking()
+            .FirstOrDefaultAsync(e =>
+                e.Ativo
+                && e.Publica
+                && e.DominioPersonalizadoStatus == StorefrontCustomDomainStatus.Active
+                && e.DominioPersonalizadoAtivo == hostNormalizado);
     }
 
     public async Task<List<Empresa>> ListPublicAsync(string? nome = null, string? cidade = null, string? bairro = null, string? servico = null)
@@ -105,4 +124,7 @@ public class EmpresaRepository : IEmpresaRepository
         _db.Empresas.Update(empresa);
         await _db.SaveChangesAsync();
     }
+
+    private static string NormalizeHost(string host) =>
+        host.Trim().ToLowerInvariant().TrimEnd('.').Split(':', 2)[0];
 }

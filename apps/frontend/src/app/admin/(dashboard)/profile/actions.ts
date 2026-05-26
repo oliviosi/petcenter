@@ -19,6 +19,7 @@ const publicProfileFieldMap = {
   bairro: "neighborhood",
   resumoContato: "contactSummary",
   resumoEndereco: "addressSummary",
+  dominioPersonalizadoDesejado: "desiredCustomDomain",
   publica: "isPublished",
 } as const;
 

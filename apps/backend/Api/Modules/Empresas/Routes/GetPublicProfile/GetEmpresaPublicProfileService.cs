@@ -24,7 +24,20 @@ public class GetEmpresaPublicProfileService : IGetEmpresaPublicProfileService
             Bairro = empresa.Bairro,
             ResumoContato = empresa.ResumoContato,
             ResumoEndereco = empresa.ResumoEndereco,
+            DominioPersonalizadoDesejado = empresa.DominioPersonalizadoDesejado,
+            DominioPersonalizadoAtivo = empresa.DominioPersonalizadoAtivo,
+            DominioPersonalizadoStatus = ToApiStatus(empresa.DominioPersonalizadoStatus),
+            DominioPersonalizadoUltimaFalha = empresa.DominioPersonalizadoUltimaFalha,
             Publica = empresa.Publica
         };
     }
+
+    private static string ToApiStatus(StorefrontCustomDomainStatus status) => status switch
+    {
+        StorefrontCustomDomainStatus.PendingSetup => "pending_setup",
+        StorefrontCustomDomainStatus.Verifying => "verifying",
+        StorefrontCustomDomainStatus.Active => "active",
+        StorefrontCustomDomainStatus.Failed => "failed",
+        _ => "removed"
+    };
 }

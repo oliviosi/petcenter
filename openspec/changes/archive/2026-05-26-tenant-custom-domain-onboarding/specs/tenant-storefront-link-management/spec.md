@@ -1,7 +1,5 @@
-## Purpose
-Define tenant-facing requirements for viewing and sharing the canonical public storefront link.
+## MODIFIED Requirements
 
-## Requirements
 ### Requirement: Tenant can view the canonical storefront link
 The system SHALL expose the petshop's canonical public storefront link in the authenticated tenant admin experience using the active custom domain when domain onboarding has completed successfully, or the shared-host storefront route when no active custom domain exists.
 

@@ -9,5 +9,6 @@ public class UpdateEmpresaPublicProfileRequest
     public string Bairro { get; set; } = string.Empty;
     public string ResumoContato { get; set; } = string.Empty;
     public string ResumoEndereco { get; set; } = string.Empty;
+    public string DominioPersonalizadoDesejado { get; set; } = string.Empty;
     public bool Publica { get; set; }
 }

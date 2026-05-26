@@ -4,6 +4,7 @@ import type {
   AdminBookingDetail,
   AdminFeedbackEntry,
   AdminFeedbackFilters,
+  AdminCustomDomain,
   AdminFeedbackPetshopSummary,
   AdminFeedbackProfessionalSummary,
   AdminFeedbackSummary,
@@ -530,7 +531,42 @@ function mapAdminPublicProfile(value: unknown): AdminPublicProfile {
       "resumoEndereco",
       "ResumoEndereco",
     ),
+    customDomain: mapAdminCustomDomain(record),
     isPublished: readBoolean(record, "isPublished", "IsPublished", "publica", "Publica"),
+  };
+}
+
+function mapAdminCustomDomain(record: JsonRecord): AdminCustomDomain {
+  return {
+    desiredDomain: readNullableString(
+      record,
+      "desiredCustomDomain",
+      "DesiredCustomDomain",
+      "dominioPersonalizadoDesejado",
+      "DominioPersonalizadoDesejado",
+    ),
+    activeDomain: readNullableString(
+      record,
+      "activeCustomDomain",
+      "ActiveCustomDomain",
+      "dominioPersonalizadoAtivo",
+      "DominioPersonalizadoAtivo",
+    ),
+    status:
+      (readString(
+        record,
+        "customDomainStatus",
+        "CustomDomainStatus",
+        "dominioPersonalizadoStatus",
+        "DominioPersonalizadoStatus",
+      ) as AdminCustomDomain["status"]) || "removed",
+    failureMessage: readNullableString(
+      record,
+      "customDomainFailureMessage",
+      "CustomDomainFailureMessage",
+      "dominioPersonalizadoUltimaFalha",
+      "DominioPersonalizadoUltimaFalha",
+    ),
   };
 }
 
@@ -686,6 +722,39 @@ export const api = {
     return mapPetshopDetail(response);
   },
 
+  async getPublicPetshopByHost(host: string) {
+    const response = await request<{
+      id: string;
+      nome: string;
+      slug: string;
+      descricao: string;
+      cidade: string;
+      bairro: string;
+      resumoContato: string;
+      resumoEndereco: string;
+      averageRating: number | null;
+      feedbackCount: number | null;
+      profissionais: Array<{
+        id: string;
+        nome: string;
+        especialidade: string | null;
+      }>;
+      servicos: Array<{
+        id: string;
+        nome: string;
+        duracaoMinutos: number;
+        precoBase: number;
+      }>;
+    }>("/petshops/public/by-host", {
+      cache: "no-store",
+      params: {
+        host,
+      },
+    });
+
+    return mapPetshopDetail(response);
+  },
+
   async getPublicSlots(
     petshopId: string,
     filters: {
@@ -794,6 +863,7 @@ export const api = {
       neighborhood: string;
       contactSummary: string;
       addressSummary: string;
+      desiredCustomDomain: string;
       isPublished: boolean;
     },
     token: string,
@@ -809,6 +879,7 @@ export const api = {
         Bairro: payload.neighborhood.trim(),
         ResumoContato: payload.contactSummary.trim(),
         ResumoEndereco: payload.addressSummary.trim(),
+        DominioPersonalizadoDesejado: payload.desiredCustomDomain.trim(),
         Publica: payload.isPublished,
       }),
     });

@@ -20,6 +20,12 @@ public class EmpresaSlugConflictException : ConflictException
         : base($"Slug '{slug}' já está em uso.") { }
 }
 
+public class EmpresaCustomDomainConflictException : ConflictException
+{
+    public EmpresaCustomDomainConflictException(string domain)
+        : base($"Domínio personalizado '{domain}' já está em uso.") { }
+}
+
 public class EmpresaPerfilPublicoIncompletoException : DomainException
 {
     public EmpresaPerfilPublicoIncompletoException()

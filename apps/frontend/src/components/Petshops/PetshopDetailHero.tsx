@@ -7,9 +7,10 @@ import type { PublicPetshopDetail } from "@/types";
 
 interface PetshopDetailHeroProps {
   petshop: PublicPetshopDetail;
+  bookingPath: string;
 }
 
-export function PetshopDetailHero({ petshop }: PetshopDetailHeroProps) {
+export function PetshopDetailHero({ petshop, bookingPath }: PetshopDetailHeroProps) {
   const featuredService = petshop.services[0];
 
   return (
@@ -88,11 +89,7 @@ export function PetshopDetailHero({ petshop }: PetshopDetailHeroProps) {
         ) : null}
 
         <Button
-          href={
-            featuredService
-              ? `/petshops/${petshop.slug}/book?serviceId=${featuredService.id}`
-              : `/petshops/${petshop.slug}/book`
-          }
+          href={featuredService ? `${bookingPath}?serviceId=${featuredService.id}` : bookingPath}
           className="w-full"
         >
           Ver horarios disponiveis

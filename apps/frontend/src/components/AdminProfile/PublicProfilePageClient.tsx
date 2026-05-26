@@ -2,7 +2,17 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, CircleAlert, Copy, Eye, EyeOff, ExternalLink, Store } from "lucide-react";
+import {
+  CheckCircle2,
+  CircleAlert,
+  Copy,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Globe,
+  Link2,
+  Store,
+} from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { SetupNotice } from "@/components/AdminSetup/SetupNotice";
@@ -16,7 +26,18 @@ import {
   adminPublicProfileSchema,
   type AdminPublicProfileValues,
 } from "@/lib/validations/adminPublicProfile";
-import type { AdminMutationResult, AdminPublicProfile } from "@/types";
+import {
+  buildCanonicalStorefrontUrl,
+  buildFallbackStorefrontUrl,
+  buildPendingCustomDomainUrl,
+  getSharedHost,
+  normalizeHost,
+} from "@/lib/storefront";
+import type {
+  AdminCustomDomain,
+  AdminMutationResult,
+  AdminPublicProfile,
+} from "@/types";
 
 interface PublicProfilePageClientProps {
   profile: AdminPublicProfile;
@@ -38,6 +59,16 @@ interface StorefrontLinkState {
   };
   title: string;
   description: string;
+}
+
+interface DomainOnboardingState {
+  badge: {
+    tone: "success" | "warning" | "danger" | "neutral";
+    label: string;
+  };
+  title: string;
+  description: string;
+  guidance: string;
 }
 
 const publicationRequirements = [
@@ -63,7 +94,157 @@ function toDefaultValues(profile: AdminPublicProfile): AdminPublicProfileValues 
     neighborhood: profile.neighborhood,
     contactSummary: profile.contactSummary,
     addressSummary: profile.addressSummary,
+    desiredCustomDomain: profile.customDomain.desiredDomain ?? "",
     isPublished: profile.isPublished,
+  };
+}
+
+function getEffectiveCustomDomain(
+  profile: AdminPublicProfile,
+  desiredCustomDomain: string | null,
+): AdminCustomDomain {
+  if (desiredCustomDomain === profile.customDomain.desiredDomain) {
+    return profile.customDomain;
+  }
+
+  if (desiredCustomDomain) {
+    return {
+      desiredDomain: desiredCustomDomain,
+      activeDomain: null,
+      status: "pending_setup",
+      failureMessage: null,
+    };
+  }
+
+  return {
+    desiredDomain: null,
+    activeDomain: null,
+    status: "removed",
+    failureMessage: null,
+  };
+}
+
+function getDomainOnboardingState(
+  customDomain: AdminCustomDomain,
+  fallbackStorefrontLink: string | null,
+): DomainOnboardingState {
+  switch (customDomain.status) {
+    case "active":
+      return {
+        badge: { tone: "success", label: "Ativo" },
+        title: "Domínio personalizado ativo",
+        description:
+          "O domínio já concluiu a ativação e passa a ser a entrada canônica da vitrine.",
+        guidance:
+          "A partir de agora, o petshop deve compartilhar o domínio próprio como link principal.",
+      };
+    case "verifying":
+      return {
+        badge: { tone: "warning", label: "Verificando" },
+        title: "Verificação em andamento",
+        description:
+          "O DNS já foi solicitado e a plataforma aguarda a confirmação da configuração antes de ativar o domínio.",
+        guidance: fallbackStorefrontLink
+          ? "Enquanto a verificação não termina, continue compartilhando o link hospedado pela petcenter."
+          : "Finalize o slug da vitrine para manter um fallback compartilhável durante a verificação.",
+      };
+    case "failed":
+      return {
+        badge: { tone: "danger", label: "Falha" },
+        title: "Falha na verificação do domínio",
+        description:
+          customDomain.failureMessage ??
+          "A validação ainda não conseguiu confirmar o domínio. Revise o DNS e tente novamente após a propagação.",
+        guidance: fallbackStorefrontLink
+          ? "O link hospedado pela petcenter continua como fallback até que o domínio volte a ficar saudável."
+          : "Defina um slug válido para restaurar o fallback compartilhável enquanto o domínio é corrigido.",
+      };
+    case "pending_setup":
+      return {
+        badge: { tone: "warning", label: "DNS pendente" },
+        title: "Aguardando configuração do DNS",
+        description:
+          "O domínio desejado já foi salvo, mas ainda precisa apontar para a infraestrutura da vitrine antes da verificação.",
+        guidance: fallbackStorefrontLink
+          ? "Compartilhe o link hospedado pela petcenter até o domínio personalizado ficar pronto."
+          : "Defina um slug para manter um link fallback enquanto o domínio ainda está em preparação.",
+      };
+    default:
+      return {
+        badge: { tone: "neutral", label: "Fallback compartilhado" },
+        title: "Nenhum domínio personalizado cadastrado",
+        description:
+          "A vitrine continua usando o host compartilhado da petcenter como entrada pública padrão.",
+        guidance:
+          "Cadastre um domínio ou subdomínio quando quiser migrar a vitrine para uma URL própria.",
+      };
+  }
+}
+
+function getStorefrontLinkState(args: {
+  canonicalStorefrontLink: string | null;
+  fallbackStorefrontLink: string | null;
+  customDomain: AdminCustomDomain;
+  isPublished: boolean;
+  missingRequirementsCount: number;
+}): StorefrontLinkState {
+  const {
+    canonicalStorefrontLink,
+    fallbackStorefrontLink,
+    customDomain,
+    isPublished,
+    missingRequirementsCount,
+  } = args;
+
+  if (!canonicalStorefrontLink) {
+    return {
+      kind: "unavailable",
+      badge: { tone: "neutral", label: "Indisponível" },
+      title: "Defina um slug ou ative um domínio para gerar o link canônico",
+      description:
+        "A vitrine precisa de um slug compartilhado ou de um domínio personalizado ativo para exibir a URL principal.",
+    };
+  }
+
+  if (isPublished && missingRequirementsCount === 0) {
+    if (customDomain.status === "active") {
+      return {
+        kind: "active",
+        badge: { tone: "success", label: "Domínio canônico ativo" },
+        title: "Compartilhe o domínio personalizado",
+        description:
+          "O domínio próprio já substituiu o host compartilhado e é o endereço oficial da vitrine neste momento.",
+      };
+    }
+
+    return {
+      kind: "active",
+      badge: { tone: "success", label: "Fallback ativo para compartilhamento" },
+      title: "Compartilhe o link atual da vitrine",
+      description: fallbackStorefrontLink
+        ? "O host compartilhado continua sendo a URL canônica enquanto o domínio próprio ainda não foi ativado."
+        : "A vitrine já está pública e o link canônico atual pode ser compartilhado com os clientes.",
+    };
+  }
+
+  if (customDomain.status === "active") {
+    return {
+      kind: "preview",
+      badge: { tone: "warning", label: "Preview do domínio ativo" },
+      title: "O domínio já é canônico, mas a vitrine ainda não está pronta",
+      description: isPublished
+        ? "Conclua os campos obrigatórios para liberar o domínio personalizado ao público."
+        : "A loja continua oculta. Publique a vitrine quando quiser liberar o domínio personalizado.",
+    };
+  }
+
+  return {
+    kind: "preview",
+    badge: { tone: "warning", label: "Fallback em preview" },
+    title: "O fallback continua sendo a referência atual",
+    description: isPublished
+      ? "O link compartilhado já está definido, mas a vitrine ainda precisa concluir os requisitos obrigatórios antes de ficar acessível."
+      : "O link compartilhado já está definido, mas a vitrine continua oculta até a publicação.",
   };
 }
 
@@ -94,7 +275,9 @@ export function PublicProfilePageClient({
 
   const values = watch();
   const normalizedSlug = values.slug.trim().toLowerCase();
-  const storefrontPath = normalizedSlug ? `/petshops/${normalizedSlug}` : "/petshops/[slug]";
+  const normalizedDesiredCustomDomain = values.desiredCustomDomain
+    ? normalizeHost(values.desiredCustomDomain)
+    : null;
   const publicAppOrigin = useMemo(() => {
     const configuredOrigin = process.env.NEXT_PUBLIC_APP_URL?.trim();
 
@@ -113,9 +296,31 @@ export function PublicProfilePageClient({
       publicationRequirements.filter(({ field }) => !values[field].trim()).map(({ label }) => label),
     [values],
   );
-  const canonicalStorefrontLink = normalizedSlug
-    ? `${publicAppOrigin}${storefrontPath}`
-    : null;
+  const effectiveCustomDomain = getEffectiveCustomDomain(profile, normalizedDesiredCustomDomain);
+  const canonicalStorefrontLink = buildCanonicalStorefrontUrl(publicAppOrigin, {
+    slug: normalizedSlug,
+    customDomain: effectiveCustomDomain,
+  });
+  const fallbackStorefrontLink = buildFallbackStorefrontUrl(publicAppOrigin, {
+    slug: normalizedSlug,
+  });
+  const pendingCustomDomainLink = buildPendingCustomDomainUrl(publicAppOrigin, {
+    customDomain: effectiveCustomDomain,
+  });
+  const domainOnboardingState = getDomainOnboardingState(
+    effectiveCustomDomain,
+    fallbackStorefrontLink,
+  );
+  const storefrontLinkState = getStorefrontLinkState({
+    canonicalStorefrontLink,
+    fallbackStorefrontLink,
+    customDomain: effectiveCustomDomain,
+    isPublished: values.isPublished,
+    missingRequirementsCount: missingRequirements.length,
+  });
+  const sharedHost = getSharedHost(publicAppOrigin);
+  const dnsRecordName = effectiveCustomDomain.desiredDomain ?? "—";
+  const dnsRecordValue = sharedHost || "Defina NEXT_PUBLIC_APP_URL para exibir o destino";
 
   const publicationState = values.isPublished
     ? missingRequirements.length === 0
@@ -125,7 +330,7 @@ export function PublicProfilePageClient({
             tone: "success" as const,
             title: "Vitrine pronta para acesso publico",
             description:
-              "Com os campos obrigatorios preenchidos, o petshop ja pode compartilhar o link publico da propria vitrine com seus clientes.",
+              "Com os campos obrigatorios preenchidos, o petshop ja pode compartilhar o link canonico atual da propria vitrine com seus clientes.",
           },
         }
       : {
@@ -134,7 +339,7 @@ export function PublicProfilePageClient({
             tone: "warning" as const,
             title: "Faltam campos para liberar a vitrine",
             description:
-              "Preencha os campos marcados para publicar a loja e habilitar o acesso direto pela pagina publica do slug escolhido.",
+              "Preencha os campos marcados para publicar a loja e habilitar o acesso direto pela vitrine escolhida como fallback ou pelo dominio proprio quando ele estiver ativo.",
           },
         }
     : {
@@ -143,33 +348,8 @@ export function PublicProfilePageClient({
           tone: "info" as const,
           title: "Vitrine fora da experiencia publica principal",
           description:
-            "Enquanto estiver oculta, a loja nao pode compartilhar a propria pagina publica com clientes. Voce pode preparar os dados com calma antes de publicar.",
+            "Enquanto estiver oculta, a loja nao pode compartilhar a propria pagina publica com clientes. Voce pode preparar o fallback e o dominio proprio com calma antes de publicar.",
         },
-      };
-
-  const storefrontLinkState: StorefrontLinkState = !normalizedSlug
-    ? {
-      kind: "unavailable",
-      badge: { tone: "neutral", label: "Indisponivel" },
-      title: "Defina um slug para gerar o link canonico",
-      description:
-        "O link principal da vitrine so pode ser exibido quando a loja tiver um slug valido para a rota publica.",
-      }
-    : values.isPublished && missingRequirements.length === 0
-      ? {
-        kind: "active",
-        badge: { tone: "success", label: "Ativo para compartilhamento" },
-        title: "Link pronto para distribuir aos clientes",
-        description:
-          "A vitrine ja esta publica e este e o link canonico que o petshop pode copiar ou abrir agora.",
-      }
-      : {
-        kind: "preview",
-        badge: { tone: "warning", label: "Preview" },
-        title: "Link previsto antes da publicacao",
-        description: values.isPublished
-          ? "O caminho ja esta definido, mas a vitrine ainda precisa concluir os requisitos obrigatorios antes de ficar acessivel."
-          : "O caminho ja esta definido, mas a vitrine continua oculta. Publique a loja quando quiser liberar o acesso externo.",
       };
 
   async function handleCopyStorefrontLink() {
@@ -235,7 +415,9 @@ export function PublicProfilePageClient({
                 Dados da vitrine pública
               </h2>
               <p className="text-sm text-content-secondary">
-                Ajuste como o petshop aparece na propria vitrine publica e, quando necessario, no catalogo secundario. A publicacao usa exatamente estes campos.
+                Ajuste como o petshop aparece na propria vitrine publica, mantenha o
+                fallback compartilhado pronto e acompanhe a migracao para o dominio
+                personalizado no mesmo fluxo.
               </p>
             </div>
 
@@ -245,7 +427,9 @@ export function PublicProfilePageClient({
                   Estado da vitrine
                 </p>
                 <p className="text-sm text-content-muted">
-                  Escolha se a loja fica disponivel para acesso publico pelo proprio link agora ou se continua oculta enquanto voce prepara os textos.
+                  Escolha se a loja fica disponivel para acesso publico pelo link
+                  canonico atual agora ou se continua oculta enquanto voce prepara os
+                  textos e o onboarding do dominio.
                 </p>
               </div>
 
@@ -273,7 +457,8 @@ export function PublicProfilePageClient({
                             Manter oculta
                           </p>
                           <p className="text-sm text-content-secondary">
-                            Use esta opcao para salvar rascunhos sem liberar a vitrine publica da loja.
+                            Use esta opcao para salvar rascunhos sem liberar a vitrine
+                            publica da loja.
                           </p>
                         </div>
                       </div>
@@ -298,7 +483,9 @@ export function PublicProfilePageClient({
                             Publicar vitrine
                           </p>
                           <p className="text-sm text-content-secondary">
-                            A loja passa a ter uma pagina publica propria pelo slug salvo e pode continuar aparecendo em <span className="font-medium">/petshops</span> como descoberta secundaria.
+                            A loja passa a ter uma pagina publica propria pelo fallback
+                            compartilhado ou pelo dominio ativo, se ele ja estiver
+                            verificado.
                           </p>
                         </div>
                       </div>
@@ -317,6 +504,14 @@ export function PublicProfilePageClient({
               hint="Use apenas letras minúsculas, números e hífens. Ex.: banho-da-vila."
             >
               <Input placeholder="meu-petshop" {...register("slug")} />
+            </FormField>
+
+            <FormField
+              label="Domínio personalizado desejado"
+              error={errors.desiredCustomDomain?.message}
+              hint="Opcional. Use um domínio ou subdomínio como agenda.petshop.com. Deixe vazio para voltar ao fallback compartilhado."
+            >
+              <Input placeholder="agenda.petshop.com" {...register("desiredCustomDomain")} />
             </FormField>
 
             <FormField
@@ -406,19 +601,22 @@ export function PublicProfilePageClient({
 
               <div className="rounded-2xl bg-surface-muted p-4">
                 <div className="flex items-center gap-2 text-content-secondary">
-                  <ExternalLink className="h-4 w-4" />
+                  <Link2 className="h-4 w-4" />
                   <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
-                    Link canonico da vitrine
+                    Link canônico da vitrine
                   </p>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-3">
-                  <Badge tone={storefrontLinkState.badge.tone}>{storefrontLinkState.badge.label}</Badge>
+                  <Badge tone={storefrontLinkState.badge.tone}>
+                    {storefrontLinkState.badge.label}
+                  </Badge>
                   <p className="text-sm font-medium text-content-primary">
                     {storefrontLinkState.title}
                   </p>
                 </div>
                 <p className="mt-2 break-all font-medium text-content-primary">
-                  {canonicalStorefrontLink ?? "Defina um slug para montar o link publico completo."}
+                  {canonicalStorefrontLink ??
+                    "Defina um slug ou ative um domínio para montar o link público completo."}
                 </p>
                 <p className="mt-2 text-sm text-content-secondary">
                   {storefrontLinkState.description}
@@ -442,9 +640,95 @@ export function PublicProfilePageClient({
                 ) : null}
               </div>
 
-              <p>
-                Quando a vitrine estiver publicada, slug e resumos passam a orientar o acesso direto da loja e tambem a eventual descoberta no catalogo secundario.
-              </p>
+              {(effectiveCustomDomain.status === "pending_setup" ||
+                effectiveCustomDomain.status === "verifying" ||
+                effectiveCustomDomain.status === "failed") &&
+              fallbackStorefrontLink ? (
+                <div className="rounded-2xl border border-dashed border-stroke-soft p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
+                    Compartilhe agora
+                  </p>
+                  <p className="mt-2 break-all font-medium text-content-primary">
+                    {fallbackStorefrontLink}
+                  </p>
+                  <p className="mt-2 text-sm text-content-secondary">
+                    Enquanto o domínio personalizado não fica ativo, este link hospedado pela
+                    petcenter continua sendo o fallback oficial para clientes.
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-muted text-content-secondary">
+                <Globe className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-content-secondary">
+                  Onboarding de domínio
+                </p>
+                <h2 className="text-lg font-semibold text-content-primary">
+                  {effectiveCustomDomain.desiredDomain ?? "Use o host compartilhado"}
+                </h2>
+              </div>
+            </div>
+
+            <Badge tone={domainOnboardingState.badge.tone}>
+              {domainOnboardingState.badge.label}
+            </Badge>
+
+            <div className="space-y-3 text-sm text-content-secondary">
+              <div className="rounded-2xl bg-surface-muted p-4">
+                <p className="text-sm font-medium text-content-primary">
+                  {domainOnboardingState.title}
+                </p>
+                <p className="mt-2">{domainOnboardingState.description}</p>
+                <p className="mt-3 text-sm text-content-secondary">
+                  {domainOnboardingState.guidance}
+                </p>
+              </div>
+
+              {effectiveCustomDomain.desiredDomain ? (
+                <>
+                  <div className="rounded-2xl bg-surface-muted p-4">
+                    <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
+                      Próxima URL desejada
+                    </p>
+                    <p className="mt-2 break-all font-medium text-content-primary">
+                      {pendingCustomDomainLink}
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3 rounded-2xl bg-surface-muted p-4">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
+                        Tipo de registro DNS
+                      </p>
+                      <p className="mt-2 font-medium text-content-primary">CNAME</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
+                        Host a configurar
+                      </p>
+                      <p className="mt-2 break-all font-medium text-content-primary">
+                        {dnsRecordName}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
+                        Valor esperado
+                      </p>
+                      <p className="mt-2 break-all font-medium text-content-primary">
+                        {dnsRecordValue}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              ) : null}
             </div>
           </div>
         </Card>

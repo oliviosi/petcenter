@@ -15,7 +15,7 @@ export default async function AdminProfilePage() {
     return (
       <PageWrapper
         title="Perfil público"
-        description="Controle como o petshop aparece no catálogo público, organize o slug da loja e ajuste os resumos que orientam a descoberta."
+        description="Controle o fallback compartilhado da vitrine, acompanhe o onboarding do domínio personalizado e ajuste os resumos que orientam a descoberta."
       >
         <PublicProfilePageClient
           profile={profile}
@@ -31,7 +31,7 @@ export default async function AdminProfilePage() {
     return (
       <PageWrapper
         title="Perfil público"
-        description="Controle como o petshop aparece no catálogo público, organize o slug da loja e ajuste os resumos que orientam a descoberta."
+        description="Controle o fallback compartilhado da vitrine, acompanhe o onboarding do domínio personalizado e ajuste os resumos que orientam a descoberta."
       >
         <DashboardErrorState
           title="Não foi possível carregar o perfil público"

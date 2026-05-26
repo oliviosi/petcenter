@@ -1,7 +1,5 @@
-## Purpose
-Define tenant-facing admin console requirements for maintaining the petshop public storefront profile.
+## MODIFIED Requirements
 
-## Requirements
 ### Requirement: Tenant admin console exposes storefront profile management
 The system SHALL provide an authenticated tenant admin console section for viewing and editing the petshop public storefront profile, including the canonical public storefront link, its current availability state, and the onboarding state of any desired custom storefront domain.
 
@@ -15,10 +13,3 @@ The system SHALL clearly communicate whether the petshop is currently public or 
 #### Scenario: Tenant reviews storefront visibility and domain readiness
 - **WHEN** an authenticated tenant user views the storefront profile section
 - **THEN** the system shows whether the petshop is public, explains the operational impact of publishing or hiding the storefront, and clarifies which storefront URL is canonical now versus which custom-domain target may still be pending
-
-### Requirement: Storefront profile section handles validation and recovery clearly
-The system SHALL provide clear validation, success, unpublished, and recoverable error states when the tenant updates the public storefront profile.
-
-#### Scenario: Public storefront data is incomplete for publication
-- **WHEN** an authenticated tenant user tries to publish the storefront without the required public profile fields
-- **THEN** the system shows explicit validation feedback explaining what must be completed before publication

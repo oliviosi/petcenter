@@ -17,7 +17,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 `API_BASE_URL` aponta para a API .NET.  
-`NEXT_PUBLIC_APP_URL` define a origem pública canônica usada para compor links da vitrine do petshop no console admin.
+`NEXT_PUBLIC_APP_URL` define a origem pública compartilhada usada para compor o fallback `/petshops/[slug]` e para exibir o destino DNS esperado do domínio personalizado no console admin.
 
 ### Sessão admin
 
@@ -76,6 +76,7 @@ npm run test
 ## Fluxo público disponível
 
 - `/` — shell neutra que orienta a entrada para a vitrine pública correta
+- `/book` — continuação do fluxo quando a vitrine foi aberta por um domínio personalizado ativo
 - `/petshops` — catálogo público secundário
 - `/petshops/[slug]` — vitrine pública principal do petshop
 - `/petshops/[slug]/book` — solicitação de reserva
@@ -88,7 +89,7 @@ npm run test
 - `/admin/bookings` — fila operacional com visão padrão de hoje + próximas reservas
 - `/admin/bookings/[id]` — detalhe operacional com contexto completo e ações
 - `/admin/feedback` — console operacional de reputação com resumo do petshop, médias por profissional e lista filtrável de avaliações com atalho para a reserva
-- `/admin/profile` — vitrine pública do petshop com slug, textos, cidade/bairro, estado de publicação e link canônico de compartilhamento
+- `/admin/profile` — vitrine pública do petshop com slug, textos, cidade/bairro, estado de publicação, onboarding de domínio personalizado e link canônico de compartilhamento
 - `/admin/professionals` — cadastro, edição e ativação/desativação de profissionais
 - `/admin/professionals/[id]` — hub operacional do profissional com perfil, serviços atribuídos e disponibilidade semanal
 - `/admin/services` — catálogo operacional de serviços com duração, preço base e status ativo/inativo
@@ -104,10 +105,11 @@ npm run test
   - cadastro, edição e exclusão de janelas recorrentes de disponibilidade semanal
 - A página `/admin/profile` concentra o perfil público usado pelo catálogo e pela página pública do petshop:
   - slug estável da loja
+  - domínio personalizado desejado com estado de onboarding, orientação de fallback e instruções de DNS
   - descrição, cidade e bairro usados na vitrine pública e no catálogo secundário
   - resumos de contato e endereço exibidos na vitrine
   - estado guiado de publicação, com checklist dos campos obrigatórios
-  - link canônico derivado de `NEXT_PUBLIC_APP_URL + /petshops/[slug]`, com estados ativo, preview e indisponível
+  - link canônico que alterna entre `NEXT_PUBLIC_APP_URL + /petshops/[slug]` e o domínio ativo, com estados ativo, preview e indisponível
 - Profissionais ou serviços inativos saem do fluxo operacional relevante:
   - profissionais inativos deixam de participar da vitrine pública
   - serviços inativos deixam de aparecer no catálogo público e nas opções de atribuição
@@ -143,13 +145,15 @@ npm run test
 ## Observações
 
 - A confirmação da reserva é assíncrona. O frontend nunca comunica confirmação imediata.
+- Quando um domínio personalizado está ativo, a homepage `/` resolve direto para a vitrine do petshop e o CTA de reserva continua em `/book`; quando o domínio ainda não está ativo, o fallback compartilhado em `/petshops/[slug]` segue sendo a entrada oficial.
 - O navegador preserva os tokens de status e feedback em cookie seguro por
   reserva para permitir reconsultas e continuidade no mesmo dispositivo.
 - O CTA de feedback só aparece para reservas concluídas quando o
   `feedbackAccessToken` ainda está disponível no contexto salvo do navegador.
 - O dashboard admin não replica nenhuma lógica de escopo por empresa no cliente; ele apenas propaga o JWT da sessão e depende do backend para garantir o isolamento multi-tenant.
 - Publicar a vitrine em `/admin/profile` exige slug, descrição, cidade, bairro, resumo de contato e resumo de endereço válidos; conflitos de slug e erros de validação retornados pelo backend são exibidos diretamente no formulário.
-- O link da vitrine só libera ações de copiar/abrir quando o storefront está público e com slug válido; antes disso, o console mostra o link previsto ou explica o que falta para disponibilizá-lo.
+- O link da vitrine só libera ações de copiar/abrir quando o storefront está público e com uma URL canônica válida; antes disso, o console mostra o preview do fallback ou do domínio desejado e explica o que falta para disponibilizá-los.
+- Enquanto o domínio personalizado estiver pendente, em verificação ou com falha, o console reforça explicitamente qual fallback compartilhado deve ser enviado aos clientes naquele momento.
 
 ## Validação sugerida
 
@@ -159,9 +163,9 @@ npm run test
 npm run build
 ```
 
-Se o runner padrão do Vitest apresentar instabilidade no ambiente local, rode os testes em série com:
+Se o runner padrão do Vitest apresentar instabilidade no ambiente local, rode os testes com um único worker no pool de forks:
 
 ```bash
 cd apps/frontend
-npx vitest run --pool threads --maxWorkers=1
+npx vitest run --pool forks --maxWorkers=1
 ```

@@ -1,7 +1,11 @@
+import { headers } from "next/headers";
 import { ArrowRight, CalendarClock, HeartHandshake, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { PublicStorefrontPage } from "@/components/Petshops/PublicStorefrontPage";
 import { PageWrapper } from "@/components/layout/PageWrapper";
+import { ApiRequestError, api } from "@/lib/api";
+import { normalizeHost, shouldResolveCustomDomainEntry } from "@/lib/storefront";
 
 const highlights = [
   {
@@ -24,7 +28,7 @@ const highlights = [
   },
 ];
 
-export default function HomePage() {
+function NeutralHomePage() {
   return (
     <PageWrapper
       title="Cada petshop com sua propria entrada publica"
@@ -85,4 +89,31 @@ export default function HomePage() {
       </div>
     </PageWrapper>
   );
+}
+
+function getRequestHost(hostHeader: string | null) {
+  return normalizeHost(hostHeader ?? "");
+}
+
+export default async function HomePage() {
+  const requestHeaders = await headers();
+  const requestHost = getRequestHost(
+    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host"),
+  );
+  const publicAppOrigin = process.env.NEXT_PUBLIC_APP_URL?.trim() ?? "";
+
+  if (!requestHost || !shouldResolveCustomDomainEntry(requestHost, publicAppOrigin)) {
+    return <NeutralHomePage />;
+  }
+
+  try {
+    const petshop = await api.getPublicPetshopByHost(requestHost);
+    return <PublicStorefrontPage petshop={petshop} entryMode="custom-domain" />;
+  } catch (error) {
+    if (error instanceof ApiRequestError && error.status === 404) {
+      return <NeutralHomePage />;
+    }
+
+    throw error;
+  }
 }

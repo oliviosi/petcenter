@@ -1,7 +1,5 @@
-## Purpose
-Define the petshop-specific public entry experience where the unauthenticated journey starts from one storefront instead of multi-petshop discovery.
+## MODIFIED Requirements
 
-## Requirements
 ### Requirement: Public shell starts from a single petshop storefront
 The system SHALL provide a public shell whose primary unauthenticated entry point is a storefront for one specific petshop, reached either by an active tenant custom domain or by the shared-host fallback storefront route.
 
@@ -12,13 +10,6 @@ The system SHALL provide a public shell whose primary unauthenticated entry poin
 #### Scenario: Client opens the shared-host fallback link
 - **WHEN** a client opens the shared-host public entry link assigned to a specific petshop and no active custom domain is being used for that visit
 - **THEN** the system shows that petshop's storefront context through the existing fallback route
-
-### Requirement: Single-petshop storefront leads into the existing booking lifecycle
-The system SHALL preserve the transition from storefront to slot discovery, booking submission, booking status follow-up, and booking-backed feedback follow-up for the selected petshop.
-
-#### Scenario: Client continues from storefront to booking lifecycle
-- **WHEN** a client continues from a petshop storefront into booking
-- **THEN** the system keeps the client within that petshop-specific journey through booking, status, and feedback follow-up routes
 
 ### Requirement: Public shell defines homepage behavior for the single-petshop model
 The system SHALL define homepage behavior that does not present multi-petshop discovery as the primary public product experience, including host-based storefront entry when a tenant custom domain is active.
