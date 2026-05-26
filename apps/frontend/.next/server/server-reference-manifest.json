@@ -56,6 +56,12 @@
           "exportedName": "logoutAdminAction",
           "filename": "src/app/admin/login/actions.ts"
         },
+        "app/admin/(dashboard)/profile/page": {
+          "moduleId": 58616,
+          "async": false,
+          "exportedName": "logoutAdminAction",
+          "filename": "src/app/admin/login/actions.ts"
+        },
         "app/admin/(dashboard)/services/page": {
           "moduleId": 79831,
           "async": false,
@@ -74,6 +80,7 @@
         "app/admin/(dashboard)/bookings/page": "rsc",
         "app/admin/(dashboard)/professionals/[id]/page": "rsc",
         "app/admin/(dashboard)/professionals/page": "rsc",
+        "app/admin/(dashboard)/profile/page": "rsc",
         "app/admin/(dashboard)/services/page": "rsc",
         "app/admin/login/page": "rsc"
       },
@@ -106,6 +113,12 @@
           "exportedName": "submitAdminLoginAction",
           "filename": "src/app/admin/login/actions.ts"
         },
+        "app/admin/(dashboard)/profile/page": {
+          "moduleId": 58616,
+          "async": false,
+          "exportedName": "submitAdminLoginAction",
+          "filename": "src/app/admin/login/actions.ts"
+        },
         "app/admin/(dashboard)/services/page": {
           "moduleId": 79831,
           "async": false,
@@ -124,6 +137,7 @@
         "app/admin/(dashboard)/bookings/page": "rsc",
         "app/admin/(dashboard)/professionals/[id]/page": "rsc",
         "app/admin/(dashboard)/professionals/page": "rsc",
+        "app/admin/(dashboard)/profile/page": "rsc",
         "app/admin/(dashboard)/services/page": "rsc",
         "app/admin/login/page": "rsc"
       },
@@ -337,6 +351,21 @@
       },
       "filename": "src/app/admin/(dashboard)/professionals/[id]/actions.ts",
       "exportedName": "submitUpdateAvailabilityAction"
+    },
+    "40791e4bc769527b277659247babaffc2d17fe6c7c": {
+      "workers": {
+        "app/admin/(dashboard)/profile/page": {
+          "moduleId": 58616,
+          "async": false,
+          "exportedName": "submitUpdatePublicProfileAction",
+          "filename": "src/app/admin/(dashboard)/profile/actions.ts"
+        }
+      },
+      "layer": {
+        "app/admin/(dashboard)/profile/page": "rsc"
+      },
+      "filename": "src/app/admin/(dashboard)/profile/actions.ts",
+      "exportedName": "submitUpdatePublicProfileAction"
     },
     "404e2f8f7aeb27e376d8f307420bba6aaca66e0a92": {
       "workers": {

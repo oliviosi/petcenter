@@ -114,6 +114,12 @@
       "namedRegex": "^/admin/professionals(?:/)?$"
     },
     {
+      "page": "/admin/profile",
+      "regex": "^/admin/profile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/profile(?:/)?$"
+    },
+    {
       "page": "/admin/services",
       "regex": "^/admin/services(?:/)?$",
       "routeKeys": {},

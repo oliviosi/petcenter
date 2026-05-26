@@ -11,14 +11,18 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("AdminNavigation", () => {
-  it("renders bookings, professionals and services with active state", () => {
-    usePathname.mockReturnValue("/admin/services");
+  it("renders bookings, public profile, professionals and services with active state", () => {
+    usePathname.mockReturnValue("/admin/profile");
 
     render(<AdminNavigation />);
 
     expect(screen.getByRole("link", { name: "Reservas" })).toHaveAttribute(
       "href",
       "/admin/bookings",
+    );
+    expect(screen.getByRole("link", { name: "Perfil público" })).toHaveAttribute(
+      "href",
+      "/admin/profile",
     );
     expect(screen.getByRole("link", { name: "Profissionais" })).toHaveAttribute(
       "href",
@@ -28,7 +32,7 @@ describe("AdminNavigation", () => {
       "href",
       "/admin/services",
     );
-    expect(screen.getByRole("link", { name: "Serviços" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Perfil público" })).toHaveAttribute(
       "aria-current",
       "page",
     );

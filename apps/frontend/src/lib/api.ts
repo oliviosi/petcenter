@@ -9,6 +9,7 @@ import type {
   AdminBookingRejection,
   AdminBookingService,
   AdminCurrentUser,
+  AdminPublicProfile,
   AdminProfessional,
   AdminProfessionalAvailability,
   AdminProfessionalServiceAssignment,
@@ -401,6 +402,40 @@ function mapAdminCurrentUser(value: unknown): AdminCurrentUser {
   };
 }
 
+function mapAdminPublicProfile(value: unknown): AdminPublicProfile {
+  const record = toRecord(value);
+
+  return {
+    id: readString(record, "id", "Id"),
+    name: readString(record, "name", "Name", "nome", "Nome"),
+    slug: readString(record, "slug", "Slug"),
+    description: readString(record, "description", "Description", "descricao", "Descricao"),
+    city: readString(record, "city", "City", "cidade", "Cidade"),
+    neighborhood: readString(
+      record,
+      "neighborhood",
+      "Neighborhood",
+      "bairro",
+      "Bairro",
+    ),
+    contactSummary: readString(
+      record,
+      "contactSummary",
+      "ContactSummary",
+      "resumoContato",
+      "ResumoContato",
+    ),
+    addressSummary: readString(
+      record,
+      "addressSummary",
+      "AddressSummary",
+      "resumoEndereco",
+      "ResumoEndereco",
+    ),
+    isPublished: readBoolean(record, "isPublished", "IsPublished", "publica", "Publica"),
+  };
+}
+
 function mapAdminProfessional(value: unknown): AdminProfessional {
   const record = toRecord(value);
 
@@ -641,6 +676,46 @@ export const api = {
     });
 
     return mapAdminCurrentUser(response);
+  },
+
+  async getAdminPublicProfile(token: string) {
+    const response = await request<unknown>("/petshops/public-profile", {
+      method: "GET",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
+
+    return mapAdminPublicProfile(response);
+  },
+
+  async updateAdminPublicProfile(
+    payload: {
+      slug: string;
+      description: string;
+      city: string;
+      neighborhood: string;
+      contactSummary: string;
+      addressSummary: string;
+      isPublished: boolean;
+    },
+    token: string,
+  ) {
+    const response = await request<unknown>("/petshops/public-profile", {
+      method: "PUT",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+      body: JSON.stringify({
+        Slug: payload.slug.trim(),
+        Descricao: payload.description.trim(),
+        Cidade: payload.city.trim(),
+        Bairro: payload.neighborhood.trim(),
+        ResumoContato: payload.contactSummary.trim(),
+        ResumoEndereco: payload.addressSummary.trim(),
+        Publica: payload.isPublished,
+      }),
+    });
+
+    return mapAdminPublicProfile(response);
   },
 
   async listAdminProfessionals(token: string) {

@@ -80,6 +80,7 @@ npm run test
 - `/admin/login` — entrada dedicada para operadores do petshop
 - `/admin/bookings` — fila operacional com visão padrão de hoje + próximas reservas
 - `/admin/bookings/[id]` — detalhe operacional com contexto completo e ações
+- `/admin/profile` — vitrine pública do petshop com slug, textos, cidade/bairro e estado de publicação
 - `/admin/professionals` — cadastro, edição e ativação/desativação de profissionais
 - `/admin/professionals/[id]` — hub operacional do profissional com perfil, serviços atribuídos e disponibilidade semanal
 - `/admin/services` — catálogo operacional de serviços com duração, preço base e status ativo/inativo
@@ -93,6 +94,11 @@ npm run test
   - edição do perfil operacional
   - atribuição e remoção de serviços ativos
   - cadastro, edição e exclusão de janelas recorrentes de disponibilidade semanal
+- A página `/admin/profile` concentra o perfil público usado pelo catálogo e pela página pública do petshop:
+  - slug estável da loja
+  - descrição, cidade e bairro usados na descoberta pública
+  - resumos de contato e endereço exibidos na vitrine
+  - estado guiado de publicação, com checklist dos campos obrigatórios
 - Profissionais ou serviços inativos saem do fluxo operacional relevante:
   - profissionais inativos deixam de participar da vitrine pública
   - serviços inativos deixam de aparecer no catálogo público e nas opções de atribuição
@@ -127,6 +133,7 @@ npm run test
 - O CTA de feedback só aparece para reservas concluídas quando o
   `feedbackAccessToken` ainda está disponível no contexto salvo do navegador.
 - O dashboard admin não replica nenhuma lógica de escopo por empresa no cliente; ele apenas propaga o JWT da sessão e depende do backend para garantir o isolamento multi-tenant.
+- Publicar a vitrine em `/admin/profile` exige slug, descrição, cidade, bairro, resumo de contato e resumo de endereço válidos; conflitos de slug e erros de validação retornados pelo backend são exibidos diretamente no formulário.
 
 ## Validação sugerida
 

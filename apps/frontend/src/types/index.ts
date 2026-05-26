@@ -195,6 +195,18 @@ export interface AdminCurrentUser {
   };
 }
 
+export interface AdminPublicProfile {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  city: string;
+  neighborhood: string;
+  contactSummary: string;
+  addressSummary: string;
+  isPublished: boolean;
+}
+
 export interface AdminProfessional {
   id: string;
   companyId: string;

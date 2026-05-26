@@ -11,6 +11,7 @@
   "/admin/(dashboard)/bookings/page": "/admin/bookings",
   "/admin/(dashboard)/professionals/[id]/page": "/admin/professionals/[id]",
   "/admin/(dashboard)/professionals/page": "/admin/professionals",
+  "/admin/(dashboard)/profile/page": "/admin/profile",
   "/admin/(dashboard)/services/page": "/admin/services",
   "/admin/login/page": "/admin/login",
   "/admin/page": "/admin"

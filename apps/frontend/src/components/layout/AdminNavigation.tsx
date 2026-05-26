@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarRange, Scissors, Users } from "lucide-react";
+import { CalendarRange, Store, Scissors, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigationItems = [
@@ -10,6 +10,11 @@ const navigationItems = [
     href: "/admin/bookings",
     label: "Reservas",
     icon: CalendarRange,
+  },
+  {
+    href: "/admin/profile",
+    label: "Perfil público",
+    icon: Store,
   },
   {
     href: "/admin/professionals",
