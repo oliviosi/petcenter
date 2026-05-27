@@ -567,6 +567,34 @@ function mapAdminCustomDomain(record: JsonRecord): AdminCustomDomain {
       "dominioPersonalizadoUltimaFalha",
       "DominioPersonalizadoUltimaFalha",
     ),
+    lastAttemptAt: readNullableString(
+      record,
+      "customDomainLastAttemptAt",
+      "CustomDomainLastAttemptAt",
+      "dominioPersonalizadoUltimaTentativaEm",
+      "DominioPersonalizadoUltimaTentativaEm",
+    ),
+    nextRetryAt: readNullableString(
+      record,
+      "customDomainNextRetryAt",
+      "CustomDomainNextRetryAt",
+      "dominioPersonalizadoProximaTentativaEm",
+      "DominioPersonalizadoProximaTentativaEm",
+    ),
+    verifiedAt: readNullableString(
+      record,
+      "customDomainVerifiedAt",
+      "CustomDomainVerifiedAt",
+      "dominioPersonalizadoVerificadoEm",
+      "DominioPersonalizadoVerificadoEm",
+    ),
+    activatedAt: readNullableString(
+      record,
+      "customDomainActivatedAt",
+      "CustomDomainActivatedAt",
+      "dominioPersonalizadoAtivadoEm",
+      "DominioPersonalizadoAtivadoEm",
+    ),
   };
 }
 

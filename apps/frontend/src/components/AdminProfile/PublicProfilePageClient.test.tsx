@@ -5,6 +5,11 @@ import { PublicProfilePageClient } from "@/components/AdminProfile/PublicProfile
 
 const refresh = vi.fn();
 const writeText = vi.fn();
+const formatDateTimeLabel = (value: string) =>
+  new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(new Date(value));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -28,6 +33,10 @@ const baseProfile = {
     activeDomain: null,
     status: "removed" as const,
     failureMessage: null,
+    lastAttemptAt: null,
+    nextRetryAt: null,
+    verifiedAt: null,
+    activatedAt: null,
   },
   isPublished: false,
 } as const;
@@ -114,6 +123,10 @@ describe("PublicProfilePageClient", () => {
             activeDomain: null,
             status: "pending_setup",
             failureMessage: null,
+            lastAttemptAt: null,
+            nextRetryAt: "2026-01-12T18:30:00Z",
+            verifiedAt: null,
+            activatedAt: null,
           },
           isPublished: true,
         }}
@@ -130,6 +143,117 @@ describe("PublicProfilePageClient", () => {
     expect(screen.getAllByText("agenda.petcenter-vila.com")).toHaveLength(2);
     expect(screen.getByText("CNAME")).toBeInTheDocument();
     expect(screen.getByText("petcenter.test")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "O domínio desejado foi salvo, mas o host compartilhado continua canônico até o DNS ficar pronto e a ativação acontecer.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Automação do domínio personalizado")).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        `A próxima tentativa automática está prevista para ${formatDateTimeLabel("2026-01-12T18:30:00Z")}.`,
+      )[0],
+    ).toBeInTheDocument();
+  });
+
+  it("shows automated verification progress while the shared host remains canonical", () => {
+    render(
+      <PublicProfilePageClient
+        profile={{
+          ...baseProfile,
+          slug: "pet-center-vila",
+          description: "Banho e tosa com atendimento humanizado.",
+          city: "São Paulo",
+          neighborhood: "Vila Mariana",
+          contactSummary: "WhatsApp (11) 99999-9999",
+          addressSummary: "Rua Exemplo, 123",
+          customDomain: {
+            desiredDomain: "agenda.petcenter-vila.com",
+            activeDomain: null,
+            status: "verifying",
+            failureMessage: null,
+            lastAttemptAt: "2026-01-12T17:00:00Z",
+            nextRetryAt: "2026-01-12T18:00:00Z",
+            verifiedAt: null,
+            activatedAt: null,
+          },
+          isPublished: true,
+        }}
+        updatePublicProfileAction={vi.fn(async () => ({
+          success: true,
+          message: "ok",
+        }))}
+      />,
+    );
+
+    expect(screen.getByText("Fallback ativo para compartilhamento")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "A verificação automática está em andamento. O host compartilhado segue como URL canônica até a ativação do domínio.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("https://petcenter.test/petshops/pet-center-vila")[0]).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        `Última checagem automática em ${formatDateTimeLabel("2026-01-12T17:00:00Z")}.`,
+      )[0],
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        `Se o DNS ainda não estiver pronto, a próxima tentativa automática está prevista para ${formatDateTimeLabel("2026-01-12T18:00:00Z")}.`,
+      )[0],
+    ).toBeInTheDocument();
+    expect(screen.getByText("Domínio verificado em")).toBeInTheDocument();
+    expect(screen.getByText("Ainda não verificado")).toBeInTheDocument();
+  });
+
+  it("shows recoverable verification failures and keeps the shared host as fallback", () => {
+    render(
+      <PublicProfilePageClient
+        profile={{
+          ...baseProfile,
+          slug: "pet-center-vila",
+          description: "Banho e tosa com atendimento humanizado.",
+          city: "São Paulo",
+          neighborhood: "Vila Mariana",
+          contactSummary: "WhatsApp (11) 99999-9999",
+          addressSummary: "Rua Exemplo, 123",
+          customDomain: {
+            desiredDomain: "agenda.petcenter-vila.com",
+            activeDomain: null,
+            status: "failed",
+            failureMessage:
+              "Não encontramos o CNAME esperado apontando para petcenter.test.",
+            lastAttemptAt: "2026-01-12T17:15:00Z",
+            nextRetryAt: "2026-01-12T19:15:00Z",
+            verifiedAt: null,
+            activatedAt: null,
+          },
+          isPublished: true,
+        }}
+        updatePublicProfileAction={vi.fn(async () => ({
+          success: true,
+          message: "ok",
+        }))}
+      />,
+    );
+
+    expect(screen.getAllByText("Falha recuperável")[0]).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "A última tentativa automática falhou. O host compartilhado segue como URL canônica até a próxima verificação bem-sucedida.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Não encontramos o CNAME esperado apontando para petcenter.test."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        `Depois de corrigir o DNS, aguarde a próxima tentativa automática em ${formatDateTimeLabel("2026-01-12T19:15:00Z")}.`,
+      )[0],
+    ).toBeInTheDocument();
+    expect(screen.getByText("Ainda não ativado")).toBeInTheDocument();
+    expect(screen.getAllByText("https://petcenter.test/petshops/pet-center-vila")[0]).toBeInTheDocument();
   });
 
   it("surfaces slug conflicts returned by the server action", async () => {
@@ -223,6 +347,10 @@ describe("PublicProfilePageClient", () => {
             activeDomain: "agenda.petcenter-vila.com",
             status: "active",
             failureMessage: null,
+            lastAttemptAt: "2026-01-12T17:30:00Z",
+            nextRetryAt: null,
+            verifiedAt: "2026-01-12T17:30:00Z",
+            activatedAt: "2026-01-12T17:31:00Z",
           },
           isPublished: true,
         }}
@@ -242,5 +370,10 @@ describe("PublicProfilePageClient", () => {
     );
     expect(screen.getByText("Domínio canônico ativo")).toBeInTheDocument();
     expect(screen.getByText("Link copiado para compartilhar com clientes.")).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        `Ativação registrada em ${formatDateTimeLabel("2026-01-12T17:31:00Z")}.`,
+      )[0],
+    ).toBeInTheDocument();
   });
 });

@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   CheckCircle2,
   CircleAlert,
+  Clock3,
   Copy,
   ExternalLink,
   Eye,
@@ -69,6 +70,13 @@ interface DomainOnboardingState {
   title: string;
   description: string;
   guidance: string;
+  latestOutcome: string;
+  retryGuidance: string;
+}
+
+interface DomainAutomationDetail {
+  label: string;
+  value: string;
 }
 
 const publicationRequirements = [
@@ -85,6 +93,25 @@ const publicationRequirements = [
   >;
   label: string;
 }>;
+
+const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
+  dateStyle: "short",
+  timeStyle: "short",
+});
+
+function formatDateTimeLabel(value: string | null, fallback: string) {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsedValue = new Date(value);
+
+  if (Number.isNaN(parsedValue.getTime())) {
+    return fallback;
+  }
+
+  return dateTimeFormatter.format(parsedValue);
+}
 
 function toDefaultValues(profile: AdminPublicProfile): AdminPublicProfileValues {
   return {
@@ -113,6 +140,10 @@ function getEffectiveCustomDomain(
       activeDomain: null,
       status: "pending_setup",
       failureMessage: null,
+      lastAttemptAt: null,
+      nextRetryAt: null,
+      verifiedAt: null,
+      activatedAt: null,
     };
   }
 
@@ -121,6 +152,10 @@ function getEffectiveCustomDomain(
     activeDomain: null,
     status: "removed",
     failureMessage: null,
+    lastAttemptAt: null,
+    nextRetryAt: null,
+    verifiedAt: null,
+    activatedAt: null,
   };
 }
 
@@ -134,40 +169,64 @@ function getDomainOnboardingState(
         badge: { tone: "success", label: "Ativo" },
         title: "Domínio personalizado ativo",
         description:
-          "O domínio já concluiu a ativação e passa a ser a entrada canônica da vitrine.",
+          "A automação confirmou o DNS e ativou o domínio próprio como a entrada canônica da vitrine.",
         guidance:
           "A partir de agora, o petshop deve compartilhar o domínio próprio como link principal.",
+        latestOutcome: customDomain.verifiedAt
+          ? `Verificação automática concluída em ${formatDateTimeLabel(customDomain.verifiedAt, "instante não informado")}.`
+          : "Verificação automática concluída com sucesso.",
+        retryGuidance: customDomain.activatedAt
+          ? `Ativação registrada em ${formatDateTimeLabel(customDomain.activatedAt, "instante não informado")}.`
+          : "Não há novas tentativas agendadas porque o domínio já está ativo.",
       };
     case "verifying":
       return {
         badge: { tone: "warning", label: "Verificando" },
-        title: "Verificação em andamento",
+        title: "Verificação automática em andamento",
         description:
-          "O DNS já foi solicitado e a plataforma aguarda a confirmação da configuração antes de ativar o domínio.",
+          "A plataforma já está executando checagens automáticas e só ativa o domínio quando o DNS apontar corretamente.",
         guidance: fallbackStorefrontLink
-          ? "Enquanto a verificação não termina, continue compartilhando o link hospedado pela petcenter."
+          ? "Enquanto a automação não conclui a ativação, continue compartilhando o link hospedado pela petcenter."
           : "Finalize o slug da vitrine para manter um fallback compartilhável durante a verificação.",
+        latestOutcome: customDomain.lastAttemptAt
+          ? `Última checagem automática em ${formatDateTimeLabel(customDomain.lastAttemptAt, "instante não informado")}.`
+          : "A primeira checagem automática será executada assim que o domínio estiver elegível.",
+        retryGuidance: customDomain.nextRetryAt
+          ? `Se o DNS ainda não estiver pronto, a próxima tentativa automática está prevista para ${formatDateTimeLabel(customDomain.nextRetryAt, "instante não informado")}.`
+          : "A automação continua tentando em novas janelas de verificação.",
       };
     case "failed":
       return {
-        badge: { tone: "danger", label: "Falha" },
-        title: "Falha na verificação do domínio",
+        badge: { tone: "danger", label: "Falha recuperável" },
+        title: "A última verificação não conseguiu ativar o domínio",
         description:
           customDomain.failureMessage ??
-          "A validação ainda não conseguiu confirmar o domínio. Revise o DNS e tente novamente após a propagação.",
+          "A checagem automática ainda não encontrou o DNS esperado. Revise o CNAME e aguarde a propagação.",
         guidance: fallbackStorefrontLink
-          ? "O link hospedado pela petcenter continua como fallback até que o domínio volte a ficar saudável."
+          ? "O link hospedado pela petcenter continua como endereço canônico até a automação recuperar o domínio."
           : "Defina um slug válido para restaurar o fallback compartilhável enquanto o domínio é corrigido.",
+        latestOutcome: customDomain.lastAttemptAt
+          ? `Última tentativa automática em ${formatDateTimeLabel(customDomain.lastAttemptAt, "instante não informado")}.`
+          : "A plataforma registrou uma falha recente neste domínio.",
+        retryGuidance: customDomain.nextRetryAt
+          ? `Depois de corrigir o DNS, aguarde a próxima tentativa automática em ${formatDateTimeLabel(customDomain.nextRetryAt, "instante não informado")}.`
+          : "Depois de corrigir o DNS, aguarde uma nova tentativa automática ou salve o domínio novamente.",
       };
     case "pending_setup":
       return {
         badge: { tone: "warning", label: "DNS pendente" },
-        title: "Aguardando configuração do DNS",
+        title: "Aguardando configuração inicial do DNS",
         description:
-          "O domínio desejado já foi salvo, mas ainda precisa apontar para a infraestrutura da vitrine antes da verificação.",
+          "O domínio desejado já foi salvo, mas a automação só consegue ativá-lo quando o CNAME apontar para o destino esperado.",
         guidance: fallbackStorefrontLink
           ? "Compartilhe o link hospedado pela petcenter até o domínio personalizado ficar pronto."
           : "Defina um slug para manter um link fallback enquanto o domínio ainda está em preparação.",
+        latestOutcome: customDomain.lastAttemptAt
+          ? `Última checagem automática em ${formatDateTimeLabel(customDomain.lastAttemptAt, "instante não informado")}.`
+          : "Ainda não existe uma verificação concluída para este domínio.",
+        retryGuidance: customDomain.nextRetryAt
+          ? `A próxima tentativa automática está prevista para ${formatDateTimeLabel(customDomain.nextRetryAt, "instante não informado")}.`
+          : "Assim que o DNS estiver correto, a plataforma continua o fluxo automaticamente.",
       };
     default:
       return {
@@ -177,8 +236,52 @@ function getDomainOnboardingState(
           "A vitrine continua usando o host compartilhado da petcenter como entrada pública padrão.",
         guidance:
           "Cadastre um domínio ou subdomínio quando quiser migrar a vitrine para uma URL própria.",
+        latestOutcome: "Sem automação de domínio ativa no momento.",
+        retryGuidance: "Quando um domínio for salvo, a plataforma agenda as verificações automaticamente.",
       };
   }
+}
+
+function getDomainAutomationDetails(
+  customDomain: AdminCustomDomain,
+): DomainAutomationDetail[] {
+  if (!customDomain.desiredDomain) {
+    return [];
+  }
+
+  return [
+    {
+      label: "Última tentativa automática",
+      value: formatDateTimeLabel(
+        customDomain.lastAttemptAt,
+        "Ainda não executada",
+      ),
+    },
+    {
+      label: "Próxima tentativa automática",
+      value:
+        customDomain.status === "active"
+          ? "Nenhuma. Domínio já ativo."
+          : formatDateTimeLabel(
+              customDomain.nextRetryAt,
+              "Aguardando nova janela automática",
+            ),
+    },
+    {
+      label: "Domínio verificado em",
+      value: formatDateTimeLabel(
+        customDomain.verifiedAt,
+        "Ainda não verificado",
+      ),
+    },
+    {
+      label: "Domínio ativado em",
+      value: formatDateTimeLabel(
+        customDomain.activatedAt,
+        "Ainda não ativado",
+      ),
+    },
+  ];
 }
 
 function getStorefrontLinkState(args: {
@@ -222,7 +325,13 @@ function getStorefrontLinkState(args: {
       badge: { tone: "success", label: "Fallback ativo para compartilhamento" },
       title: "Compartilhe o link atual da vitrine",
       description: fallbackStorefrontLink
-        ? "O host compartilhado continua sendo a URL canônica enquanto o domínio próprio ainda não foi ativado."
+        ? customDomain.status === "failed"
+          ? "A última tentativa automática falhou. O host compartilhado segue como URL canônica até a próxima verificação bem-sucedida."
+          : customDomain.status === "verifying"
+            ? "A verificação automática está em andamento. O host compartilhado segue como URL canônica até a ativação do domínio."
+            : customDomain.status === "pending_setup"
+              ? "O domínio desejado foi salvo, mas o host compartilhado continua canônico até o DNS ficar pronto e a ativação acontecer."
+              : "O host compartilhado continua sendo a URL canônica enquanto nenhum domínio próprio ativo estiver disponível."
         : "A vitrine já está pública e o link canônico atual pode ser compartilhado com os clientes.",
     };
   }
@@ -310,6 +419,10 @@ export function PublicProfilePageClient({
   const domainOnboardingState = getDomainOnboardingState(
     effectiveCustomDomain,
     fallbackStorefrontLink,
+  );
+  const domainAutomationDetails = useMemo(
+    () => getDomainAutomationDetails(effectiveCustomDomain),
+    [effectiveCustomDomain],
   );
   const storefrontLinkState = getStorefrontLinkState({
     canonicalStorefrontLink,
@@ -622,6 +735,50 @@ export function PublicProfilePageClient({
                   {storefrontLinkState.description}
                 </p>
 
+                {effectiveCustomDomain.desiredDomain ? (
+                  <div className="mt-4 space-y-4 rounded-2xl bg-surface-muted p-4">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex items-center gap-2 text-content-secondary">
+                        <Clock3 className="h-4 w-4" />
+                        <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
+                          Automação do domínio personalizado
+                        </p>
+                      </div>
+                      <Badge tone={domainOnboardingState.badge.tone}>
+                        {domainOnboardingState.badge.label}
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-content-primary">
+                        {domainOnboardingState.latestOutcome}
+                      </p>
+                      <p className="text-sm text-content-secondary">
+                        {domainOnboardingState.retryGuidance}
+                      </p>
+                      <p className="text-sm text-content-secondary">
+                        {domainOnboardingState.guidance}
+                      </p>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {domainAutomationDetails.map((detail) => (
+                        <div
+                          key={detail.label}
+                          className="rounded-2xl border border-stroke-soft bg-surface-card p-4"
+                        >
+                          <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
+                            {detail.label}
+                          </p>
+                          <p className="mt-2 text-sm font-medium text-content-primary">
+                            {detail.value}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
                 {storefrontLinkState.kind === "active" && canonicalStorefrontLink ? (
                   <div className="mt-4 flex flex-wrap gap-3">
                     <Button type="button" size="sm" onClick={handleCopyStorefrontLink}>
@@ -687,6 +844,12 @@ export function PublicProfilePageClient({
                   {domainOnboardingState.title}
                 </p>
                 <p className="mt-2">{domainOnboardingState.description}</p>
+                <p className="mt-3 text-sm font-medium text-content-primary">
+                  {domainOnboardingState.latestOutcome}
+                </p>
+                <p className="mt-2 text-sm text-content-secondary">
+                  {domainOnboardingState.retryGuidance}
+                </p>
                 <p className="mt-3 text-sm text-content-secondary">
                   {domainOnboardingState.guidance}
                 </p>

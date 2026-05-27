@@ -14,5 +14,9 @@ public class GetEmpresaPublicProfileResponse
     public string? DominioPersonalizadoAtivo { get; set; }
     public string DominioPersonalizadoStatus { get; set; } = "removed";
     public string? DominioPersonalizadoUltimaFalha { get; set; }
+    public DateTime? DominioPersonalizadoUltimaTentativaEm { get; set; }
+    public DateTime? DominioPersonalizadoProximaTentativaEm { get; set; }
+    public DateTime? DominioPersonalizadoVerificadoEm { get; set; }
+    public DateTime? DominioPersonalizadoAtivadoEm { get; set; }
     public bool Publica { get; set; }
 }

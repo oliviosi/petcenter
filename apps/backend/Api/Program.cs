@@ -1,5 +1,6 @@
 using Api.Configurations;
 using Api.Extensions;
+using Api.Modules.Empresas.Infrastructure;
 using Api.Infrastructure.Persistence;
 using Api.Middlewares;
 using Api.Modules.Bookings.Infrastructure;
@@ -55,6 +56,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 builder.Services.Configure<DatabaseOptions>(builder.Configuration.GetSection("Database"));
+builder.Services.AddOptions<StorefrontDomainVerificationOptions>()
+    .Bind(builder.Configuration.GetSection(StorefrontDomainVerificationOptions.SectionName))
+    .ValidateDataAnnotations()
+    .Validate(options => !string.IsNullOrWhiteSpace(options.ExpectedTarget), "StorefrontDomainVerification:ExpectedTarget é obrigatório.")
+    .Validate(options => options.WorkerInterval > TimeSpan.Zero, "StorefrontDomainVerification:WorkerInterval deve ser maior que zero.")
+    .Validate(options => options.RetryDelay > TimeSpan.Zero, "StorefrontDomainVerification:RetryDelay deve ser maior que zero.")
+    .Validate(options => options.BatchSize > 0, "StorefrontDomainVerification:BatchSize deve ser maior que zero.")
+    .ValidateOnStart();
 builder.Services.AddOptions<BookingQueueOptions>()
     .Bind(builder.Configuration.GetSection(BookingQueueOptions.SectionName))
     .ValidateDataAnnotations()

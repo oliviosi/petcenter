@@ -14,8 +14,12 @@ public class GetPublicEmpresaByHostServiceTests
     {
         using var db = TestData.CreateDbContext();
         var scenario = TestData.SeedPublicScenario(db, new DateOnly(2026, 1, 5));
-        scenario.Empresa.DefinirDominioPersonalizadoDesejado("agenda.petcenter-vila.com");
-        scenario.Empresa.AtivarDominioPersonalizado();
+        scenario.Empresa.DefinirDominioPersonalizadoDesejado(
+            "agenda.petcenter-vila.com",
+            new DateTime(2026, 1, 5, 8, 0, 0, DateTimeKind.Utc));
+        scenario.Empresa.AtivarDominioPersonalizado(
+            new DateTime(2026, 1, 5, 8, 30, 0, DateTimeKind.Utc),
+            new DateTime(2026, 1, 5, 8, 30, 0, DateTimeKind.Utc));
         await db.SaveChangesAsync();
 
         var sut = new GetPublicEmpresaByHostService(
@@ -36,7 +40,13 @@ public class GetPublicEmpresaByHostServiceTests
     {
         using var db = TestData.CreateDbContext();
         var scenario = TestData.SeedPublicScenario(db, new DateOnly(2026, 1, 5));
-        scenario.Empresa.DefinirDominioPersonalizadoDesejado("agenda.petcenter-vila.com");
+        scenario.Empresa.DefinirDominioPersonalizadoDesejado(
+            "agenda.petcenter-vila.com",
+            new DateTime(2026, 1, 5, 8, 0, 0, DateTimeKind.Utc));
+        scenario.Empresa.RegistrarFalhaDominioPersonalizado(
+            "O domínio ainda não aponta para o destino esperado.",
+            new DateTime(2026, 1, 5, 8, 15, 0, DateTimeKind.Utc),
+            new DateTime(2026, 1, 5, 8, 30, 0, DateTimeKind.Utc));
         await db.SaveChangesAsync();
 
         var sut = new GetPublicEmpresaByHostService(

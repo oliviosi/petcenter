@@ -15,7 +15,10 @@ public class UpdateEmpresaPublicProfileServiceTests
         db.Empresas.Add(empresa);
         await db.SaveChangesAsync();
 
-        var sut = new UpdateEmpresaPublicProfileService(new EmpresaRepository(db));
+        var agora = new DateTimeOffset(2026, 6, 27, 12, 0, 0, TimeSpan.Zero);
+        var sut = new UpdateEmpresaPublicProfileService(
+            new EmpresaRepository(db),
+            new ManualTimeProvider(agora));
 
         var response = await sut.HandleAsync(new UpdateEmpresaPublicProfileRequest
         {
@@ -33,6 +36,8 @@ public class UpdateEmpresaPublicProfileServiceTests
         Assert.Equal("agenda.petcenter-vila.com", response.DominioPersonalizadoDesejado);
         Assert.Null(response.DominioPersonalizadoAtivo);
         Assert.Equal("pending_setup", response.DominioPersonalizadoStatus);
+        Assert.Equal(agora.UtcDateTime, response.DominioPersonalizadoProximaTentativaEm);
+        Assert.Null(response.DominioPersonalizadoUltimaTentativaEm);
         Assert.True(response.Publica);
     }
 
@@ -47,13 +52,19 @@ public class UpdateEmpresaPublicProfileServiceTests
         empresa.DefinirBairro("Vila Mariana");
         empresa.DefinirResumoContato("WhatsApp (11) 99999-9999");
         empresa.DefinirResumoEndereco("Rua Exemplo, 123");
-        empresa.DefinirDominioPersonalizadoDesejado("agenda.petcenter-vila.com");
-        empresa.AtivarDominioPersonalizado();
+        empresa.DefinirDominioPersonalizadoDesejado(
+            "agenda.petcenter-vila.com",
+            new DateTime(2026, 6, 27, 9, 0, 0, DateTimeKind.Utc));
+        empresa.AtivarDominioPersonalizado(
+            new DateTime(2026, 6, 27, 10, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 6, 27, 10, 0, 0, DateTimeKind.Utc));
         empresa.PublicarNoCatalogo();
         db.Empresas.Add(empresa);
         await db.SaveChangesAsync();
 
-        var sut = new UpdateEmpresaPublicProfileService(new EmpresaRepository(db));
+        var sut = new UpdateEmpresaPublicProfileService(
+            new EmpresaRepository(db),
+            new ManualTimeProvider(new DateTimeOffset(2026, 6, 27, 12, 0, 0, TimeSpan.Zero)));
 
         var response = await sut.HandleAsync(new UpdateEmpresaPublicProfileRequest
         {
@@ -70,5 +81,93 @@ public class UpdateEmpresaPublicProfileServiceTests
 
         Assert.Equal("agenda.petcenter-vila.com", response.DominioPersonalizadoAtivo);
         Assert.Equal("active", response.DominioPersonalizadoStatus);
+        Assert.NotNull(response.DominioPersonalizadoAtivadoEm);
+        Assert.NotNull(response.DominioPersonalizadoVerificadoEm);
+    }
+
+    [Fact]
+    public async Task HandleAsync_ShouldResetAutomationStateWhenDesiredDomainChanges()
+    {
+        using var db = TestData.CreateDbContext();
+        var empresa = new Empresa("Pet Center Vila");
+        empresa.DefinirSlug("pet-center-vila");
+        empresa.DefinirDescricao("Banho e tosa com atendimento humanizado.");
+        empresa.DefinirCidade("São Paulo");
+        empresa.DefinirBairro("Vila Mariana");
+        empresa.DefinirResumoContato("WhatsApp (11) 99999-9999");
+        empresa.DefinirResumoEndereco("Rua Exemplo, 123");
+        empresa.DefinirDominioPersonalizadoDesejado(
+            "agenda.petcenter-vila.com",
+            new DateTime(2026, 6, 27, 9, 0, 0, DateTimeKind.Utc));
+        empresa.AtivarDominioPersonalizado(
+            new DateTime(2026, 6, 27, 10, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 6, 27, 10, 0, 0, DateTimeKind.Utc));
+        db.Empresas.Add(empresa);
+        await db.SaveChangesAsync();
+
+        var agora = new DateTimeOffset(2026, 6, 27, 13, 0, 0, TimeSpan.Zero);
+        var sut = new UpdateEmpresaPublicProfileService(
+            new EmpresaRepository(db),
+            new ManualTimeProvider(agora));
+
+        var response = await sut.HandleAsync(new UpdateEmpresaPublicProfileRequest
+        {
+            EmpresaId = empresa.Id,
+            Slug = "pet-center-vila",
+            Descricao = "Banho e tosa com atendimento humanizado.",
+            Cidade = "São Paulo",
+            Bairro = "Vila Mariana",
+            ResumoContato = "WhatsApp (11) 99999-9999",
+            ResumoEndereco = "Rua Exemplo, 123",
+            DominioPersonalizadoDesejado = "agenda-nova.petcenter-vila.com",
+            Publica = false
+        });
+
+        Assert.Equal("agenda-nova.petcenter-vila.com", response.DominioPersonalizadoDesejado);
+        Assert.Null(response.DominioPersonalizadoAtivo);
+        Assert.Equal("pending_setup", response.DominioPersonalizadoStatus);
+        Assert.Equal(agora.UtcDateTime, response.DominioPersonalizadoProximaTentativaEm);
+        Assert.Null(response.DominioPersonalizadoVerificadoEm);
+        Assert.Null(response.DominioPersonalizadoAtivadoEm);
+    }
+
+    [Fact]
+    public async Task HandleAsync_ShouldResetAutomationStateWhenDesiredDomainIsRemoved()
+    {
+        using var db = TestData.CreateDbContext();
+        var empresa = new Empresa("Pet Center Vila");
+        empresa.DefinirDominioPersonalizadoDesejado(
+            "agenda.petcenter-vila.com",
+            new DateTime(2026, 6, 27, 9, 0, 0, DateTimeKind.Utc));
+        empresa.RegistrarFalhaDominioPersonalizado(
+            "O domínio ainda não aponta para o destino esperado.",
+            new DateTime(2026, 6, 27, 10, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 6, 27, 10, 15, 0, DateTimeKind.Utc));
+        db.Empresas.Add(empresa);
+        await db.SaveChangesAsync();
+
+        var sut = new UpdateEmpresaPublicProfileService(
+            new EmpresaRepository(db),
+            new ManualTimeProvider(new DateTimeOffset(2026, 6, 27, 12, 0, 0, TimeSpan.Zero)));
+
+        var response = await sut.HandleAsync(new UpdateEmpresaPublicProfileRequest
+        {
+            EmpresaId = empresa.Id,
+            Slug = "pet-center-vila",
+            Descricao = "Banho e tosa com atendimento humanizado.",
+            Cidade = "São Paulo",
+            Bairro = "Vila Mariana",
+            ResumoContato = "WhatsApp (11) 99999-9999",
+            ResumoEndereco = "Rua Exemplo, 123",
+            DominioPersonalizadoDesejado = string.Empty,
+            Publica = false
+        });
+
+        Assert.Null(response.DominioPersonalizadoDesejado);
+        Assert.Null(response.DominioPersonalizadoAtivo);
+        Assert.Equal("removed", response.DominioPersonalizadoStatus);
+        Assert.Null(response.DominioPersonalizadoUltimaFalha);
+        Assert.Null(response.DominioPersonalizadoUltimaTentativaEm);
+        Assert.Null(response.DominioPersonalizadoProximaTentativaEm);
     }
 }

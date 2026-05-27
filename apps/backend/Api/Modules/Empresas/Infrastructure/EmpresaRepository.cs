@@ -49,6 +49,23 @@ public class EmpresaRepository : IEmpresaRepository
                 && e.DominioPersonalizadoAtivo == hostNormalizado);
     }
 
+    public async Task<List<Empresa>> ListEligibleForDomainVerificationAsync(DateTime referenciaUtc, int take = 100)
+    {
+        var referencia = EnsureUtc(referenciaUtc);
+
+        return await _db.Empresas
+            .Where(e =>
+                e.Ativo
+                && e.DominioPersonalizadoDesejado != null
+                && e.DominioPersonalizadoStatus != StorefrontCustomDomainStatus.Active
+                && e.DominioPersonalizadoProximaTentativaEm != null
+                && e.DominioPersonalizadoProximaTentativaEm <= referencia)
+            .OrderBy(e => e.DominioPersonalizadoProximaTentativaEm)
+            .ThenBy(e => e.CriadoEm)
+            .Take(take)
+            .ToListAsync();
+    }
+
     public async Task<List<Empresa>> ListPublicAsync(string? nome = null, string? cidade = null, string? bairro = null, string? servico = null)
     {
         var query = _db.Empresas.AsNoTracking()
@@ -124,6 +141,9 @@ public class EmpresaRepository : IEmpresaRepository
         _db.Empresas.Update(empresa);
         await _db.SaveChangesAsync();
     }
+
+    private static DateTime EnsureUtc(DateTime value) =>
+        value.Kind == DateTimeKind.Utc ? value : DateTime.SpecifyKind(value, DateTimeKind.Utc);
 
     private static string NormalizeHost(string host) =>
         host.Trim().ToLowerInvariant().TrimEnd('.').Split(':', 2)[0];

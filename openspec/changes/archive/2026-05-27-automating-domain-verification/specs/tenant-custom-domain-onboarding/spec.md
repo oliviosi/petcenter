@@ -1,13 +1,4 @@
-## Purpose
-Define tenant-facing requirements for registering, verifying, activating, and removing a custom storefront domain.
-
-## Requirements
-### Requirement: Tenant can register a desired storefront domain
-The system SHALL allow an authenticated tenant user to register one desired custom domain or subdomain for the petshop storefront.
-
-#### Scenario: Tenant saves a desired domain
-- **WHEN** an authenticated tenant user provides a valid desired storefront domain in the admin experience
-- **THEN** the system stores that desired domain for onboarding instead of activating it immediately
+## ADDED Requirements
 
 ### Requirement: Tenant can understand automated verification progress
 The system SHALL communicate whether automated verification has started, when the latest verification attempt ran, and whether another retry is still pending for the desired storefront domain.
@@ -15,6 +6,8 @@ The system SHALL communicate whether automated verification has started, when th
 #### Scenario: Tenant reviews verification progress after saving a domain
 - **WHEN** an authenticated tenant user opens storefront domain onboarding after saving a desired domain that is being processed automatically
 - **THEN** the system shows that automated verification is in progress or scheduled, together with the latest verification progress context available
+
+## MODIFIED Requirements
 
 ### Requirement: Tenant can understand domain onboarding state and DNS instructions
 The system SHALL communicate the onboarding state of the desired storefront domain, including the required DNS instructions, whether automated verification is pending setup, actively verifying, active, failed, or removed, and the latest recoverable outcome shown to the tenant.
@@ -37,10 +30,3 @@ The system SHALL treat a storefront custom domain as active only after verificat
 #### Scenario: Domain verification succeeds
 - **WHEN** the desired storefront domain is successfully verified
 - **THEN** the system marks that domain as active for the tenant storefront
-
-### Requirement: Tenant can remove or replace the desired custom domain
-The system SHALL allow the tenant to remove the current desired or active storefront domain and return the storefront to the shared-host fallback link.
-
-#### Scenario: Tenant removes active custom domain
-- **WHEN** an authenticated tenant user removes the active storefront custom domain
-- **THEN** the system stops treating that domain as canonical and restores the shared-host storefront link as the tenant-facing fallback entry

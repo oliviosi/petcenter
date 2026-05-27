@@ -64,6 +64,10 @@ export interface AdminCustomDomain {
   activeDomain: string | null;
   status: AdminCustomDomainStatus;
   failureMessage: string | null;
+  lastAttemptAt: string | null;
+  nextRetryAt: string | null;
+  verifiedAt: string | null;
+  activatedAt: string | null;
 }
 
 export interface BookingSearchFilters {

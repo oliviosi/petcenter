@@ -60,9 +60,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGetMeService, GetMeService>();
         services.AddScoped<IGetEmpresaPublicProfileService, GetEmpresaPublicProfileService>();
         services.AddScoped<IUpdateEmpresaPublicProfileService, UpdateEmpresaPublicProfileService>();
+        services.AddScoped<IStorefrontDomainDnsVerificationService, StorefrontDomainDnsVerificationService>();
+        services.AddScoped<IStorefrontDomainVerificationService, StorefrontDomainVerificationService>();
         services.AddScoped<IListPublicEmpresasService, ListPublicEmpresasService>();
         services.AddScoped<IGetPublicEmpresaByHostService, GetPublicEmpresaByHostService>();
         services.AddScoped<IGetPublicEmpresaBySlugService, GetPublicEmpresaBySlugService>();
+        services.AddHostedService<StorefrontDomainVerificationWorker>();
 
         // Profissionais
         services.AddScoped<IProfissionalRepository, ProfissionalRepository>();

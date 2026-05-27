@@ -18,6 +18,10 @@ public partial class Empresa
     public string? DominioPersonalizadoDesejado { get; private set; }
     public string? DominioPersonalizadoAtivo { get; private set; }
     public string? DominioPersonalizadoUltimaFalha { get; private set; }
+    public DateTime? DominioPersonalizadoUltimaTentativaEm { get; private set; }
+    public DateTime? DominioPersonalizadoProximaTentativaEm { get; private set; }
+    public DateTime? DominioPersonalizadoVerificadoEm { get; private set; }
+    public DateTime? DominioPersonalizadoAtivadoEm { get; private set; }
     public StorefrontCustomDomainStatus DominioPersonalizadoStatus { get; private set; } =
         StorefrontCustomDomainStatus.Removed;
     public bool Publica { get; private set; }
@@ -68,7 +72,7 @@ public partial class Empresa
     public void DefinirResumoEndereco(string? resumoEndereco) =>
         ResumoEndereco = NormalizarTextoOpcional(resumoEndereco);
 
-    public void DefinirDominioPersonalizadoDesejado(string? dominio)
+    public void DefinirDominioPersonalizadoDesejado(string? dominio, DateTime agoraUtc)
     {
         if (string.IsNullOrWhiteSpace(dominio))
         {
@@ -83,30 +87,41 @@ public partial class Empresa
         DominioPersonalizadoDesejado = dominioNormalizado;
         DominioPersonalizadoAtivo = null;
         DominioPersonalizadoUltimaFalha = null;
+        DominioPersonalizadoUltimaTentativaEm = null;
+        DominioPersonalizadoProximaTentativaEm = GarantirUtc(agoraUtc);
+        DominioPersonalizadoVerificadoEm = null;
+        DominioPersonalizadoAtivadoEm = null;
         DominioPersonalizadoStatus = StorefrontCustomDomainStatus.PendingSetup;
     }
 
-    public void MarcarDominioPersonalizadoEmVerificacao()
+    public void MarcarDominioPersonalizadoEmVerificacao(DateTime tentativaEmUtc, DateTime proximaTentativaEmUtc)
     {
         if (string.IsNullOrWhiteSpace(DominioPersonalizadoDesejado))
             throw new ArgumentException("Domínio personalizado é obrigatório.");
 
-        DominioPersonalizadoAtivo = null;
-        DominioPersonalizadoUltimaFalha = null;
+        DominioPersonalizadoUltimaTentativaEm = GarantirUtc(tentativaEmUtc);
+        DominioPersonalizadoProximaTentativaEm = GarantirUtc(proximaTentativaEmUtc);
         DominioPersonalizadoStatus = StorefrontCustomDomainStatus.Verifying;
     }
 
-    public void AtivarDominioPersonalizado()
+    public void AtivarDominioPersonalizado(DateTime verificadoEmUtc, DateTime ativadoEmUtc)
     {
         if (string.IsNullOrWhiteSpace(DominioPersonalizadoDesejado))
             throw new ArgumentException("Domínio personalizado é obrigatório.");
 
         DominioPersonalizadoAtivo = DominioPersonalizadoDesejado;
         DominioPersonalizadoUltimaFalha = null;
+        DominioPersonalizadoUltimaTentativaEm = GarantirUtc(verificadoEmUtc);
+        DominioPersonalizadoProximaTentativaEm = null;
+        DominioPersonalizadoVerificadoEm = GarantirUtc(verificadoEmUtc);
+        DominioPersonalizadoAtivadoEm = GarantirUtc(ativadoEmUtc);
         DominioPersonalizadoStatus = StorefrontCustomDomainStatus.Active;
     }
 
-    public void RegistrarFalhaDominioPersonalizado(string motivo)
+    public void RegistrarFalhaDominioPersonalizado(
+        string motivo,
+        DateTime tentativaEmUtc,
+        DateTime proximaTentativaEmUtc)
     {
         if (string.IsNullOrWhiteSpace(DominioPersonalizadoDesejado))
             throw new ArgumentException("Domínio personalizado é obrigatório.");
@@ -115,6 +130,10 @@ public partial class Empresa
 
         DominioPersonalizadoAtivo = null;
         DominioPersonalizadoUltimaFalha = motivo.Trim();
+        DominioPersonalizadoUltimaTentativaEm = GarantirUtc(tentativaEmUtc);
+        DominioPersonalizadoProximaTentativaEm = GarantirUtc(proximaTentativaEmUtc);
+        DominioPersonalizadoVerificadoEm = null;
+        DominioPersonalizadoAtivadoEm = null;
         DominioPersonalizadoStatus = StorefrontCustomDomainStatus.Failed;
     }
 
@@ -123,6 +142,10 @@ public partial class Empresa
         DominioPersonalizadoDesejado = null;
         DominioPersonalizadoAtivo = null;
         DominioPersonalizadoUltimaFalha = null;
+        DominioPersonalizadoUltimaTentativaEm = null;
+        DominioPersonalizadoProximaTentativaEm = null;
+        DominioPersonalizadoVerificadoEm = null;
+        DominioPersonalizadoAtivadoEm = null;
         DominioPersonalizadoStatus = StorefrontCustomDomainStatus.Removed;
     }
 
@@ -156,6 +179,14 @@ public partial class Empresa
             throw new ArgumentException("Domínio personalizado inválido.");
 
         return dominioNormalizado;
+    }
+
+    private static DateTime GarantirUtc(DateTime dataHora)
+    {
+        if (dataHora.Kind == DateTimeKind.Utc)
+            return dataHora;
+
+        return DateTime.SpecifyKind(dataHora, DateTimeKind.Utc);
     }
 
     [GeneratedRegex("^[a-z0-9]+(?:-[a-z0-9]+)*$")]

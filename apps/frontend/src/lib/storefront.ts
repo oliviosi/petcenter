@@ -61,12 +61,20 @@ export function buildCustomDomainUrl(publicAppOrigin: string, domain: string | n
   return `${getPreferredProtocol(publicAppOrigin)}//${normalizeHost(domain)}`;
 }
 
+function isActiveCustomDomain(
+  customDomain: Pick<AdminPublicProfile["customDomain"], "activeDomain" | "status">,
+) {
+  return customDomain.status === "active" && Boolean(customDomain.activeDomain);
+}
+
 export function buildCanonicalStorefrontUrl(
   publicAppOrigin: string,
   profile: Pick<AdminPublicProfile, "slug" | "customDomain">,
 ) {
   return (
-    buildCustomDomainUrl(publicAppOrigin, profile.customDomain.activeDomain) ??
+    (isActiveCustomDomain(profile.customDomain)
+      ? buildCustomDomainUrl(publicAppOrigin, profile.customDomain.activeDomain)
+      : null) ??
     buildSharedStorefrontUrl(publicAppOrigin, profile.slug)
   );
 }
@@ -91,10 +99,13 @@ export function buildBookingPath(slug: string, mode: StorefrontEntryMode) {
 
 export function getStorefrontEntryMode(
   requestHost: string,
-  customDomain: Pick<AdminPublicProfile["customDomain"], "activeDomain">,
+  customDomain: Pick<AdminPublicProfile["customDomain"], "activeDomain" | "status">,
 ): StorefrontEntryMode {
-  return customDomain.activeDomain &&
-    normalizeHost(customDomain.activeDomain) === normalizeHost(requestHost)
+  const activeDomain =
+    customDomain.status === "active" ? customDomain.activeDomain : null;
+
+  return activeDomain &&
+    normalizeHost(activeDomain) === normalizeHost(requestHost)
     ? "custom-domain"
     : "shared-host";
 }

@@ -26,6 +26,14 @@ public class EmpresaConfiguration : IEntityTypeConfiguration<Empresa>
         builder.Property(e => e.DominioPersonalizadoUltimaFalha)
             .HasColumnName("dominio_personalizado_ultima_falha")
             .HasMaxLength(300);
+        builder.Property(e => e.DominioPersonalizadoUltimaTentativaEm)
+            .HasColumnName("dominio_personalizado_ultima_tentativa_em");
+        builder.Property(e => e.DominioPersonalizadoProximaTentativaEm)
+            .HasColumnName("dominio_personalizado_proxima_tentativa_em");
+        builder.Property(e => e.DominioPersonalizadoVerificadoEm)
+            .HasColumnName("dominio_personalizado_verificado_em");
+        builder.Property(e => e.DominioPersonalizadoAtivadoEm)
+            .HasColumnName("dominio_personalizado_ativado_em");
         builder.Property(e => e.DominioPersonalizadoStatus)
             .HasColumnName("dominio_personalizado_status")
             .HasConversion<string>()
@@ -37,5 +45,6 @@ public class EmpresaConfiguration : IEntityTypeConfiguration<Empresa>
         builder.HasIndex(e => e.Slug).IsUnique();
         builder.HasIndex(e => e.DominioPersonalizadoDesejado).IsUnique();
         builder.HasIndex(e => e.DominioPersonalizadoAtivo).IsUnique();
+        builder.HasIndex(e => e.DominioPersonalizadoProximaTentativaEm);
     }
 }

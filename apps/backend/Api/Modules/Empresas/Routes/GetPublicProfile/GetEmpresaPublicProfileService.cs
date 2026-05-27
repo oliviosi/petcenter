@@ -28,6 +28,10 @@ public class GetEmpresaPublicProfileService : IGetEmpresaPublicProfileService
             DominioPersonalizadoAtivo = empresa.DominioPersonalizadoAtivo,
             DominioPersonalizadoStatus = ToApiStatus(empresa.DominioPersonalizadoStatus),
             DominioPersonalizadoUltimaFalha = empresa.DominioPersonalizadoUltimaFalha,
+            DominioPersonalizadoUltimaTentativaEm = empresa.DominioPersonalizadoUltimaTentativaEm,
+            DominioPersonalizadoProximaTentativaEm = empresa.DominioPersonalizadoProximaTentativaEm,
+            DominioPersonalizadoVerificadoEm = empresa.DominioPersonalizadoVerificadoEm,
+            DominioPersonalizadoAtivadoEm = empresa.DominioPersonalizadoAtivadoEm,
             Publica = empresa.Publica
         };
     }

@@ -1,7 +1,5 @@
-## Purpose
-Define tenant-facing admin console requirements for maintaining the petshop public storefront profile.
+## MODIFIED Requirements
 
-## Requirements
 ### Requirement: Tenant admin console exposes storefront profile management
 The system SHALL provide an authenticated tenant admin console section for viewing and editing the petshop public storefront profile, including the canonical public storefront link, its current availability state, the onboarding state of any desired custom storefront domain, and the latest automated verification context available for that domain.
 

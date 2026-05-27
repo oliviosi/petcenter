@@ -6,8 +6,13 @@ namespace Api.Modules.Empresas.Routes.UpdatePublicProfile;
 public class UpdateEmpresaPublicProfileService : IUpdateEmpresaPublicProfileService
 {
     private readonly IEmpresaRepository _repo;
+    private readonly TimeProvider _timeProvider;
 
-    public UpdateEmpresaPublicProfileService(IEmpresaRepository repo) => _repo = repo;
+    public UpdateEmpresaPublicProfileService(IEmpresaRepository repo, TimeProvider timeProvider)
+    {
+        _repo = repo;
+        _timeProvider = timeProvider;
+    }
 
     public async Task<UpdateEmpresaPublicProfileResponse> HandleAsync(UpdateEmpresaPublicProfileRequest request)
     {
@@ -20,7 +25,9 @@ public class UpdateEmpresaPublicProfileService : IUpdateEmpresaPublicProfileServ
         empresa.DefinirBairro(request.Bairro);
         empresa.DefinirResumoContato(request.ResumoContato);
         empresa.DefinirResumoEndereco(request.ResumoEndereco);
-        empresa.DefinirDominioPersonalizadoDesejado(request.DominioPersonalizadoDesejado);
+        empresa.DefinirDominioPersonalizadoDesejado(
+            request.DominioPersonalizadoDesejado,
+            _timeProvider.GetUtcNow().UtcDateTime);
 
         if (!string.IsNullOrWhiteSpace(empresa.Slug))
         {
@@ -57,6 +64,10 @@ public class UpdateEmpresaPublicProfileService : IUpdateEmpresaPublicProfileServ
             DominioPersonalizadoAtivo = empresa.DominioPersonalizadoAtivo,
             DominioPersonalizadoStatus = ToApiStatus(empresa.DominioPersonalizadoStatus),
             DominioPersonalizadoUltimaFalha = empresa.DominioPersonalizadoUltimaFalha,
+            DominioPersonalizadoUltimaTentativaEm = empresa.DominioPersonalizadoUltimaTentativaEm,
+            DominioPersonalizadoProximaTentativaEm = empresa.DominioPersonalizadoProximaTentativaEm,
+            DominioPersonalizadoVerificadoEm = empresa.DominioPersonalizadoVerificadoEm,
+            DominioPersonalizadoAtivadoEm = empresa.DominioPersonalizadoAtivadoEm,
             Publica = empresa.Publica
         };
     }
