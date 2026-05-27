@@ -13,10 +13,17 @@ function createProfile(
       desiredDomain: "agenda.petcenter-vila.com",
       activeDomain: null,
       status: "removed",
-      failureMessage: null,
-      lastAttemptAt: null,
-      nextRetryAt: null,
-      verifiedAt: null,
+      dnsStatus: "removed",
+      dnsFailureMessage: null,
+      dnsLastAttemptAt: null,
+      dnsNextRetryAt: null,
+      dnsVerifiedAt: null,
+      tlsStatus: "not_started",
+      tlsFailureMessage: null,
+      tlsProvisioningStartedAt: null,
+      tlsLastAttemptAt: null,
+      tlsNextRetryAt: null,
+      httpsReadyAt: null,
       activatedAt: null,
       ...customDomain,
     },
@@ -29,19 +36,23 @@ describe("storefront canonical helpers", () => {
       "https://petcenter.test",
       createProfile({
         activeDomain: "agenda.petcenter-vila.com",
-        status: "verifying",
+        status: "provisioning_tls",
+        dnsStatus: "verified",
+        tlsStatus: "provisioning",
       }),
     );
 
     expect(canonicalUrl).toBe("https://petcenter.test/petshops/pet-center-vila");
   });
 
-  it("keeps the shared-host link canonical after a recoverable verification failure", () => {
+  it("keeps the shared-host link canonical after a recoverable certificate failure", () => {
     const canonicalUrl = buildCanonicalStorefrontUrl(
       "https://petcenter.test",
       createProfile({
         activeDomain: "agenda.petcenter-vila.com",
-        status: "failed",
+        status: "tls_failed",
+        dnsStatus: "verified",
+        tlsStatus: "failed",
       }),
     );
 
@@ -52,6 +63,8 @@ describe("storefront canonical helpers", () => {
     const profile = createProfile({
       activeDomain: "agenda.petcenter-vila.com",
       status: "active",
+      dnsStatus: "verified",
+      tlsStatus: "ready",
     });
 
     expect(buildCanonicalStorefrontUrl("https://petcenter.test", profile)).toBe(

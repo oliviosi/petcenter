@@ -21,9 +21,18 @@ public partial class Empresa
     public DateTime? DominioPersonalizadoUltimaTentativaEm { get; private set; }
     public DateTime? DominioPersonalizadoProximaTentativaEm { get; private set; }
     public DateTime? DominioPersonalizadoVerificadoEm { get; private set; }
+    public string? DominioPersonalizadoTlsUltimaFalha { get; private set; }
+    public DateTime? DominioPersonalizadoTlsProvisionamentoIniciadoEm { get; private set; }
+    public DateTime? DominioPersonalizadoTlsUltimaTentativaEm { get; private set; }
+    public DateTime? DominioPersonalizadoTlsProximaTentativaEm { get; private set; }
+    public DateTime? DominioPersonalizadoHttpsProntoEm { get; private set; }
     public DateTime? DominioPersonalizadoAtivadoEm { get; private set; }
     public StorefrontCustomDomainStatus DominioPersonalizadoStatus { get; private set; } =
         StorefrontCustomDomainStatus.Removed;
+    public StorefrontCustomDomainDnsStatus DominioPersonalizadoDnsStatus { get; private set; } =
+        StorefrontCustomDomainDnsStatus.Removed;
+    public StorefrontCustomDomainTlsStatus DominioPersonalizadoTlsStatus { get; private set; } =
+        StorefrontCustomDomainTlsStatus.NotStarted;
     public bool Publica { get; private set; }
     public bool Ativo { get; private set; } = true;
     public DateTime CriadoEm { get; private set; } = DateTime.UtcNow;
@@ -90,8 +99,15 @@ public partial class Empresa
         DominioPersonalizadoUltimaTentativaEm = null;
         DominioPersonalizadoProximaTentativaEm = GarantirUtc(agoraUtc);
         DominioPersonalizadoVerificadoEm = null;
+        DominioPersonalizadoTlsUltimaFalha = null;
+        DominioPersonalizadoTlsProvisionamentoIniciadoEm = null;
+        DominioPersonalizadoTlsUltimaTentativaEm = null;
+        DominioPersonalizadoTlsProximaTentativaEm = null;
+        DominioPersonalizadoHttpsProntoEm = null;
         DominioPersonalizadoAtivadoEm = null;
         DominioPersonalizadoStatus = StorefrontCustomDomainStatus.PendingSetup;
+        DominioPersonalizadoDnsStatus = StorefrontCustomDomainDnsStatus.PendingSetup;
+        DominioPersonalizadoTlsStatus = StorefrontCustomDomainTlsStatus.NotStarted;
     }
 
     public void MarcarDominioPersonalizadoEmVerificacao(DateTime tentativaEmUtc, DateTime proximaTentativaEmUtc)
@@ -102,18 +118,70 @@ public partial class Empresa
         DominioPersonalizadoUltimaTentativaEm = GarantirUtc(tentativaEmUtc);
         DominioPersonalizadoProximaTentativaEm = GarantirUtc(proximaTentativaEmUtc);
         DominioPersonalizadoStatus = StorefrontCustomDomainStatus.Verifying;
+        DominioPersonalizadoDnsStatus = StorefrontCustomDomainDnsStatus.Verifying;
     }
 
-    public void AtivarDominioPersonalizado(DateTime verificadoEmUtc, DateTime ativadoEmUtc)
+    public void MarcarDominioPersonalizadoDnsVerificado(DateTime verificadoEmUtc, DateTime iniciarProvisionamentoTlsEmUtc)
     {
         if (string.IsNullOrWhiteSpace(DominioPersonalizadoDesejado))
             throw new ArgumentException("Domínio personalizado é obrigatório.");
 
+        var verificadoEm = GarantirUtc(verificadoEmUtc);
+        var provisionamentoEm = GarantirUtc(iniciarProvisionamentoTlsEmUtc);
+
+        DominioPersonalizadoAtivo = null;
+        DominioPersonalizadoUltimaFalha = null;
+        DominioPersonalizadoUltimaTentativaEm = verificadoEm;
+        DominioPersonalizadoProximaTentativaEm = null;
+        DominioPersonalizadoVerificadoEm = verificadoEm;
+        DominioPersonalizadoDnsStatus = StorefrontCustomDomainDnsStatus.Verified;
+
+        DominioPersonalizadoTlsProvisionamentoIniciadoEm ??= provisionamentoEm;
+        DominioPersonalizadoTlsUltimaFalha = null;
+        DominioPersonalizadoTlsUltimaTentativaEm = null;
+        DominioPersonalizadoTlsProximaTentativaEm = provisionamentoEm;
+        DominioPersonalizadoHttpsProntoEm = null;
+        DominioPersonalizadoAtivadoEm = null;
+        DominioPersonalizadoTlsStatus = StorefrontCustomDomainTlsStatus.Provisioning;
+        DominioPersonalizadoStatus = StorefrontCustomDomainStatus.ProvisioningTls;
+    }
+
+    public void MarcarDominioPersonalizadoTlsEmProvisionamento(DateTime tentativaEmUtc, DateTime proximaTentativaEmUtc)
+    {
+        if (string.IsNullOrWhiteSpace(DominioPersonalizadoDesejado))
+            throw new ArgumentException("Domínio personalizado é obrigatório.");
+        if (DominioPersonalizadoVerificadoEm is null)
+            throw new ArgumentException("Domínio personalizado ainda não foi verificado no DNS.");
+
+        var tentativaEm = GarantirUtc(tentativaEmUtc);
+
+        DominioPersonalizadoTlsProvisionamentoIniciadoEm ??= tentativaEm;
+        DominioPersonalizadoTlsUltimaTentativaEm = tentativaEm;
+        DominioPersonalizadoTlsProximaTentativaEm = GarantirUtc(proximaTentativaEmUtc);
+        DominioPersonalizadoTlsStatus = StorefrontCustomDomainTlsStatus.Provisioning;
+        DominioPersonalizadoStatus = StorefrontCustomDomainStatus.ProvisioningTls;
+    }
+
+    public void AtivarDominioPersonalizado(DateTime httpsProntoEmUtc, DateTime ativadoEmUtc)
+    {
+        if (string.IsNullOrWhiteSpace(DominioPersonalizadoDesejado))
+            throw new ArgumentException("Domínio personalizado é obrigatório.");
+
+        var httpsProntoEm = GarantirUtc(httpsProntoEmUtc);
+
         DominioPersonalizadoAtivo = DominioPersonalizadoDesejado;
         DominioPersonalizadoUltimaFalha = null;
-        DominioPersonalizadoUltimaTentativaEm = GarantirUtc(verificadoEmUtc);
+        DominioPersonalizadoUltimaTentativaEm ??= DominioPersonalizadoVerificadoEm ?? httpsProntoEm;
         DominioPersonalizadoProximaTentativaEm = null;
-        DominioPersonalizadoVerificadoEm = GarantirUtc(verificadoEmUtc);
+        DominioPersonalizadoVerificadoEm ??= httpsProntoEm;
+        DominioPersonalizadoDnsStatus = StorefrontCustomDomainDnsStatus.Verified;
+
+        DominioPersonalizadoTlsProvisionamentoIniciadoEm ??= httpsProntoEm;
+        DominioPersonalizadoTlsUltimaFalha = null;
+        DominioPersonalizadoTlsUltimaTentativaEm = httpsProntoEm;
+        DominioPersonalizadoTlsProximaTentativaEm = null;
+        DominioPersonalizadoHttpsProntoEm = httpsProntoEm;
+        DominioPersonalizadoTlsStatus = StorefrontCustomDomainTlsStatus.Ready;
         DominioPersonalizadoAtivadoEm = GarantirUtc(ativadoEmUtc);
         DominioPersonalizadoStatus = StorefrontCustomDomainStatus.Active;
     }
@@ -133,8 +201,38 @@ public partial class Empresa
         DominioPersonalizadoUltimaTentativaEm = GarantirUtc(tentativaEmUtc);
         DominioPersonalizadoProximaTentativaEm = GarantirUtc(proximaTentativaEmUtc);
         DominioPersonalizadoVerificadoEm = null;
+        DominioPersonalizadoTlsUltimaFalha = null;
+        DominioPersonalizadoTlsProvisionamentoIniciadoEm = null;
+        DominioPersonalizadoTlsUltimaTentativaEm = null;
+        DominioPersonalizadoTlsProximaTentativaEm = null;
+        DominioPersonalizadoHttpsProntoEm = null;
         DominioPersonalizadoAtivadoEm = null;
         DominioPersonalizadoStatus = StorefrontCustomDomainStatus.Failed;
+        DominioPersonalizadoDnsStatus = StorefrontCustomDomainDnsStatus.Failed;
+        DominioPersonalizadoTlsStatus = StorefrontCustomDomainTlsStatus.NotStarted;
+    }
+
+    public void RegistrarFalhaTlsDominioPersonalizado(
+        string motivo,
+        DateTime tentativaEmUtc,
+        DateTime proximaTentativaEmUtc)
+    {
+        if (string.IsNullOrWhiteSpace(DominioPersonalizadoDesejado))
+            throw new ArgumentException("Domínio personalizado é obrigatório.");
+        if (DominioPersonalizadoVerificadoEm is null)
+            throw new ArgumentException("Domínio personalizado ainda não foi verificado no DNS.");
+        if (string.IsNullOrWhiteSpace(motivo))
+            throw new ArgumentException("Motivo é obrigatório.");
+
+        DominioPersonalizadoAtivo = null;
+        DominioPersonalizadoTlsProvisionamentoIniciadoEm ??= GarantirUtc(tentativaEmUtc);
+        DominioPersonalizadoTlsUltimaFalha = motivo.Trim();
+        DominioPersonalizadoTlsUltimaTentativaEm = GarantirUtc(tentativaEmUtc);
+        DominioPersonalizadoTlsProximaTentativaEm = GarantirUtc(proximaTentativaEmUtc);
+        DominioPersonalizadoHttpsProntoEm = null;
+        DominioPersonalizadoAtivadoEm = null;
+        DominioPersonalizadoTlsStatus = StorefrontCustomDomainTlsStatus.Failed;
+        DominioPersonalizadoStatus = StorefrontCustomDomainStatus.TlsFailed;
     }
 
     public void RemoverDominioPersonalizado()
@@ -145,8 +243,15 @@ public partial class Empresa
         DominioPersonalizadoUltimaTentativaEm = null;
         DominioPersonalizadoProximaTentativaEm = null;
         DominioPersonalizadoVerificadoEm = null;
+        DominioPersonalizadoTlsUltimaFalha = null;
+        DominioPersonalizadoTlsProvisionamentoIniciadoEm = null;
+        DominioPersonalizadoTlsUltimaTentativaEm = null;
+        DominioPersonalizadoTlsProximaTentativaEm = null;
+        DominioPersonalizadoHttpsProntoEm = null;
         DominioPersonalizadoAtivadoEm = null;
         DominioPersonalizadoStatus = StorefrontCustomDomainStatus.Removed;
+        DominioPersonalizadoDnsStatus = StorefrontCustomDomainDnsStatus.Removed;
+        DominioPersonalizadoTlsStatus = StorefrontCustomDomainTlsStatus.NotStarted;
     }
 
     public void PublicarNoCatalogo()

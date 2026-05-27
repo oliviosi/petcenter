@@ -49,7 +49,7 @@ public class EmpresaRepository : IEmpresaRepository
                 && e.DominioPersonalizadoAtivo == hostNormalizado);
     }
 
-    public async Task<List<Empresa>> ListEligibleForDomainVerificationAsync(DateTime referenciaUtc, int take = 100)
+    public async Task<List<Empresa>> ListEligibleForDomainAutomationAsync(DateTime referenciaUtc, int take = 100)
     {
         var referencia = EnsureUtc(referenciaUtc);
 
@@ -58,9 +58,17 @@ public class EmpresaRepository : IEmpresaRepository
                 e.Ativo
                 && e.DominioPersonalizadoDesejado != null
                 && e.DominioPersonalizadoStatus != StorefrontCustomDomainStatus.Active
-                && e.DominioPersonalizadoProximaTentativaEm != null
-                && e.DominioPersonalizadoProximaTentativaEm <= referencia)
-            .OrderBy(e => e.DominioPersonalizadoProximaTentativaEm)
+                && (
+                    (e.DominioPersonalizadoVerificadoEm == null
+                        && e.DominioPersonalizadoProximaTentativaEm != null
+                        && e.DominioPersonalizadoProximaTentativaEm <= referencia)
+                    || (e.DominioPersonalizadoVerificadoEm != null
+                        && e.DominioPersonalizadoAtivo == null
+                        && e.DominioPersonalizadoTlsProximaTentativaEm != null
+                        && e.DominioPersonalizadoTlsProximaTentativaEm <= referencia)))
+            .OrderBy(e => e.DominioPersonalizadoVerificadoEm == null
+                ? e.DominioPersonalizadoProximaTentativaEm
+                : e.DominioPersonalizadoTlsProximaTentativaEm)
             .ThenBy(e => e.CriadoEm)
             .Take(take)
             .ToListAsync();

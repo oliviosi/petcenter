@@ -1,7 +1,5 @@
-## Purpose
-Define tenant-facing requirements for asynchronous verification of custom storefront domains and handoff into certificate-readiness provisioning after DNS verification succeeds.
+## MODIFIED Requirements
 
-## Requirements
 ### Requirement: Desired storefront domains are verified asynchronously
 The system SHALL evaluate eligible desired storefront domains asynchronously after they are saved, using background verification instead of requiring a tenant-triggered foreground check, and SHALL advance DNS-verified domains into certificate-readiness provisioning rather than activating them immediately.
 
@@ -16,7 +14,7 @@ The system SHALL persist the latest DNS-verification outcome for a desired store
 - **WHEN** an automated verification attempt does not find the expected DNS configuration
 - **THEN** the system records a recoverable failed outcome and keeps a future retry scheduled for the same desired domain
 
-### Requirement: Successful automated verification starts certificate-readiness provisioning
+### Requirement: Successful automated verification activates the storefront domain
 The system SHALL treat successful automated DNS verification as the prerequisite for certificate-readiness provisioning, and SHALL NOT promote the desired storefront domain directly to active until HTTPS readiness succeeds.
 
 #### Scenario: Verification succeeds in background processing

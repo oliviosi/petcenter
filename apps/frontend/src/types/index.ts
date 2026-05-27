@@ -55,18 +55,40 @@ export interface PublicPetshopDetail extends PublicPetshopSummary {
 export type AdminCustomDomainStatus =
   | "removed"
   | "pending_setup"
-  | "verifying"
+  | "verifying_dns"
+  | "provisioning_tls"
   | "active"
+  | "dns_failed"
+  | "tls_failed";
+
+export type AdminCustomDomainDnsStatus =
+  | "removed"
+  | "pending_setup"
+  | "verifying"
+  | "verified"
+  | "failed";
+
+export type AdminCustomDomainTlsStatus =
+  | "not_started"
+  | "provisioning"
+  | "ready"
   | "failed";
 
 export interface AdminCustomDomain {
   desiredDomain: string | null;
   activeDomain: string | null;
   status: AdminCustomDomainStatus;
-  failureMessage: string | null;
-  lastAttemptAt: string | null;
-  nextRetryAt: string | null;
-  verifiedAt: string | null;
+  dnsStatus: AdminCustomDomainDnsStatus;
+  dnsFailureMessage: string | null;
+  dnsLastAttemptAt: string | null;
+  dnsNextRetryAt: string | null;
+  dnsVerifiedAt: string | null;
+  tlsStatus: AdminCustomDomainTlsStatus;
+  tlsFailureMessage: string | null;
+  tlsProvisioningStartedAt: string | null;
+  tlsLastAttemptAt: string | null;
+  tlsNextRetryAt: string | null;
+  httpsReadyAt: string | null;
   activatedAt: string | null;
 }
 

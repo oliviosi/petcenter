@@ -5,6 +5,8 @@ public enum StorefrontCustomDomainStatus
     Removed = 0,
     PendingSetup = 1,
     Verifying = 2,
-    Active = 3,
-    Failed = 4
+    ProvisioningTls = 3,
+    Active = 4,
+    Failed = 5,
+    TlsFailed = 6
 }

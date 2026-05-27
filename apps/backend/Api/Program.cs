@@ -64,11 +64,20 @@ builder.Services.AddOptions<StorefrontDomainVerificationOptions>()
     .Validate(options => options.RetryDelay > TimeSpan.Zero, "StorefrontDomainVerification:RetryDelay deve ser maior que zero.")
     .Validate(options => options.BatchSize > 0, "StorefrontDomainVerification:BatchSize deve ser maior que zero.")
     .ValidateOnStart();
+builder.Services.AddOptions<StorefrontDomainCertificateReadinessOptions>()
+    .Bind(builder.Configuration.GetSection(StorefrontDomainCertificateReadinessOptions.SectionName))
+    .ValidateDataAnnotations()
+    .Validate(options => !string.IsNullOrWhiteSpace(options.ProbePath), "StorefrontDomainCertificateReadiness:ProbePath é obrigatório.")
+    .Validate(options => options.RequestTimeout > TimeSpan.Zero, "StorefrontDomainCertificateReadiness:RequestTimeout deve ser maior que zero.")
+    .Validate(options => options.RetryDelay > TimeSpan.Zero, "StorefrontDomainCertificateReadiness:RetryDelay deve ser maior que zero.")
+    .Validate(options => options.SuccessStatusCodes.Length > 0, "StorefrontDomainCertificateReadiness:SuccessStatusCodes deve ter ao menos um código.")
+    .ValidateOnStart();
 builder.Services.AddOptions<BookingQueueOptions>()
     .Bind(builder.Configuration.GetSection(BookingQueueOptions.SectionName))
     .ValidateDataAnnotations()
     .Validate(options => options.Port > 0, "RabbitMq:Bookings:Port deve ser maior que zero.")
     .ValidateOnStart();
+builder.Services.AddHttpClient();
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
 if (string.IsNullOrWhiteSpace(connectionString))

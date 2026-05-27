@@ -32,10 +32,17 @@ const baseProfile = {
     desiredDomain: null,
     activeDomain: null,
     status: "removed" as const,
-    failureMessage: null,
-    lastAttemptAt: null,
-    nextRetryAt: null,
-    verifiedAt: null,
+    dnsStatus: "removed" as const,
+    dnsFailureMessage: null,
+    dnsLastAttemptAt: null,
+    dnsNextRetryAt: null,
+    dnsVerifiedAt: null,
+    tlsStatus: "not_started" as const,
+    tlsFailureMessage: null,
+    tlsProvisioningStartedAt: null,
+    tlsLastAttemptAt: null,
+    tlsNextRetryAt: null,
+    httpsReadyAt: null,
     activatedAt: null,
   },
   isPublished: false,
@@ -122,10 +129,17 @@ describe("PublicProfilePageClient", () => {
             desiredDomain: "agenda.petcenter-vila.com",
             activeDomain: null,
             status: "pending_setup",
-            failureMessage: null,
-            lastAttemptAt: null,
-            nextRetryAt: "2026-01-12T18:30:00Z",
-            verifiedAt: null,
+            dnsStatus: "pending_setup",
+            dnsFailureMessage: null,
+            dnsLastAttemptAt: null,
+            dnsNextRetryAt: "2026-01-12T18:30:00Z",
+            dnsVerifiedAt: null,
+            tlsStatus: "not_started",
+            tlsFailureMessage: null,
+            tlsProvisioningStartedAt: null,
+            tlsLastAttemptAt: null,
+            tlsNextRetryAt: null,
+            httpsReadyAt: null,
             activatedAt: null,
           },
           isPublished: true,
@@ -145,10 +159,12 @@ describe("PublicProfilePageClient", () => {
     expect(screen.getByText("petcenter.test")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "O domínio desejado foi salvo, mas o host compartilhado continua canônico até o DNS ficar pronto e a ativação acontecer.",
+        "O domínio desejado foi salvo, mas o host compartilhado continua canônico até o DNS ficar pronto.",
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("Automação do domínio personalizado")).toBeInTheDocument();
+    expect(screen.getByText("Etapa 1 · DNS")).toBeInTheDocument();
+    expect(screen.getByText("Etapa 2 · HTTPS/TLS")).toBeInTheDocument();
     expect(
       screen.getAllByText(
         `A próxima tentativa automática está prevista para ${formatDateTimeLabel("2026-01-12T18:30:00Z")}.`,
@@ -156,7 +172,7 @@ describe("PublicProfilePageClient", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows automated verification progress while the shared host remains canonical", () => {
+  it("shows TLS provisioning progress while the shared host remains canonical", () => {
     render(
       <PublicProfilePageClient
         profile={{
@@ -170,11 +186,18 @@ describe("PublicProfilePageClient", () => {
           customDomain: {
             desiredDomain: "agenda.petcenter-vila.com",
             activeDomain: null,
-            status: "verifying",
-            failureMessage: null,
-            lastAttemptAt: "2026-01-12T17:00:00Z",
-            nextRetryAt: "2026-01-12T18:00:00Z",
-            verifiedAt: null,
+            status: "provisioning_tls",
+            dnsStatus: "verified",
+            dnsFailureMessage: null,
+            dnsLastAttemptAt: "2026-01-12T17:00:00Z",
+            dnsNextRetryAt: null,
+            dnsVerifiedAt: "2026-01-12T17:00:00Z",
+            tlsStatus: "provisioning",
+            tlsFailureMessage: null,
+            tlsProvisioningStartedAt: "2026-01-12T17:05:00Z",
+            tlsLastAttemptAt: "2026-01-12T17:10:00Z",
+            tlsNextRetryAt: "2026-01-12T18:00:00Z",
+            httpsReadyAt: null,
             activatedAt: null,
           },
           isPublished: true,
@@ -189,25 +212,27 @@ describe("PublicProfilePageClient", () => {
     expect(screen.getByText("Fallback ativo para compartilhamento")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "A verificação automática está em andamento. O host compartilhado segue como URL canônica até a ativação do domínio.",
+        "O DNS já está pronto, mas o certificado ainda está sendo provisionado. O host compartilhado segue como URL canônica até o HTTPS ficar pronto.",
       ),
     ).toBeInTheDocument();
     expect(screen.getAllByText("https://petcenter.test/petshops/pet-center-vila")[0]).toBeInTheDocument();
+    expect(screen.getByText("DNS concluído, aguardando certificado")).toBeInTheDocument();
+    expect(screen.getByText("DNS validado")).toBeInTheDocument();
+    expect(screen.getByText("Certificado em provisão")).toBeInTheDocument();
     expect(
-      screen.getAllByText(
-        `Última checagem automática em ${formatDateTimeLabel("2026-01-12T17:00:00Z")}.`,
-      )[0],
+      screen.getAllByText(`DNS validado em ${formatDateTimeLabel("2026-01-12T17:00:00Z")}.`)[0],
     ).toBeInTheDocument();
     expect(
       screen.getAllByText(
-        `Se o DNS ainda não estiver pronto, a próxima tentativa automática está prevista para ${formatDateTimeLabel("2026-01-12T18:00:00Z")}.`,
+        `Se o certificado ainda não estiver pronto, a próxima checagem HTTPS está prevista para ${formatDateTimeLabel("2026-01-12T18:00:00Z")}.`,
       )[0],
     ).toBeInTheDocument();
-    expect(screen.getByText("Domínio verificado em")).toBeInTheDocument();
-    expect(screen.getByText("Ainda não verificado")).toBeInTheDocument();
+    expect(
+      screen.getByText(formatDateTimeLabel("2026-01-12T17:05:00Z")),
+    ).toBeInTheDocument();
   });
 
-  it("shows recoverable verification failures and keeps the shared host as fallback", () => {
+  it("shows certificate-blocked failures and keeps the shared host as fallback", () => {
     render(
       <PublicProfilePageClient
         profile={{
@@ -221,12 +246,19 @@ describe("PublicProfilePageClient", () => {
           customDomain: {
             desiredDomain: "agenda.petcenter-vila.com",
             activeDomain: null,
-            status: "failed",
-            failureMessage:
-              "Não encontramos o CNAME esperado apontando para petcenter.test.",
-            lastAttemptAt: "2026-01-12T17:15:00Z",
-            nextRetryAt: "2026-01-12T19:15:00Z",
-            verifiedAt: null,
+            status: "tls_failed",
+            dnsStatus: "verified",
+            dnsFailureMessage: null,
+            dnsLastAttemptAt: "2026-01-12T17:00:00Z",
+            dnsNextRetryAt: null,
+            dnsVerifiedAt: "2026-01-12T17:00:00Z",
+            tlsStatus: "failed",
+            tlsFailureMessage:
+              "O certificado ainda não foi emitido para agenda.petcenter-vila.com.",
+            tlsProvisioningStartedAt: "2026-01-12T17:05:00Z",
+            tlsLastAttemptAt: "2026-01-12T17:15:00Z",
+            tlsNextRetryAt: "2026-01-12T19:15:00Z",
+            httpsReadyAt: null,
             activatedAt: null,
           },
           isPublished: true,
@@ -238,21 +270,22 @@ describe("PublicProfilePageClient", () => {
       />,
     );
 
-    expect(screen.getAllByText("Falha recuperável")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Bloqueado pelo certificado")[0]).toBeInTheDocument();
     expect(
       screen.getByText(
-        "A última tentativa automática falhou. O host compartilhado segue como URL canônica até a próxima verificação bem-sucedida.",
+        "O DNS já foi validado, mas o certificado ainda falhou. O host compartilhado segue como URL canônica até a recuperação do HTTPS.",
       ),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Não encontramos o CNAME esperado apontando para petcenter.test."),
+      screen.getAllByText("O certificado ainda não foi emitido para agenda.petcenter-vila.com.")[0],
     ).toBeInTheDocument();
     expect(
       screen.getAllByText(
-        `Depois de corrigir o DNS, aguarde a próxima tentativa automática em ${formatDateTimeLabel("2026-01-12T19:15:00Z")}.`,
+        `Depois de corrigir o bloqueio, aguarde a próxima checagem HTTPS em ${formatDateTimeLabel("2026-01-12T19:15:00Z")}.`,
       )[0],
     ).toBeInTheDocument();
-    expect(screen.getByText("Ainda não ativado")).toBeInTheDocument();
+    expect(screen.queryByText("Certificado em provisão")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Falha recuperável")[0]).toBeInTheDocument();
     expect(screen.getAllByText("https://petcenter.test/petshops/pet-center-vila")[0]).toBeInTheDocument();
   });
 
@@ -346,10 +379,17 @@ describe("PublicProfilePageClient", () => {
             desiredDomain: "agenda.petcenter-vila.com",
             activeDomain: "agenda.petcenter-vila.com",
             status: "active",
-            failureMessage: null,
-            lastAttemptAt: "2026-01-12T17:30:00Z",
-            nextRetryAt: null,
-            verifiedAt: "2026-01-12T17:30:00Z",
+            dnsStatus: "verified",
+            dnsFailureMessage: null,
+            dnsLastAttemptAt: "2026-01-12T17:30:00Z",
+            dnsNextRetryAt: null,
+            dnsVerifiedAt: "2026-01-12T17:30:00Z",
+            tlsStatus: "ready",
+            tlsFailureMessage: null,
+            tlsProvisioningStartedAt: "2026-01-12T17:30:30Z",
+            tlsLastAttemptAt: "2026-01-12T17:31:00Z",
+            tlsNextRetryAt: null,
+            httpsReadyAt: "2026-01-12T17:31:00Z",
             activatedAt: "2026-01-12T17:31:00Z",
           },
           isPublished: true,

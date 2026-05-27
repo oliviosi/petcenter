@@ -17,6 +17,17 @@ public class GetEmpresaPublicProfileResponse
     public DateTime? DominioPersonalizadoUltimaTentativaEm { get; set; }
     public DateTime? DominioPersonalizadoProximaTentativaEm { get; set; }
     public DateTime? DominioPersonalizadoVerificadoEm { get; set; }
+    public string DominioPersonalizadoDnsStatus { get; set; } = "removed";
+    public string? DominioPersonalizadoDnsUltimaFalha { get; set; }
+    public DateTime? DominioPersonalizadoDnsUltimaTentativaEm { get; set; }
+    public DateTime? DominioPersonalizadoDnsProximaTentativaEm { get; set; }
+    public DateTime? DominioPersonalizadoDnsVerificadoEm { get; set; }
+    public string DominioPersonalizadoTlsStatus { get; set; } = "not_started";
+    public string? DominioPersonalizadoTlsUltimaFalha { get; set; }
+    public DateTime? DominioPersonalizadoTlsProvisionamentoIniciadoEm { get; set; }
+    public DateTime? DominioPersonalizadoTlsUltimaTentativaEm { get; set; }
+    public DateTime? DominioPersonalizadoTlsProximaTentativaEm { get; set; }
+    public DateTime? DominioPersonalizadoHttpsProntoEm { get; set; }
     public DateTime? DominioPersonalizadoAtivadoEm { get; set; }
     public bool Publica { get; set; }
 }

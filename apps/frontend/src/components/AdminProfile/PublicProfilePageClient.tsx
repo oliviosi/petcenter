@@ -74,9 +74,19 @@ interface DomainOnboardingState {
   retryGuidance: string;
 }
 
-interface DomainAutomationDetail {
-  label: string;
-  value: string;
+interface DomainStageState {
+  key: "dns" | "tls";
+  eyebrow: string;
+  title: string;
+  description: string;
+  badge: {
+    tone: "success" | "warning" | "danger" | "neutral";
+    label: string;
+  };
+  metadata: Array<{
+    label: string;
+    value: string;
+  }>;
 }
 
 const publicationRequirements = [
@@ -139,10 +149,17 @@ function getEffectiveCustomDomain(
       desiredDomain: desiredCustomDomain,
       activeDomain: null,
       status: "pending_setup",
-      failureMessage: null,
-      lastAttemptAt: null,
-      nextRetryAt: null,
-      verifiedAt: null,
+      dnsStatus: "pending_setup",
+      dnsFailureMessage: null,
+      dnsLastAttemptAt: null,
+      dnsNextRetryAt: null,
+      dnsVerifiedAt: null,
+      tlsStatus: "not_started",
+      tlsFailureMessage: null,
+      tlsProvisioningStartedAt: null,
+      tlsLastAttemptAt: null,
+      tlsNextRetryAt: null,
+      httpsReadyAt: null,
       activatedAt: null,
     };
   }
@@ -151,10 +168,17 @@ function getEffectiveCustomDomain(
     desiredDomain: null,
     activeDomain: null,
     status: "removed",
-    failureMessage: null,
-    lastAttemptAt: null,
-    nextRetryAt: null,
-    verifiedAt: null,
+    dnsStatus: "removed",
+    dnsFailureMessage: null,
+    dnsLastAttemptAt: null,
+    dnsNextRetryAt: null,
+    dnsVerifiedAt: null,
+    tlsStatus: "not_started",
+    tlsFailureMessage: null,
+    tlsProvisioningStartedAt: null,
+    tlsLastAttemptAt: null,
+    tlsNextRetryAt: null,
+    httpsReadyAt: null,
     activatedAt: null,
   };
 }
@@ -169,47 +193,80 @@ function getDomainOnboardingState(
         badge: { tone: "success", label: "Ativo" },
         title: "Domínio personalizado ativo",
         description:
-          "A automação confirmou o DNS e ativou o domínio próprio como a entrada canônica da vitrine.",
+          "O DNS e o HTTPS já foram concluídos. O domínio próprio assumiu a entrada canônica da vitrine.",
         guidance:
           "A partir de agora, o petshop deve compartilhar o domínio próprio como link principal.",
-        latestOutcome: customDomain.verifiedAt
-          ? `Verificação automática concluída em ${formatDateTimeLabel(customDomain.verifiedAt, "instante não informado")}.`
-          : "Verificação automática concluída com sucesso.",
+        latestOutcome: customDomain.httpsReadyAt
+          ? `HTTPS liberado em ${formatDateTimeLabel(customDomain.httpsReadyAt, "instante não informado")}.`
+          : "HTTPS pronto e domínio liberado para uso.",
         retryGuidance: customDomain.activatedAt
           ? `Ativação registrada em ${formatDateTimeLabel(customDomain.activatedAt, "instante não informado")}.`
           : "Não há novas tentativas agendadas porque o domínio já está ativo.",
       };
-    case "verifying":
+    case "provisioning_tls":
       return {
-        badge: { tone: "warning", label: "Verificando" },
-        title: "Verificação automática em andamento",
+        badge: { tone: "warning", label: "TLS em andamento" },
+        title: "DNS concluído, aguardando certificado",
         description:
-          "A plataforma já está executando checagens automáticas e só ativa o domínio quando o DNS apontar corretamente.",
+          "O DNS já foi validado, mas o domínio ainda espera a conclusão do certificado e da prontidão HTTPS antes da troca canônica.",
         guidance: fallbackStorefrontLink
-          ? "Enquanto a automação não conclui a ativação, continue compartilhando o link hospedado pela petcenter."
-          : "Finalize o slug da vitrine para manter um fallback compartilhável durante a verificação.",
-        latestOutcome: customDomain.lastAttemptAt
-          ? `Última checagem automática em ${formatDateTimeLabel(customDomain.lastAttemptAt, "instante não informado")}.`
-          : "A primeira checagem automática será executada assim que o domínio estiver elegível.",
-        retryGuidance: customDomain.nextRetryAt
-          ? `Se o DNS ainda não estiver pronto, a próxima tentativa automática está prevista para ${formatDateTimeLabel(customDomain.nextRetryAt, "instante não informado")}.`
+          ? "Continue compartilhando o link hospedado pela petcenter até o HTTPS ficar pronto."
+          : "Finalize o slug da vitrine para manter um fallback compartilhável enquanto o certificado é emitido.",
+        latestOutcome: customDomain.dnsVerifiedAt
+          ? `DNS validado em ${formatDateTimeLabel(customDomain.dnsVerifiedAt, "instante não informado")}.`
+          : "O DNS já foi reconhecido e o HTTPS entrou na fila de liberação.",
+        retryGuidance: customDomain.tlsNextRetryAt
+          ? `Se o certificado ainda não estiver pronto, a próxima checagem HTTPS está prevista para ${formatDateTimeLabel(customDomain.tlsNextRetryAt, "instante não informado")}.`
+          : "A plataforma continua acompanhando automaticamente a prontidão HTTPS.",
+      };
+    case "tls_failed":
+      return {
+        badge: { tone: "danger", label: "Bloqueado pelo certificado" },
+        title: "O certificado ainda não ficou pronto",
+        description:
+          customDomain.tlsFailureMessage ??
+          "O DNS já está correto, mas a última checagem HTTPS ainda não conseguiu liberar o domínio com segurança.",
+        guidance: fallbackStorefrontLink
+          ? "O host compartilhado continua como endereço canônico até a recuperação automática do certificado."
+          : "Defina um slug válido para restaurar o fallback compartilhável enquanto o certificado é recuperado.",
+        latestOutcome: customDomain.tlsLastAttemptAt
+          ? `Última tentativa HTTPS em ${formatDateTimeLabel(customDomain.tlsLastAttemptAt, "instante não informado")}.`
+          : "A plataforma registrou uma falha recuperável na etapa de certificado.",
+        retryGuidance: customDomain.tlsNextRetryAt
+          ? `Depois de corrigir o bloqueio, aguarde a próxima checagem HTTPS em ${formatDateTimeLabel(customDomain.tlsNextRetryAt, "instante não informado")}.`
+          : "Depois de corrigir o bloqueio, aguarde uma nova checagem automática ou salve o domínio novamente.",
+      };
+    case "verifying_dns":
+      return {
+        badge: { tone: "warning", label: "Verificando DNS" },
+        title: "Verificação automática do DNS em andamento",
+        description:
+          "A plataforma já está executando checagens automáticas e só libera o domínio quando o DNS apontar corretamente.",
+        guidance: fallbackStorefrontLink
+          ? "Enquanto a automação não conclui o DNS, continue compartilhando o link hospedado pela petcenter."
+          : "Finalize o slug da vitrine para manter um fallback compartilhável durante a verificação do DNS.",
+        latestOutcome: customDomain.dnsLastAttemptAt
+          ? `Última checagem DNS em ${formatDateTimeLabel(customDomain.dnsLastAttemptAt, "instante não informado")}.`
+          : "A primeira checagem DNS será executada assim que o domínio estiver elegível.",
+        retryGuidance: customDomain.dnsNextRetryAt
+          ? `Se o DNS ainda não estiver pronto, a próxima tentativa automática está prevista para ${formatDateTimeLabel(customDomain.dnsNextRetryAt, "instante não informado")}.`
           : "A automação continua tentando em novas janelas de verificação.",
       };
-    case "failed":
+    case "dns_failed":
       return {
-        badge: { tone: "danger", label: "Falha recuperável" },
-        title: "A última verificação não conseguiu ativar o domínio",
+        badge: { tone: "danger", label: "Falha de DNS" },
+        title: "A última checagem DNS não conseguiu liberar o domínio",
         description:
-          customDomain.failureMessage ??
-          "A checagem automática ainda não encontrou o DNS esperado. Revise o CNAME e aguarde a propagação.",
+          customDomain.dnsFailureMessage ??
+          "A checagem automática ainda não encontrou o CNAME esperado. Revise o DNS e aguarde a propagação.",
         guidance: fallbackStorefrontLink
-          ? "O link hospedado pela petcenter continua como endereço canônico até a automação recuperar o domínio."
-          : "Defina um slug válido para restaurar o fallback compartilhável enquanto o domínio é corrigido.",
-        latestOutcome: customDomain.lastAttemptAt
-          ? `Última tentativa automática em ${formatDateTimeLabel(customDomain.lastAttemptAt, "instante não informado")}.`
-          : "A plataforma registrou uma falha recente neste domínio.",
-        retryGuidance: customDomain.nextRetryAt
-          ? `Depois de corrigir o DNS, aguarde a próxima tentativa automática em ${formatDateTimeLabel(customDomain.nextRetryAt, "instante não informado")}.`
+          ? "O link hospedado pela petcenter continua como endereço canônico até a automação recuperar o DNS."
+          : "Defina um slug válido para restaurar o fallback compartilhável enquanto o DNS é corrigido.",
+        latestOutcome: customDomain.dnsLastAttemptAt
+          ? `Última tentativa DNS em ${formatDateTimeLabel(customDomain.dnsLastAttemptAt, "instante não informado")}.`
+          : "A plataforma registrou uma falha recente na etapa de DNS.",
+        retryGuidance: customDomain.dnsNextRetryAt
+          ? `Depois de corrigir o DNS, aguarde a próxima tentativa automática em ${formatDateTimeLabel(customDomain.dnsNextRetryAt, "instante não informado")}.`
           : "Depois de corrigir o DNS, aguarde uma nova tentativa automática ou salve o domínio novamente.",
       };
     case "pending_setup":
@@ -221,11 +278,11 @@ function getDomainOnboardingState(
         guidance: fallbackStorefrontLink
           ? "Compartilhe o link hospedado pela petcenter até o domínio personalizado ficar pronto."
           : "Defina um slug para manter um link fallback enquanto o domínio ainda está em preparação.",
-        latestOutcome: customDomain.lastAttemptAt
-          ? `Última checagem automática em ${formatDateTimeLabel(customDomain.lastAttemptAt, "instante não informado")}.`
+        latestOutcome: customDomain.dnsLastAttemptAt
+          ? `Última checagem DNS em ${formatDateTimeLabel(customDomain.dnsLastAttemptAt, "instante não informado")}.`
           : "Ainda não existe uma verificação concluída para este domínio.",
-        retryGuidance: customDomain.nextRetryAt
-          ? `A próxima tentativa automática está prevista para ${formatDateTimeLabel(customDomain.nextRetryAt, "instante não informado")}.`
+        retryGuidance: customDomain.dnsNextRetryAt
+          ? `A próxima tentativa automática está prevista para ${formatDateTimeLabel(customDomain.dnsNextRetryAt, "instante não informado")}.`
           : "Assim que o DNS estiver correto, a plataforma continua o fluxo automaticamente.",
       };
     default:
@@ -242,46 +299,244 @@ function getDomainOnboardingState(
   }
 }
 
-function getDomainAutomationDetails(
-  customDomain: AdminCustomDomain,
-): DomainAutomationDetail[] {
-  if (!customDomain.desiredDomain) {
-    return [];
-  }
+function getDomainStageStates(customDomain: AdminCustomDomain): DomainStageState[] {
+  const dnsStage: DomainStageState = (() => {
+    switch (customDomain.dnsStatus) {
+      case "verified":
+        return {
+          key: "dns",
+          eyebrow: "Etapa 1 · DNS",
+          title: "DNS validado",
+          description:
+            "O CNAME já aponta corretamente para a petcenter. A etapa de certificado pode seguir.",
+          badge: { tone: "success", label: "Concluído" },
+          metadata: [
+            {
+              label: "Verificado em",
+              value: formatDateTimeLabel(
+                customDomain.dnsVerifiedAt,
+                "Instante não informado",
+              ),
+            },
+            {
+              label: "Última checagem",
+              value: formatDateTimeLabel(
+                customDomain.dnsLastAttemptAt,
+                "Instante não informado",
+              ),
+            },
+          ],
+        };
+      case "failed":
+        return {
+          key: "dns",
+          eyebrow: "Etapa 1 · DNS",
+          title: "DNS com falha recuperável",
+          description:
+            customDomain.dnsFailureMessage ??
+            "Ainda não encontramos o CNAME esperado para liberar a próxima etapa.",
+          badge: { tone: "danger", label: "Falha recuperável" },
+          metadata: [
+            {
+              label: "Última tentativa",
+              value: formatDateTimeLabel(
+                customDomain.dnsLastAttemptAt,
+                "Ainda não executada",
+              ),
+            },
+            {
+              label: "Próxima tentativa",
+              value: formatDateTimeLabel(
+                customDomain.dnsNextRetryAt,
+                "Aguardando nova janela automática",
+              ),
+            },
+          ],
+        };
+      case "verifying":
+        return {
+          key: "dns",
+          eyebrow: "Etapa 1 · DNS",
+          title: "Verificação DNS em andamento",
+          description:
+            "A plataforma está checando automaticamente se o CNAME já aponta para o destino esperado.",
+          badge: { tone: "warning", label: "Em andamento" },
+          metadata: [
+            {
+              label: "Última checagem",
+              value: formatDateTimeLabel(
+                customDomain.dnsLastAttemptAt,
+                "Ainda não executada",
+              ),
+            },
+            {
+              label: "Próxima tentativa",
+              value: formatDateTimeLabel(
+                customDomain.dnsNextRetryAt,
+                "Aguardando nova janela automática",
+              ),
+            },
+          ],
+        };
+      default:
+        return {
+          key: "dns",
+          eyebrow: "Etapa 1 · DNS",
+          title: "Aguardando configuração do DNS",
+          description:
+            "Configure o registro CNAME para que a plataforma consiga iniciar a validação automática.",
+          badge: { tone: "warning", label: "Pendente" },
+          metadata: [
+            {
+              label: "Última checagem",
+              value: formatDateTimeLabel(
+                customDomain.dnsLastAttemptAt,
+                "Ainda não executada",
+              ),
+            },
+            {
+              label: "Próxima tentativa",
+              value: formatDateTimeLabel(
+                customDomain.dnsNextRetryAt,
+                "Será exibida após a primeira checagem",
+              ),
+            },
+          ],
+        };
+    }
+  })();
 
-  return [
-    {
-      label: "Última tentativa automática",
-      value: formatDateTimeLabel(
-        customDomain.lastAttemptAt,
-        "Ainda não executada",
-      ),
-    },
-    {
-      label: "Próxima tentativa automática",
-      value:
-        customDomain.status === "active"
-          ? "Nenhuma. Domínio já ativo."
-          : formatDateTimeLabel(
-              customDomain.nextRetryAt,
-              "Aguardando nova janela automática",
+  const tlsStage: DomainStageState = (() => {
+    if (customDomain.dnsStatus !== "verified") {
+      return {
+        key: "tls",
+        eyebrow: "Etapa 2 · HTTPS/TLS",
+        title: "TLS aguardando conclusão do DNS",
+        description:
+          "A emissão do certificado só começa depois que o DNS da etapa anterior for validado.",
+        badge: { tone: "neutral", label: "Aguardando DNS" },
+        metadata: [
+          {
+            label: "Provisionamento iniciado em",
+            value: formatDateTimeLabel(
+              customDomain.tlsProvisioningStartedAt,
+              "Ainda não iniciado",
             ),
-    },
-    {
-      label: "Domínio verificado em",
-      value: formatDateTimeLabel(
-        customDomain.verifiedAt,
-        "Ainda não verificado",
-      ),
-    },
-    {
-      label: "Domínio ativado em",
-      value: formatDateTimeLabel(
-        customDomain.activatedAt,
-        "Ainda não ativado",
-      ),
-    },
-  ];
+          },
+          {
+            label: "HTTPS pronto em",
+            value: formatDateTimeLabel(customDomain.httpsReadyAt, "Ainda não liberado"),
+          },
+        ],
+      };
+    }
+
+    switch (customDomain.tlsStatus) {
+      case "ready":
+        return {
+          key: "tls",
+          eyebrow: "Etapa 2 · HTTPS/TLS",
+          title: "Certificado pronto",
+          description:
+            "O domínio já responde com HTTPS e pode assumir a URL canônica quando a ativação for aplicada.",
+          badge: { tone: "success", label: "Concluído" },
+          metadata: [
+            {
+              label: "Provisionamento iniciado em",
+              value: formatDateTimeLabel(
+                customDomain.tlsProvisioningStartedAt,
+                "Instante não informado",
+              ),
+            },
+            {
+              label: "HTTPS pronto em",
+              value: formatDateTimeLabel(
+                customDomain.httpsReadyAt,
+                "Instante não informado",
+              ),
+            },
+          ],
+        };
+      case "failed":
+        return {
+          key: "tls",
+          eyebrow: "Etapa 2 · HTTPS/TLS",
+          title: "Bloqueado pelo certificado",
+          description:
+            customDomain.tlsFailureMessage ??
+            "A última checagem HTTPS não conseguiu confirmar o certificado do domínio.",
+          badge: { tone: "danger", label: "Falha recuperável" },
+          metadata: [
+            {
+              label: "Última tentativa",
+              value: formatDateTimeLabel(
+                customDomain.tlsLastAttemptAt,
+                "Ainda não executada",
+              ),
+            },
+            {
+              label: "Próxima tentativa",
+              value: formatDateTimeLabel(
+                customDomain.tlsNextRetryAt,
+                "Aguardando nova janela automática",
+              ),
+            },
+          ],
+        };
+      case "provisioning":
+        return {
+          key: "tls",
+          eyebrow: "Etapa 2 · HTTPS/TLS",
+          title: "Certificado em provisão",
+          description:
+            "O DNS já passou. Agora a plataforma acompanha a emissão do certificado e só troca o link canônico quando o HTTPS estiver pronto.",
+          badge: { tone: "warning", label: "Em andamento" },
+          metadata: [
+            {
+              label: "Provisionamento iniciado em",
+              value: formatDateTimeLabel(
+                customDomain.tlsProvisioningStartedAt,
+                "Instante não informado",
+              ),
+            },
+            {
+              label: "Próxima checagem HTTPS",
+              value: formatDateTimeLabel(
+                customDomain.tlsNextRetryAt,
+                "Aguardando nova janela automática",
+              ),
+            },
+          ],
+        };
+      default:
+        return {
+          key: "tls",
+          eyebrow: "Etapa 2 · HTTPS/TLS",
+          title: "TLS aguardando início",
+          description:
+            "O DNS já foi validado. A próxima etapa é liberar o certificado e a prontidão HTTPS.",
+          badge: { tone: "warning", label: "Pendente" },
+          metadata: [
+            {
+              label: "Provisionamento iniciado em",
+              value: formatDateTimeLabel(
+                customDomain.tlsProvisioningStartedAt,
+                "Ainda não iniciado",
+              ),
+            },
+            {
+              label: "Última checagem HTTPS",
+              value: formatDateTimeLabel(
+                customDomain.tlsLastAttemptAt,
+                "Ainda não executada",
+              ),
+            },
+          ],
+        };
+    }
+  })();
+
+  return [dnsStage, tlsStage];
 }
 
 function getStorefrontLinkState(args: {
@@ -325,13 +580,17 @@ function getStorefrontLinkState(args: {
       badge: { tone: "success", label: "Fallback ativo para compartilhamento" },
       title: "Compartilhe o link atual da vitrine",
       description: fallbackStorefrontLink
-        ? customDomain.status === "failed"
-          ? "A última tentativa automática falhou. O host compartilhado segue como URL canônica até a próxima verificação bem-sucedida."
-          : customDomain.status === "verifying"
-            ? "A verificação automática está em andamento. O host compartilhado segue como URL canônica até a ativação do domínio."
-            : customDomain.status === "pending_setup"
-              ? "O domínio desejado foi salvo, mas o host compartilhado continua canônico até o DNS ficar pronto e a ativação acontecer."
-              : "O host compartilhado continua sendo a URL canônica enquanto nenhum domínio próprio ativo estiver disponível."
+        ? customDomain.status === "tls_failed"
+          ? "O DNS já foi validado, mas o certificado ainda falhou. O host compartilhado segue como URL canônica até a recuperação do HTTPS."
+          : customDomain.status === "provisioning_tls"
+            ? "O DNS já está pronto, mas o certificado ainda está sendo provisionado. O host compartilhado segue como URL canônica até o HTTPS ficar pronto."
+            : customDomain.status === "dns_failed"
+              ? "A última checagem DNS falhou. O host compartilhado segue como URL canônica até a próxima verificação bem-sucedida."
+              : customDomain.status === "verifying_dns"
+                ? "A verificação automática do DNS está em andamento. O host compartilhado segue como URL canônica até a ativação do domínio."
+                : customDomain.status === "pending_setup"
+                  ? "O domínio desejado foi salvo, mas o host compartilhado continua canônico até o DNS ficar pronto."
+                  : "O host compartilhado continua sendo a URL canônica enquanto nenhum domínio próprio ativo estiver disponível."
         : "A vitrine já está pública e o link canônico atual pode ser compartilhado com os clientes.",
     };
   }
@@ -420,8 +679,8 @@ export function PublicProfilePageClient({
     effectiveCustomDomain,
     fallbackStorefrontLink,
   );
-  const domainAutomationDetails = useMemo(
-    () => getDomainAutomationDetails(effectiveCustomDomain),
+  const domainStageStates = useMemo(
+    () => getDomainStageStates(effectiveCustomDomain),
     [effectiveCustomDomain],
   );
   const storefrontLinkState = getStorefrontLinkState({
@@ -761,18 +1020,41 @@ export function PublicProfilePageClient({
                       </p>
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {domainAutomationDetails.map((detail) => (
+                    <div className="grid gap-3">
+                      {domainStageStates.map((stage) => (
                         <div
-                          key={detail.label}
-                          className="rounded-2xl border border-stroke-soft bg-surface-card p-4"
+                          key={stage.key}
+                          className="rounded-2xl border border-stroke-soft bg-surface-card p-4 shadow-sm"
                         >
-                          <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
-                            {detail.label}
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div className="space-y-1">
+                              <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
+                                {stage.eyebrow}
+                              </p>
+                              <p className="text-sm font-semibold text-content-primary">
+                                {stage.title}
+                              </p>
+                            </div>
+                            <Badge tone={stage.badge.tone}>{stage.badge.label}</Badge>
+                          </div>
+                          <p className="mt-3 text-sm text-content-secondary">
+                            {stage.description}
                           </p>
-                          <p className="mt-2 text-sm font-medium text-content-primary">
-                            {detail.value}
-                          </p>
+                          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                            {stage.metadata.map((detail) => (
+                              <div
+                                key={`${stage.key}-${detail.label}`}
+                                className="rounded-2xl bg-surface-muted p-4"
+                              >
+                                <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
+                                  {detail.label}
+                                </p>
+                                <p className="mt-2 text-sm font-medium text-content-primary">
+                                  {detail.value}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -797,9 +1079,8 @@ export function PublicProfilePageClient({
                 ) : null}
               </div>
 
-              {(effectiveCustomDomain.status === "pending_setup" ||
-                effectiveCustomDomain.status === "verifying" ||
-                effectiveCustomDomain.status === "failed") &&
+              {effectiveCustomDomain.desiredDomain &&
+              effectiveCustomDomain.status !== "active" &&
               fallbackStorefrontLink ? (
                 <div className="rounded-2xl border border-dashed border-stroke-soft p-4">
                   <p className="text-xs font-medium uppercase tracking-wide text-content-muted">

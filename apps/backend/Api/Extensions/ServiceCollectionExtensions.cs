@@ -61,6 +61,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGetEmpresaPublicProfileService, GetEmpresaPublicProfileService>();
         services.AddScoped<IUpdateEmpresaPublicProfileService, UpdateEmpresaPublicProfileService>();
         services.AddScoped<IStorefrontDomainDnsVerificationService, StorefrontDomainDnsVerificationService>();
+        services.AddScoped<IStorefrontDomainCertificateReadinessService, StorefrontDomainCertificateReadinessService>();
         services.AddScoped<IStorefrontDomainVerificationService, StorefrontDomainVerificationService>();
         services.AddScoped<IListPublicEmpresasService, ListPublicEmpresasService>();
         services.AddScoped<IGetPublicEmpresaByHostService, GetPublicEmpresaByHostService>();

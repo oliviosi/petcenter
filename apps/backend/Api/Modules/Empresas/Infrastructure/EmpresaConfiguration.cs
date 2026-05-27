@@ -32,10 +32,29 @@ public class EmpresaConfiguration : IEntityTypeConfiguration<Empresa>
             .HasColumnName("dominio_personalizado_proxima_tentativa_em");
         builder.Property(e => e.DominioPersonalizadoVerificadoEm)
             .HasColumnName("dominio_personalizado_verificado_em");
+        builder.Property(e => e.DominioPersonalizadoTlsUltimaFalha)
+            .HasColumnName("dominio_personalizado_tls_ultima_falha")
+            .HasMaxLength(300);
+        builder.Property(e => e.DominioPersonalizadoTlsProvisionamentoIniciadoEm)
+            .HasColumnName("dominio_personalizado_tls_provisionamento_iniciado_em");
+        builder.Property(e => e.DominioPersonalizadoTlsUltimaTentativaEm)
+            .HasColumnName("dominio_personalizado_tls_ultima_tentativa_em");
+        builder.Property(e => e.DominioPersonalizadoTlsProximaTentativaEm)
+            .HasColumnName("dominio_personalizado_tls_proxima_tentativa_em");
+        builder.Property(e => e.DominioPersonalizadoHttpsProntoEm)
+            .HasColumnName("dominio_personalizado_https_pronto_em");
         builder.Property(e => e.DominioPersonalizadoAtivadoEm)
             .HasColumnName("dominio_personalizado_ativado_em");
         builder.Property(e => e.DominioPersonalizadoStatus)
             .HasColumnName("dominio_personalizado_status")
+            .HasConversion<string>()
+            .HasMaxLength(40);
+        builder.Property(e => e.DominioPersonalizadoDnsStatus)
+            .HasColumnName("dominio_personalizado_dns_status")
+            .HasConversion<string>()
+            .HasMaxLength(40);
+        builder.Property(e => e.DominioPersonalizadoTlsStatus)
+            .HasColumnName("dominio_personalizado_tls_status")
             .HasConversion<string>()
             .HasMaxLength(40);
         builder.Property(e => e.Publica).HasColumnName("publica").IsRequired();
@@ -46,5 +65,6 @@ public class EmpresaConfiguration : IEntityTypeConfiguration<Empresa>
         builder.HasIndex(e => e.DominioPersonalizadoDesejado).IsUnique();
         builder.HasIndex(e => e.DominioPersonalizadoAtivo).IsUnique();
         builder.HasIndex(e => e.DominioPersonalizadoProximaTentativaEm);
+        builder.HasIndex(e => e.DominioPersonalizadoTlsProximaTentativaEm);
     }
 }

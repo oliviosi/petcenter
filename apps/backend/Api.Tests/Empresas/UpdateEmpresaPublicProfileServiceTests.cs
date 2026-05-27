@@ -36,6 +36,8 @@ public class UpdateEmpresaPublicProfileServiceTests
         Assert.Equal("agenda.petcenter-vila.com", response.DominioPersonalizadoDesejado);
         Assert.Null(response.DominioPersonalizadoAtivo);
         Assert.Equal("pending_setup", response.DominioPersonalizadoStatus);
+        Assert.Equal("pending_setup", response.DominioPersonalizadoDnsStatus);
+        Assert.Equal("not_started", response.DominioPersonalizadoTlsStatus);
         Assert.Equal(agora.UtcDateTime, response.DominioPersonalizadoProximaTentativaEm);
         Assert.Null(response.DominioPersonalizadoUltimaTentativaEm);
         Assert.True(response.Publica);
@@ -81,8 +83,11 @@ public class UpdateEmpresaPublicProfileServiceTests
 
         Assert.Equal("agenda.petcenter-vila.com", response.DominioPersonalizadoAtivo);
         Assert.Equal("active", response.DominioPersonalizadoStatus);
+        Assert.Equal("verified", response.DominioPersonalizadoDnsStatus);
+        Assert.Equal("ready", response.DominioPersonalizadoTlsStatus);
         Assert.NotNull(response.DominioPersonalizadoAtivadoEm);
         Assert.NotNull(response.DominioPersonalizadoVerificadoEm);
+        Assert.NotNull(response.DominioPersonalizadoHttpsProntoEm);
     }
 
     [Fact]
@@ -126,8 +131,12 @@ public class UpdateEmpresaPublicProfileServiceTests
         Assert.Equal("agenda-nova.petcenter-vila.com", response.DominioPersonalizadoDesejado);
         Assert.Null(response.DominioPersonalizadoAtivo);
         Assert.Equal("pending_setup", response.DominioPersonalizadoStatus);
+        Assert.Equal("pending_setup", response.DominioPersonalizadoDnsStatus);
+        Assert.Equal("not_started", response.DominioPersonalizadoTlsStatus);
         Assert.Equal(agora.UtcDateTime, response.DominioPersonalizadoProximaTentativaEm);
         Assert.Null(response.DominioPersonalizadoVerificadoEm);
+        Assert.Null(response.DominioPersonalizadoTlsProvisionamentoIniciadoEm);
+        Assert.Null(response.DominioPersonalizadoHttpsProntoEm);
         Assert.Null(response.DominioPersonalizadoAtivadoEm);
     }
 
@@ -166,6 +175,8 @@ public class UpdateEmpresaPublicProfileServiceTests
         Assert.Null(response.DominioPersonalizadoDesejado);
         Assert.Null(response.DominioPersonalizadoAtivo);
         Assert.Equal("removed", response.DominioPersonalizadoStatus);
+        Assert.Equal("removed", response.DominioPersonalizadoDnsStatus);
+        Assert.Equal("not_started", response.DominioPersonalizadoTlsStatus);
         Assert.Null(response.DominioPersonalizadoUltimaFalha);
         Assert.Null(response.DominioPersonalizadoUltimaTentativaEm);
         Assert.Null(response.DominioPersonalizadoProximaTentativaEm);
