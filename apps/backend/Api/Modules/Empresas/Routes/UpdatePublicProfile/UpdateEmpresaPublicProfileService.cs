@@ -1,16 +1,22 @@
 using Api.Modules.Empresas.Domain;
 using Api.Modules.Empresas.Infrastructure;
+using Microsoft.Extensions.Options;
 
 namespace Api.Modules.Empresas.Routes.UpdatePublicProfile;
 
 public class UpdateEmpresaPublicProfileService : IUpdateEmpresaPublicProfileService
 {
     private readonly IEmpresaRepository _repo;
+    private readonly StorefrontDomainVerificationOptions _domainVerificationOptions;
     private readonly TimeProvider _timeProvider;
 
-    public UpdateEmpresaPublicProfileService(IEmpresaRepository repo, TimeProvider timeProvider)
+    public UpdateEmpresaPublicProfileService(
+        IEmpresaRepository repo,
+        IOptions<StorefrontDomainVerificationOptions> domainVerificationOptions,
+        TimeProvider timeProvider)
     {
         _repo = repo;
+        _domainVerificationOptions = domainVerificationOptions.Value;
         _timeProvider = timeProvider;
     }
 
@@ -62,17 +68,21 @@ public class UpdateEmpresaPublicProfileService : IUpdateEmpresaPublicProfileServ
             ResumoEndereco = empresa.ResumoEndereco,
             DominioPersonalizadoDesejado = empresa.DominioPersonalizadoDesejado,
             DominioPersonalizadoAtivo = empresa.DominioPersonalizadoAtivo,
-            DominioPersonalizadoStatus = ToApiStatus(empresa.DominioPersonalizadoStatus),
+            DominioPersonalizadoModo = StorefrontCustomDomainApiMapper.ToApiMode(empresa.ObterModoDominioPersonalizadoDesejado()),
+            DominioPersonalizadoOrientacaoDns = StorefrontCustomDomainApiMapper.BuildOnboardingGuidance(
+                empresa.DominioPersonalizadoDesejado,
+                _domainVerificationOptions),
+            DominioPersonalizadoStatus = StorefrontCustomDomainApiMapper.ToApiStatus(empresa.DominioPersonalizadoStatus),
             DominioPersonalizadoUltimaFalha = empresa.DominioPersonalizadoUltimaFalha,
             DominioPersonalizadoUltimaTentativaEm = empresa.DominioPersonalizadoUltimaTentativaEm,
             DominioPersonalizadoProximaTentativaEm = empresa.DominioPersonalizadoProximaTentativaEm,
             DominioPersonalizadoVerificadoEm = empresa.DominioPersonalizadoVerificadoEm,
-            DominioPersonalizadoDnsStatus = ToApiDnsStatus(empresa.DominioPersonalizadoDnsStatus),
+            DominioPersonalizadoDnsStatus = StorefrontCustomDomainApiMapper.ToApiDnsStatus(empresa.DominioPersonalizadoDnsStatus),
             DominioPersonalizadoDnsUltimaFalha = empresa.DominioPersonalizadoUltimaFalha,
             DominioPersonalizadoDnsUltimaTentativaEm = empresa.DominioPersonalizadoUltimaTentativaEm,
             DominioPersonalizadoDnsProximaTentativaEm = empresa.DominioPersonalizadoProximaTentativaEm,
             DominioPersonalizadoDnsVerificadoEm = empresa.DominioPersonalizadoVerificadoEm,
-            DominioPersonalizadoTlsStatus = ToApiTlsStatus(empresa.DominioPersonalizadoTlsStatus),
+            DominioPersonalizadoTlsStatus = StorefrontCustomDomainApiMapper.ToApiTlsStatus(empresa.DominioPersonalizadoTlsStatus),
             DominioPersonalizadoTlsUltimaFalha = empresa.DominioPersonalizadoTlsUltimaFalha,
             DominioPersonalizadoTlsProvisionamentoIniciadoEm = empresa.DominioPersonalizadoTlsProvisionamentoIniciadoEm,
             DominioPersonalizadoTlsUltimaTentativaEm = empresa.DominioPersonalizadoTlsUltimaTentativaEm,
@@ -82,32 +92,4 @@ public class UpdateEmpresaPublicProfileService : IUpdateEmpresaPublicProfileServ
             Publica = empresa.Publica
         };
     }
-
-    private static string ToApiStatus(StorefrontCustomDomainStatus status) => status switch
-    {
-        StorefrontCustomDomainStatus.PendingSetup => "pending_setup",
-        StorefrontCustomDomainStatus.Verifying => "verifying_dns",
-        StorefrontCustomDomainStatus.ProvisioningTls => "provisioning_tls",
-        StorefrontCustomDomainStatus.Active => "active",
-        StorefrontCustomDomainStatus.Failed => "dns_failed",
-        StorefrontCustomDomainStatus.TlsFailed => "tls_failed",
-        _ => "removed"
-    };
-
-    private static string ToApiDnsStatus(StorefrontCustomDomainDnsStatus status) => status switch
-    {
-        StorefrontCustomDomainDnsStatus.PendingSetup => "pending_setup",
-        StorefrontCustomDomainDnsStatus.Verifying => "verifying",
-        StorefrontCustomDomainDnsStatus.Verified => "verified",
-        StorefrontCustomDomainDnsStatus.Failed => "failed",
-        _ => "removed"
-    };
-
-    private static string ToApiTlsStatus(StorefrontCustomDomainTlsStatus status) => status switch
-    {
-        StorefrontCustomDomainTlsStatus.Provisioning => "provisioning",
-        StorefrontCustomDomainTlsStatus.Ready => "ready",
-        StorefrontCustomDomainTlsStatus.Failed => "failed",
-        _ => "not_started"
-    };
 }

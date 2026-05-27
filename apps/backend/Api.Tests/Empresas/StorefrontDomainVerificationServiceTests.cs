@@ -63,6 +63,56 @@ public class StorefrontDomainVerificationServiceTests
     }
 
     [Fact]
+    public async Task ProcessPendingAsync_ShouldHandOffApexDnsSuccessToTlsProvisioningAndActivateWhenHttpsIsReady()
+    {
+        using var db = TestData.CreateDbContext();
+        var empresa = new Empresa("Pet Center Vila");
+        empresa.DefinirDominioPersonalizadoDesejado(
+            "petcenter-vila.com.br",
+            new DateTime(2026, 6, 27, 9, 0, 0, DateTimeKind.Utc));
+        db.Empresas.Add(empresa);
+        await db.SaveChangesAsync();
+
+        var agora = new DateTimeOffset(2026, 6, 27, 9, 30, 0, TimeSpan.Zero);
+        var sut = new StorefrontDomainVerificationService(
+            new EmpresaRepository(db),
+            new FakeStorefrontDomainDnsVerificationService(new StorefrontDomainDnsVerificationResult
+            {
+                IsVerified = true,
+                Message = "Domínio verificado com sucesso."
+            }),
+            new FakeStorefrontDomainCertificateReadinessService(new StorefrontDomainCertificateReadinessResult
+            {
+                IsReady = true,
+                Message = "HTTPS pronto para o domínio."
+            }),
+            Options.Create(new StorefrontDomainVerificationOptions
+            {
+                ExpectedTarget = "storefront.petcenter.local",
+                ApexExpectedTargets = ["198.51.100.10", "apex.storefront.petcenter.local"],
+                RetryDelay = TimeSpan.FromMinutes(15),
+                BatchSize = 10
+            }),
+            Options.Create(new StorefrontDomainCertificateReadinessOptions
+            {
+                ProbePath = "/",
+                RetryDelay = TimeSpan.FromMinutes(15)
+            }),
+            new ManualTimeProvider(agora));
+
+        await sut.ProcessPendingAsync();
+
+        var empresaAtualizada = await db.Empresas.FindAsync(empresa.Id);
+        Assert.NotNull(empresaAtualizada);
+        Assert.Equal(StorefrontCustomDomainStatus.Active, empresaAtualizada!.DominioPersonalizadoStatus);
+        Assert.Equal(StorefrontCustomDomainDnsStatus.Verified, empresaAtualizada.DominioPersonalizadoDnsStatus);
+        Assert.Equal(StorefrontCustomDomainTlsStatus.Ready, empresaAtualizada.DominioPersonalizadoTlsStatus);
+        Assert.Equal("petcenter-vila.com.br", empresaAtualizada.DominioPersonalizadoAtivo);
+        Assert.Equal(agora.UtcDateTime, empresaAtualizada.DominioPersonalizadoHttpsProntoEm);
+        Assert.Equal(agora.UtcDateTime, empresaAtualizada.DominioPersonalizadoAtivadoEm);
+    }
+
+    [Fact]
     public async Task ProcessPendingAsync_ShouldRecordRecoverableFailureAndScheduleRetry()
     {
         using var db = TestData.CreateDbContext();

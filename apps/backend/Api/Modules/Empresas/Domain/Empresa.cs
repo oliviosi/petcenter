@@ -110,6 +110,14 @@ public partial class Empresa
         DominioPersonalizadoTlsStatus = StorefrontCustomDomainTlsStatus.NotStarted;
     }
 
+    public StorefrontCustomDomainMode ObterModoDominioPersonalizadoDesejado()
+    {
+        if (string.IsNullOrWhiteSpace(DominioPersonalizadoDesejado))
+            return StorefrontCustomDomainMode.None;
+
+        return StorefrontCustomDomainAnalysis.Create(DominioPersonalizadoDesejado).Mode;
+    }
+
     public void MarcarDominioPersonalizadoEmVerificacao(DateTime tentativaEmUtc, DateTime proximaTentativaEmUtc)
     {
         if (string.IsNullOrWhiteSpace(DominioPersonalizadoDesejado))
@@ -282,6 +290,8 @@ public partial class Empresa
         var dominioNormalizado = dominio.Trim().ToLowerInvariant().TrimEnd('.');
         if (!CustomDomainRegex.IsMatch(dominioNormalizado))
             throw new ArgumentException("Domínio personalizado inválido.");
+
+        _ = StorefrontCustomDomainAnalysis.Create(dominioNormalizado);
 
         return dominioNormalizado;
     }

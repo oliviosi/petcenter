@@ -536,7 +536,109 @@ function mapAdminPublicProfile(value: unknown): AdminPublicProfile {
   };
 }
 
+function mapAdminCustomDomainDnsGuidance(
+  record: JsonRecord,
+  fallbackMode: AdminCustomDomain["mode"],
+): AdminCustomDomain["dnsGuidance"] {
+  const guidanceRecord = readNullableObject(
+    record,
+    "customDomainDnsGuidance",
+    "CustomDomainDnsGuidance",
+    "dominioPersonalizadoOrientacaoDns",
+    "DominioPersonalizadoOrientacaoDns",
+  );
+
+  if (!guidanceRecord) {
+    return {
+      mode: fallbackMode,
+      recordType: "none",
+      recordName: "",
+      zoneDns: "",
+      expectedValues: [],
+      expectedHostnames: [],
+      expectedIps: [],
+      primaryInstruction: "",
+      secondaryInstruction: null,
+      optionalWwwRedirectInstruction: null,
+    };
+  }
+
+  return {
+    mode:
+      (readString(guidanceRecord, "mode", "Mode", "modo", "Modo") as AdminCustomDomain["mode"]) ||
+      fallbackMode,
+    recordType:
+      (readString(
+        guidanceRecord,
+        "recordType",
+        "RecordType",
+        "tipoRegistro",
+        "TipoRegistro",
+      ) as AdminCustomDomain["dnsGuidance"]["recordType"]) || "none",
+    recordName: readNullableString(
+      guidanceRecord,
+      "recordName",
+      "RecordName",
+      "nomeRegistro",
+      "NomeRegistro",
+    ) ?? "",
+    zoneDns: readNullableString(guidanceRecord, "zoneDns", "ZoneDns", "zonaDns", "ZonaDns") ?? "",
+    expectedValues: readArray(
+      readValue(
+        guidanceRecord,
+        "expectedValues",
+        "ExpectedValues",
+        "valoresEsperados",
+        "ValoresEsperados",
+      ),
+    ).filter((value): value is string => typeof value === "string"),
+    expectedHostnames: readArray(
+      readValue(
+        guidanceRecord,
+        "expectedHostnames",
+        "ExpectedHostnames",
+        "hostnamesEsperados",
+        "HostnamesEsperados",
+      ),
+    ).filter((value): value is string => typeof value === "string"),
+    expectedIps: readArray(
+      readValue(guidanceRecord, "expectedIps", "ExpectedIps", "ipsEsperados", "IpsEsperados"),
+    ).filter((value): value is string => typeof value === "string"),
+    primaryInstruction:
+      readNullableString(
+        guidanceRecord,
+        "primaryInstruction",
+        "PrimaryInstruction",
+        "instrucaoPrimaria",
+        "InstrucaoPrimaria",
+      ) ?? "",
+    secondaryInstruction: readNullableString(
+      guidanceRecord,
+      "secondaryInstruction",
+      "SecondaryInstruction",
+      "instrucaoSecundaria",
+      "InstrucaoSecundaria",
+    ),
+    optionalWwwRedirectInstruction: readNullableString(
+      guidanceRecord,
+      "optionalWwwRedirectInstruction",
+      "OptionalWwwRedirectInstruction",
+      "orientacaoRedirecionamentoWwwOpcional",
+      "OrientacaoRedirecionamentoWwwOpcional",
+    ),
+  };
+}
+
 function mapAdminCustomDomain(record: JsonRecord): AdminCustomDomain {
+  const mode =
+    (readNullableString(
+      record,
+      "customDomainMode",
+      "CustomDomainMode",
+      "dominioPersonalizadoModo",
+      "DominioPersonalizadoModo",
+    ) as AdminCustomDomain["mode"] | null) ?? "none";
+
   return {
     desiredDomain: readNullableString(
       record,
@@ -552,6 +654,8 @@ function mapAdminCustomDomain(record: JsonRecord): AdminCustomDomain {
       "dominioPersonalizadoAtivo",
       "DominioPersonalizadoAtivo",
     ),
+    mode,
+    dnsGuidance: mapAdminCustomDomainDnsGuidance(record, mode),
     status:
       (readString(
         record,

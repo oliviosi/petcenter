@@ -109,6 +109,16 @@ const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
   timeStyle: "short",
 });
 
+const countryCodeSecondLevelDomains = new Set([
+  "com",
+  "net",
+  "org",
+  "gov",
+  "edu",
+  "mil",
+  "co",
+]);
+
 function formatDateTimeLabel(value: string | null, fallback: string) {
   if (!value) {
     return fallback;
@@ -136,37 +146,29 @@ function toDefaultValues(profile: AdminPublicProfile): AdminPublicProfileValues 
   };
 }
 
-function getEffectiveCustomDomain(
-  profile: AdminPublicProfile,
-  desiredCustomDomain: string | null,
-): AdminCustomDomain {
-  if (desiredCustomDomain === profile.customDomain.desiredDomain) {
-    return profile.customDomain;
-  }
+function createEmptyDnsGuidance(
+  mode: AdminCustomDomain["mode"] = "none",
+): AdminCustomDomain["dnsGuidance"] {
+  return {
+    mode,
+    recordType: "none",
+    recordName: "",
+    zoneDns: "",
+    expectedValues: [],
+    expectedHostnames: [],
+    expectedIps: [],
+    primaryInstruction: "",
+    secondaryInstruction: null,
+    optionalWwwRedirectInstruction: null,
+  };
+}
 
-  if (desiredCustomDomain) {
-    return {
-      desiredDomain: desiredCustomDomain,
-      activeDomain: null,
-      status: "pending_setup",
-      dnsStatus: "pending_setup",
-      dnsFailureMessage: null,
-      dnsLastAttemptAt: null,
-      dnsNextRetryAt: null,
-      dnsVerifiedAt: null,
-      tlsStatus: "not_started",
-      tlsFailureMessage: null,
-      tlsProvisioningStartedAt: null,
-      tlsLastAttemptAt: null,
-      tlsNextRetryAt: null,
-      httpsReadyAt: null,
-      activatedAt: null,
-    };
-  }
-
+function createEmptyCustomDomain(): AdminCustomDomain {
   return {
     desiredDomain: null,
     activeDomain: null,
+    mode: "none",
+    dnsGuidance: createEmptyDnsGuidance(),
     status: "removed",
     dnsStatus: "removed",
     dnsFailureMessage: null,
@@ -183,10 +185,173 @@ function getEffectiveCustomDomain(
   };
 }
 
+function analyzeCustomDomain(domain: string | null) {
+  const normalizedDomain = domain ? normalizeHost(domain) : "";
+
+  if (!normalizedDomain) {
+    return {
+      normalizedDomain: "",
+      mode: "none" as const,
+      zoneDns: "",
+      recordName: "",
+    };
+  }
+
+  const labels = normalizedDomain.split(".").filter(Boolean);
+
+  if (labels.length < 2) {
+    return {
+      normalizedDomain,
+      mode: "none" as const,
+      zoneDns: normalizedDomain,
+      recordName: "",
+    };
+  }
+
+  const topLevelDomain = labels.at(-1) ?? "";
+  const secondLevelDomain = labels.at(-2) ?? "";
+  const publicSuffixLength =
+    topLevelDomain.length === 2 && countryCodeSecondLevelDomains.has(secondLevelDomain)
+      ? 2
+      : 1;
+  const registrableLabelCount = publicSuffixLength + 1;
+  const zoneLabels = labels.slice(-registrableLabelCount);
+  const recordLabels = labels.slice(0, -registrableLabelCount);
+
+  return {
+    normalizedDomain,
+    mode: (recordLabels.length === 0 ? "apex" : "subdomain") as AdminCustomDomain["mode"],
+    zoneDns: zoneLabels.join("."),
+    recordName: recordLabels.join(".") || "@",
+  };
+}
+
+function buildLocalDnsGuidance(
+  domain: string | null,
+  publicAppOrigin: string,
+): AdminCustomDomain["dnsGuidance"] {
+  const analysis = analyzeCustomDomain(domain);
+
+  if (analysis.mode === "none") {
+    return createEmptyDnsGuidance();
+  }
+
+  const sharedHost = getSharedHost(publicAppOrigin);
+
+  if (analysis.mode === "subdomain") {
+    return {
+      mode: "subdomain",
+      recordType: "cname",
+      recordName: analysis.recordName,
+      zoneDns: analysis.zoneDns,
+      expectedValues: sharedHost ? [sharedHost] : [],
+      expectedHostnames: sharedHost ? [sharedHost] : [],
+      expectedIps: [],
+      primaryInstruction: sharedHost
+        ? `Crie um registro CNAME para '${analysis.recordName}' apontando para '${sharedHost}'.`
+        : "Defina a URL pública da aplicação para exibir o destino CNAME esperado.",
+      secondaryInstruction:
+        "Depois que o DNS propagar, a verificação e o provisionamento HTTPS continuarão automaticamente.",
+      optionalWwwRedirectInstruction: null,
+    };
+  }
+
+  return {
+    mode: "apex",
+    recordType: "apex_supported_targets",
+    recordName: "@",
+    zoneDns: analysis.zoneDns,
+    expectedValues: [],
+    expectedHostnames: [],
+    expectedIps: [],
+    primaryInstruction:
+      "Configure o domínio raiz para resolver para um dos destinos apex suportados.",
+    secondaryInstruction:
+      "Salve o domínio para carregar os destinos suportados pela plataforma e escolher entre A/AAAA direto ou ALIAS/ANAME/flattening no provedor DNS.",
+    optionalWwwRedirectInstruction: analysis.zoneDns
+      ? `Opcionalmente, você pode redirecionar 'www.${analysis.zoneDns}' para '${analysis.zoneDns}', mas isso não é obrigatório para ativação.`
+      : null,
+  };
+}
+
+function getDomainModeLabel(mode: AdminCustomDomain["mode"]) {
+  switch (mode) {
+    case "apex":
+      return "Domínio raiz";
+    case "subdomain":
+      return "Subdomínio";
+    default:
+      return "Host compartilhado";
+  }
+}
+
+function getRecordTypeLabel(
+  recordType: AdminCustomDomain["dnsGuidance"]["recordType"],
+  mode: AdminCustomDomain["mode"],
+) {
+  if (recordType === "cname") {
+    return "CNAME";
+  }
+
+  if (recordType === "apex_supported_targets") {
+    return "A/AAAA ou ALIAS/ANAME";
+  }
+
+  return mode === "apex" ? "A/AAAA ou ALIAS/ANAME" : "CNAME";
+}
+
+function getEffectiveDnsGuidance(
+  customDomain: AdminCustomDomain,
+  publicAppOrigin: string,
+): AdminCustomDomain["dnsGuidance"] {
+  if (
+    customDomain.dnsGuidance.recordType !== "none" ||
+    customDomain.dnsGuidance.primaryInstruction
+  ) {
+    return customDomain.dnsGuidance;
+  }
+
+  if (!customDomain.desiredDomain) {
+    return customDomain.dnsGuidance;
+  }
+
+  return buildLocalDnsGuidance(customDomain.desiredDomain, publicAppOrigin);
+}
+
+function getEffectiveCustomDomain(
+  profile: AdminPublicProfile,
+  desiredCustomDomain: string | null,
+): AdminCustomDomain {
+  if (desiredCustomDomain === profile.customDomain.desiredDomain) {
+    return profile.customDomain;
+  }
+
+  if (desiredCustomDomain) {
+    const analysis = analyzeCustomDomain(desiredCustomDomain);
+
+    return {
+      ...createEmptyCustomDomain(),
+      desiredDomain: desiredCustomDomain,
+      mode: analysis.mode,
+      dnsGuidance: createEmptyDnsGuidance(analysis.mode),
+      status: "pending_setup",
+      dnsStatus: "pending_setup",
+    };
+  }
+
+  return createEmptyCustomDomain();
+}
+
 function getDomainOnboardingState(
   customDomain: AdminCustomDomain,
+  dnsGuidance: AdminCustomDomain["dnsGuidance"],
   fallbackStorefrontLink: string | null,
 ): DomainOnboardingState {
+  const dnsExpectationCopy =
+    dnsGuidance.recordType === "apex_supported_targets"
+      ? "os destinos apex suportados"
+      : "a configuração CNAME esperada";
+
   switch (customDomain.status) {
     case "active":
       return {
@@ -241,7 +406,7 @@ function getDomainOnboardingState(
         badge: { tone: "warning", label: "Verificando DNS" },
         title: "Verificação automática do DNS em andamento",
         description:
-          "A plataforma já está executando checagens automáticas e só libera o domínio quando o DNS apontar corretamente.",
+          "A plataforma já está executando checagens automáticas e só libera o domínio quando o DNS resolver para a configuração esperada.",
         guidance: fallbackStorefrontLink
           ? "Enquanto a automação não conclui o DNS, continue compartilhando o link hospedado pela petcenter."
           : "Finalize o slug da vitrine para manter um fallback compartilhável durante a verificação do DNS.",
@@ -258,7 +423,7 @@ function getDomainOnboardingState(
         title: "A última checagem DNS não conseguiu liberar o domínio",
         description:
           customDomain.dnsFailureMessage ??
-          "A checagem automática ainda não encontrou o CNAME esperado. Revise o DNS e aguarde a propagação.",
+          `A checagem automática ainda não encontrou ${dnsExpectationCopy}. Revise o DNS e aguarde a propagação.`,
         guidance: fallbackStorefrontLink
           ? "O link hospedado pela petcenter continua como endereço canônico até a automação recuperar o DNS."
           : "Defina um slug válido para restaurar o fallback compartilhável enquanto o DNS é corrigido.",
@@ -274,7 +439,9 @@ function getDomainOnboardingState(
         badge: { tone: "warning", label: "DNS pendente" },
         title: "Aguardando configuração inicial do DNS",
         description:
-          "O domínio desejado já foi salvo, mas a automação só consegue ativá-lo quando o CNAME apontar para o destino esperado.",
+          dnsGuidance.recordType === "apex_supported_targets"
+            ? "O domínio raiz já foi salvo, mas a automação só consegue ativá-lo quando ele resolver para um dos destinos apex suportados."
+            : "O domínio desejado já foi salvo, mas a automação só consegue ativá-lo quando o CNAME apontar para o destino esperado.",
         guidance: fallbackStorefrontLink
           ? "Compartilhe o link hospedado pela petcenter até o domínio personalizado ficar pronto."
           : "Defina um slug para manter um link fallback enquanto o domínio ainda está em preparação.",
@@ -299,16 +466,36 @@ function getDomainOnboardingState(
   }
 }
 
-function getDomainStageStates(customDomain: AdminCustomDomain): DomainStageState[] {
+function getDomainStageStates(
+  customDomain: AdminCustomDomain,
+  dnsGuidance: AdminCustomDomain["dnsGuidance"],
+): DomainStageState[] {
   const dnsStage: DomainStageState = (() => {
+    const dnsValidatedDescription =
+      dnsGuidance.recordType === "apex_supported_targets"
+        ? "O domínio raiz já resolve para um dos destinos apex suportados. A etapa de certificado pode seguir."
+        : "O CNAME já aponta corretamente para a petcenter. A etapa de certificado pode seguir.";
+    const dnsFailedDescription =
+      customDomain.dnsFailureMessage ??
+      (dnsGuidance.recordType === "apex_supported_targets"
+        ? "Ainda não encontramos um destino apex suportado para liberar a próxima etapa."
+        : "Ainda não encontramos o CNAME esperado para liberar a próxima etapa.");
+    const dnsVerifyingDescription =
+      dnsGuidance.recordType === "apex_supported_targets"
+        ? "A plataforma está checando automaticamente se o domínio raiz já resolve para um destino apex suportado."
+        : "A plataforma está checando automaticamente se o CNAME já aponta para o destino esperado.";
+    const dnsPendingDescription =
+      dnsGuidance.recordType === "apex_supported_targets"
+        ? "Configure o domínio raiz com um destino apex suportado para que a plataforma consiga iniciar a validação automática."
+        : "Configure o registro CNAME para que a plataforma consiga iniciar a validação automática.";
+
     switch (customDomain.dnsStatus) {
       case "verified":
         return {
           key: "dns",
           eyebrow: "Etapa 1 · DNS",
           title: "DNS validado",
-          description:
-            "O CNAME já aponta corretamente para a petcenter. A etapa de certificado pode seguir.",
+          description: dnsValidatedDescription,
           badge: { tone: "success", label: "Concluído" },
           metadata: [
             {
@@ -332,9 +519,7 @@ function getDomainStageStates(customDomain: AdminCustomDomain): DomainStageState
           key: "dns",
           eyebrow: "Etapa 1 · DNS",
           title: "DNS com falha recuperável",
-          description:
-            customDomain.dnsFailureMessage ??
-            "Ainda não encontramos o CNAME esperado para liberar a próxima etapa.",
+          description: dnsFailedDescription,
           badge: { tone: "danger", label: "Falha recuperável" },
           metadata: [
             {
@@ -358,8 +543,7 @@ function getDomainStageStates(customDomain: AdminCustomDomain): DomainStageState
           key: "dns",
           eyebrow: "Etapa 1 · DNS",
           title: "Verificação DNS em andamento",
-          description:
-            "A plataforma está checando automaticamente se o CNAME já aponta para o destino esperado.",
+          description: dnsVerifyingDescription,
           badge: { tone: "warning", label: "Em andamento" },
           metadata: [
             {
@@ -383,8 +567,7 @@ function getDomainStageStates(customDomain: AdminCustomDomain): DomainStageState
           key: "dns",
           eyebrow: "Etapa 1 · DNS",
           title: "Aguardando configuração do DNS",
-          description:
-            "Configure o registro CNAME para que a plataforma consiga iniciar a validação automática.",
+          description: dnsPendingDescription,
           badge: { tone: "warning", label: "Pendente" },
           metadata: [
             {
@@ -665,6 +848,10 @@ export function PublicProfilePageClient({
     [values],
   );
   const effectiveCustomDomain = getEffectiveCustomDomain(profile, normalizedDesiredCustomDomain);
+  const effectiveDnsGuidance = useMemo(
+    () => getEffectiveDnsGuidance(effectiveCustomDomain, publicAppOrigin),
+    [effectiveCustomDomain, publicAppOrigin],
+  );
   const canonicalStorefrontLink = buildCanonicalStorefrontUrl(publicAppOrigin, {
     slug: normalizedSlug,
     customDomain: effectiveCustomDomain,
@@ -677,11 +864,12 @@ export function PublicProfilePageClient({
   });
   const domainOnboardingState = getDomainOnboardingState(
     effectiveCustomDomain,
+    effectiveDnsGuidance,
     fallbackStorefrontLink,
   );
   const domainStageStates = useMemo(
-    () => getDomainStageStates(effectiveCustomDomain),
-    [effectiveCustomDomain],
+    () => getDomainStageStates(effectiveCustomDomain, effectiveDnsGuidance),
+    [effectiveCustomDomain, effectiveDnsGuidance],
   );
   const storefrontLinkState = getStorefrontLinkState({
     canonicalStorefrontLink,
@@ -690,9 +878,6 @@ export function PublicProfilePageClient({
     isPublished: values.isPublished,
     missingRequirementsCount: missingRequirements.length,
   });
-  const sharedHost = getSharedHost(publicAppOrigin);
-  const dnsRecordName = effectiveCustomDomain.desiredDomain ?? "—";
-  const dnsRecordValue = sharedHost || "Defina NEXT_PUBLIC_APP_URL para exibir o destino";
 
   const publicationState = values.isPublished
     ? missingRequirements.length === 0
@@ -881,9 +1066,9 @@ export function PublicProfilePageClient({
             <FormField
               label="Domínio personalizado desejado"
               error={errors.desiredCustomDomain?.message}
-              hint="Opcional. Use um domínio ou subdomínio como agenda.petshop.com. Deixe vazio para voltar ao fallback compartilhado."
+              hint="Opcional. Use um subdomínio como agenda.petshop.com.br ou um domínio raiz como petshop.com.br. Deixe vazio para voltar ao fallback compartilhado."
             >
-              <Input placeholder="agenda.petshop.com" {...register("desiredCustomDomain")} />
+              <Input placeholder="agenda.petshop.com.br ou petshop.com.br" {...register("desiredCustomDomain")} />
             </FormField>
 
             <FormField
@@ -1109,9 +1294,20 @@ export function PublicProfilePageClient({
                 <p className="text-sm font-medium text-content-secondary">
                   Onboarding de domínio
                 </p>
-                <h2 className="text-lg font-semibold text-content-primary">
-                  {effectiveCustomDomain.desiredDomain ?? "Use o host compartilhado"}
-                </h2>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h2 className="text-lg font-semibold text-content-primary">
+                    {effectiveCustomDomain.desiredDomain ?? "Use o host compartilhado"}
+                  </h2>
+                  {effectiveCustomDomain.desiredDomain ? (
+                    <Badge tone="neutral">
+                      {getDomainModeLabel(
+                        effectiveDnsGuidance.mode === "none"
+                          ? effectiveCustomDomain.mode
+                          : effectiveDnsGuidance.mode,
+                      )}
+                    </Badge>
+                  ) : null}
+                </div>
               </div>
             </div>
 
@@ -1150,27 +1346,123 @@ export function PublicProfilePageClient({
                   <div className="grid gap-3 rounded-2xl bg-surface-muted p-4">
                     <div>
                       <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
+                        Estratégia de onboarding
+                      </p>
+                      <p className="mt-2 font-medium text-content-primary">
+                        {getDomainModeLabel(
+                          effectiveDnsGuidance.mode === "none"
+                            ? effectiveCustomDomain.mode
+                            : effectiveDnsGuidance.mode,
+                        )}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
                         Tipo de registro DNS
                       </p>
-                      <p className="mt-2 font-medium text-content-primary">CNAME</p>
+                      <p className="mt-2 font-medium text-content-primary">
+                        {getRecordTypeLabel(
+                          effectiveDnsGuidance.recordType,
+                          effectiveCustomDomain.mode,
+                        )}
+                      </p>
                     </div>
                     <div>
                       <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
                         Host a configurar
                       </p>
                       <p className="mt-2 break-all font-medium text-content-primary">
-                        {dnsRecordName}
+                        {effectiveDnsGuidance.recordName || "—"}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
-                        Valor esperado
+                        Zona DNS
                       </p>
                       <p className="mt-2 break-all font-medium text-content-primary">
-                        {dnsRecordValue}
+                        {effectiveDnsGuidance.zoneDns || "—"}
                       </p>
                     </div>
                   </div>
+
+                  <div className="rounded-2xl border border-stroke-soft bg-surface-card p-4 shadow-sm">
+                    <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
+                      Instrução principal
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-content-primary">
+                      {effectiveDnsGuidance.primaryInstruction ||
+                        "Salve o domínio para carregar as instruções de DNS específicas deste onboarding."}
+                    </p>
+                    {effectiveDnsGuidance.secondaryInstruction ? (
+                      <p className="mt-3 text-sm text-content-secondary">
+                        {effectiveDnsGuidance.secondaryInstruction}
+                      </p>
+                    ) : null}
+                  </div>
+
+                  {effectiveDnsGuidance.expectedHostnames.length > 0 ? (
+                    <div className="rounded-2xl border border-stroke-soft bg-surface-card p-4 shadow-sm">
+                      <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
+                        Hostnames suportados
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        {effectiveDnsGuidance.expectedHostnames.map((hostname) => (
+                          <p
+                            key={hostname}
+                            className="break-all text-sm font-medium text-content-primary"
+                          >
+                            {hostname}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {effectiveDnsGuidance.expectedIps.length > 0 ? (
+                    <div className="rounded-2xl border border-stroke-soft bg-surface-card p-4 shadow-sm">
+                      <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
+                        IPs suportados para A/AAAA
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        {effectiveDnsGuidance.expectedIps.map((ip) => (
+                          <p key={ip} className="break-all text-sm font-medium text-content-primary">
+                            {ip}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {effectiveDnsGuidance.expectedValues.length > 0 &&
+                  effectiveDnsGuidance.expectedHostnames.length === 0 &&
+                  effectiveDnsGuidance.expectedIps.length === 0 ? (
+                    <div className="rounded-2xl border border-stroke-soft bg-surface-card p-4 shadow-sm">
+                      <p className="text-xs font-medium uppercase tracking-wide text-content-muted">
+                        Valores esperados
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        {effectiveDnsGuidance.expectedValues.map((value) => (
+                          <p
+                            key={value}
+                            className="break-all text-sm font-medium text-content-primary"
+                          >
+                            {value}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {effectiveDnsGuidance.optionalWwwRedirectInstruction ? (
+                    <div className="rounded-2xl bg-surface-brand-soft p-4">
+                      <p className="text-xs font-medium uppercase tracking-wide text-content-primary">
+                        Recomendação opcional de www
+                      </p>
+                      <p className="mt-2 text-sm text-content-primary">
+                        {effectiveDnsGuidance.optionalWwwRedirectInstruction}
+                      </p>
+                    </div>
+                  ) : null}
                 </>
               ) : null}
             </div>

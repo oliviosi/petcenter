@@ -1,7 +1,5 @@
-## Purpose
-Define tenant-facing requirements for TLS provisioning, certificate-readiness tracking, and final HTTPS activation of custom storefront domains after DNS verification succeeds.
+## MODIFIED Requirements
 
-## Requirements
 ### Requirement: DNS-verified storefront domains enter certificate-readiness provisioning
 The system SHALL transition a desired storefront domain into certificate-readiness provisioning after DNS verification succeeds, whether the verified domain is a subdomain or an apex/root domain, instead of activating the domain immediately.
 

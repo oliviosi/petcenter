@@ -1,3 +1,5 @@
+using Api.Modules.Empresas.Routes;
+
 namespace Api.Modules.Empresas.Routes.GetPublicProfile;
 
 public class GetEmpresaPublicProfileResponse
@@ -12,6 +14,8 @@ public class GetEmpresaPublicProfileResponse
     public string? ResumoEndereco { get; set; }
     public string? DominioPersonalizadoDesejado { get; set; }
     public string? DominioPersonalizadoAtivo { get; set; }
+    public string DominioPersonalizadoModo { get; set; } = "none";
+    public StorefrontCustomDomainOnboardingGuidanceResponse DominioPersonalizadoOrientacaoDns { get; set; } = new();
     public string DominioPersonalizadoStatus { get; set; } = "removed";
     public string? DominioPersonalizadoUltimaFalha { get; set; }
     public DateTime? DominioPersonalizadoUltimaTentativaEm { get; set; }

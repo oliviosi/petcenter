@@ -1,3 +1,4 @@
+using Api.Modules.Empresas.Domain;
 using FluentValidation;
 
 namespace Api.Modules.Empresas.Routes.UpdatePublicProfile;
@@ -36,6 +37,12 @@ public class UpdateEmpresaPublicProfileRequestValidator : AbstractValidator<Upda
             .MaximumLength(253).WithMessage("Domínio personalizado deve ter no máximo 253 caracteres.")
             .Matches("^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$")
             .When(x => !string.IsNullOrWhiteSpace(x.DominioPersonalizadoDesejado))
-            .WithMessage("Domínio personalizado deve conter um host válido, como agenda.petshop.com.");
+            .WithMessage("Domínio personalizado deve conter um host válido, como agenda.petshop.com.br ou petshop.com.br.")
+            .Must(BeSupportedStorefrontDomain)
+            .When(x => !string.IsNullOrWhiteSpace(x.DominioPersonalizadoDesejado))
+            .WithMessage("Domínio personalizado deve ser um subdomínio válido ou um domínio raiz suportado, como agenda.petshop.com.br ou petshop.com.br.");
     }
+
+    private static bool BeSupportedStorefrontDomain(string? domain) =>
+        StorefrontCustomDomainAnalysis.TryCreate(domain) is not null;
 }

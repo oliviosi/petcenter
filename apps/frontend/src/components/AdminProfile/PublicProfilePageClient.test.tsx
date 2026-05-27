@@ -31,6 +31,19 @@ const baseProfile = {
   customDomain: {
     desiredDomain: null,
     activeDomain: null,
+    mode: "none" as const,
+    dnsGuidance: {
+      mode: "none" as const,
+      recordType: "none" as const,
+      recordName: "",
+      zoneDns: "",
+      expectedValues: [],
+      expectedHostnames: [],
+      expectedIps: [],
+      primaryInstruction: "",
+      secondaryInstruction: null,
+      optionalWwwRedirectInstruction: null,
+    },
     status: "removed" as const,
     dnsStatus: "removed" as const,
     dnsFailureMessage: null,
@@ -126,6 +139,7 @@ describe("PublicProfilePageClient", () => {
           contactSummary: "WhatsApp (11) 99999-9999",
           addressSummary: "Rua Exemplo, 123",
           customDomain: {
+            ...baseProfile.customDomain,
             desiredDomain: "agenda.petcenter-vila.com",
             activeDomain: null,
             status: "pending_setup",
@@ -154,7 +168,7 @@ describe("PublicProfilePageClient", () => {
     expect(screen.getByText("Fallback ativo para compartilhamento")).toBeInTheDocument();
     expect(screen.getByText("Compartilhe agora")).toBeInTheDocument();
     expect(screen.getAllByText("https://petcenter.test/petshops/pet-center-vila")[0]).toBeInTheDocument();
-    expect(screen.getAllByText("agenda.petcenter-vila.com")).toHaveLength(2);
+    expect(screen.getByText("agenda.petcenter-vila.com")).toBeInTheDocument();
     expect(screen.getByText("CNAME")).toBeInTheDocument();
     expect(screen.getByText("petcenter.test")).toBeInTheDocument();
     expect(
@@ -172,6 +186,143 @@ describe("PublicProfilePageClient", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows apex-specific DNS guidance with optional www redirection advice", () => {
+    render(
+      <PublicProfilePageClient
+        profile={{
+          ...baseProfile,
+          slug: "pet-center-vila",
+          description: "Banho e tosa com atendimento humanizado.",
+          city: "São Paulo",
+          neighborhood: "Vila Mariana",
+          contactSummary: "WhatsApp (11) 99999-9999",
+          addressSummary: "Rua Exemplo, 123",
+          customDomain: {
+            ...baseProfile.customDomain,
+            desiredDomain: "petcenter-vila.com.br",
+            activeDomain: null,
+            mode: "apex",
+            dnsGuidance: {
+              mode: "apex",
+              recordType: "apex_supported_targets",
+              recordName: "@",
+              zoneDns: "petcenter-vila.com.br",
+              expectedValues: ["198.51.100.10", "apex.storefront.petcenter.local"],
+              expectedHostnames: ["apex.storefront.petcenter.local"],
+              expectedIps: ["198.51.100.10"],
+              primaryInstruction:
+                "Configure o domínio raiz para resolver para um dos destinos apex suportados.",
+              secondaryInstruction:
+                "Use registros A/AAAA com os IPs informados ou, se seu provedor suportar ALIAS/ANAME/flattening, faça o domínio raiz resolver para um dos hostnames esperados.",
+              optionalWwwRedirectInstruction:
+                "Opcionalmente, você pode redirecionar 'www.petcenter-vila.com.br' para 'petcenter-vila.com.br', mas isso não é obrigatório para ativação.",
+            },
+            status: "pending_setup",
+            dnsStatus: "pending_setup",
+            dnsFailureMessage: null,
+            dnsLastAttemptAt: null,
+            dnsNextRetryAt: "2026-01-12T18:30:00Z",
+            dnsVerifiedAt: null,
+            tlsStatus: "not_started",
+            tlsFailureMessage: null,
+            tlsProvisioningStartedAt: null,
+            tlsLastAttemptAt: null,
+            tlsNextRetryAt: null,
+            httpsReadyAt: null,
+            activatedAt: null,
+          },
+          isPublished: true,
+        }}
+        updatePublicProfileAction={vi.fn(async () => ({
+          success: true,
+          message: "ok",
+        }))}
+      />,
+    );
+
+    expect(screen.getAllByText("Domínio raiz")[0]).toBeInTheDocument();
+    expect(screen.getByText("A/AAAA ou ALIAS/ANAME")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Configure o domínio raiz para resolver para um dos destinos apex suportados.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("apex.storefront.petcenter.local")).toBeInTheDocument();
+    expect(screen.getByText("198.51.100.10")).toBeInTheDocument();
+    expect(screen.getByText("Recomendação opcional de www")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Opcionalmente, você pode redirecionar 'www.petcenter-vila.com.br' para 'petcenter-vila.com.br', mas isso não é obrigatório para ativação.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps the shared-host fallback canonical while an apex domain waits for HTTPS", () => {
+    render(
+      <PublicProfilePageClient
+        profile={{
+          ...baseProfile,
+          slug: "pet-center-vila",
+          description: "Banho e tosa com atendimento humanizado.",
+          city: "São Paulo",
+          neighborhood: "Vila Mariana",
+          contactSummary: "WhatsApp (11) 99999-9999",
+          addressSummary: "Rua Exemplo, 123",
+          customDomain: {
+            ...baseProfile.customDomain,
+            desiredDomain: "petcenter-vila.com.br",
+            activeDomain: null,
+            mode: "apex",
+            dnsGuidance: {
+              mode: "apex",
+              recordType: "apex_supported_targets",
+              recordName: "@",
+              zoneDns: "petcenter-vila.com.br",
+              expectedValues: ["198.51.100.10", "apex.storefront.petcenter.local"],
+              expectedHostnames: ["apex.storefront.petcenter.local"],
+              expectedIps: ["198.51.100.10"],
+              primaryInstruction:
+                "Configure o domínio raiz para resolver para um dos destinos apex suportados.",
+              secondaryInstruction:
+                "Use registros A/AAAA com os IPs informados ou, se seu provedor suportar ALIAS/ANAME/flattening, faça o domínio raiz resolver para um dos hostnames esperados.",
+              optionalWwwRedirectInstruction:
+                "Opcionalmente, você pode redirecionar 'www.petcenter-vila.com.br' para 'petcenter-vila.com.br', mas isso não é obrigatório para ativação.",
+            },
+            status: "provisioning_tls",
+            dnsStatus: "verified",
+            dnsFailureMessage: null,
+            dnsLastAttemptAt: "2026-01-12T17:00:00Z",
+            dnsNextRetryAt: null,
+            dnsVerifiedAt: "2026-01-12T17:00:00Z",
+            tlsStatus: "provisioning",
+            tlsFailureMessage: null,
+            tlsProvisioningStartedAt: "2026-01-12T17:05:00Z",
+            tlsLastAttemptAt: "2026-01-12T17:10:00Z",
+            tlsNextRetryAt: "2026-01-12T18:00:00Z",
+            httpsReadyAt: null,
+            activatedAt: null,
+          },
+          isPublished: true,
+        }}
+        updatePublicProfileAction={vi.fn(async () => ({
+          success: true,
+          message: "ok",
+        }))}
+      />,
+    );
+
+    expect(screen.getByText("Fallback ativo para compartilhamento")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "O DNS já está pronto, mas o certificado ainda está sendo provisionado. O host compartilhado segue como URL canônica até o HTTPS ficar pronto.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("https://petcenter.test/petshops/pet-center-vila")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Domínio raiz")[0]).toBeInTheDocument();
+    expect(screen.getByText("DNS validado")).toBeInTheDocument();
+    expect(screen.getByText("Certificado em provisão")).toBeInTheDocument();
+  });
+
   it("shows TLS provisioning progress while the shared host remains canonical", () => {
     render(
       <PublicProfilePageClient
@@ -184,6 +335,7 @@ describe("PublicProfilePageClient", () => {
           contactSummary: "WhatsApp (11) 99999-9999",
           addressSummary: "Rua Exemplo, 123",
           customDomain: {
+            ...baseProfile.customDomain,
             desiredDomain: "agenda.petcenter-vila.com",
             activeDomain: null,
             status: "provisioning_tls",
@@ -244,6 +396,7 @@ describe("PublicProfilePageClient", () => {
           contactSummary: "WhatsApp (11) 99999-9999",
           addressSummary: "Rua Exemplo, 123",
           customDomain: {
+            ...baseProfile.customDomain,
             desiredDomain: "agenda.petcenter-vila.com",
             activeDomain: null,
             status: "tls_failed",
@@ -376,6 +529,7 @@ describe("PublicProfilePageClient", () => {
           contactSummary: "WhatsApp (11) 99999-9999",
           addressSummary: "Rua Exemplo, 123",
           customDomain: {
+            ...baseProfile.customDomain,
             desiredDomain: "agenda.petcenter-vila.com",
             activeDomain: "agenda.petcenter-vila.com",
             status: "active",

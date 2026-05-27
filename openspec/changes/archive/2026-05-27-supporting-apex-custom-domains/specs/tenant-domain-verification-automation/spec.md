@@ -1,7 +1,5 @@
-## Purpose
-Define tenant-facing requirements for asynchronous verification of custom storefront domains and handoff into certificate-readiness provisioning after DNS verification succeeds.
+## MODIFIED Requirements
 
-## Requirements
 ### Requirement: Desired storefront domains are verified asynchronously
 The system SHALL evaluate eligible desired storefront domains asynchronously after they are saved, using background verification instead of requiring a tenant-triggered foreground check, and SHALL support both subdomain and apex/root domains in that flow.
 

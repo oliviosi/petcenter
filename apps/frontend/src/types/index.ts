@@ -74,9 +74,31 @@ export type AdminCustomDomainTlsStatus =
   | "ready"
   | "failed";
 
+export type AdminCustomDomainMode = "none" | "subdomain" | "apex";
+
+export type AdminCustomDomainDnsRecordType =
+  | "none"
+  | "cname"
+  | "apex_supported_targets";
+
+export interface AdminCustomDomainDnsGuidance {
+  mode: AdminCustomDomainMode;
+  recordType: AdminCustomDomainDnsRecordType;
+  recordName: string;
+  zoneDns: string;
+  expectedValues: string[];
+  expectedHostnames: string[];
+  expectedIps: string[];
+  primaryInstruction: string;
+  secondaryInstruction: string | null;
+  optionalWwwRedirectInstruction: string | null;
+}
+
 export interface AdminCustomDomain {
   desiredDomain: string | null;
   activeDomain: string | null;
+  mode: AdminCustomDomainMode;
+  dnsGuidance: AdminCustomDomainDnsGuidance;
   status: AdminCustomDomainStatus;
   dnsStatus: AdminCustomDomainDnsStatus;
   dnsFailureMessage: string | null;

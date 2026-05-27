@@ -64,7 +64,8 @@ export const adminPublicProfileSchema = z
       .trim()
       .max(253, "Domínio personalizado deve ter no máximo 253 caracteres.")
       .refine((value) => value.length === 0 || customDomainRegex.test(value), {
-        message: "Domínio personalizado deve conter um host válido, como agenda.petshop.com.",
+        message:
+          "Domínio personalizado deve conter um host válido, como agenda.petshop.com.br ou petshop.com.br.",
       }),
     isPublished: z.boolean(),
   })

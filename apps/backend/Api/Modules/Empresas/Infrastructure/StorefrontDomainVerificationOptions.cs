@@ -9,6 +9,8 @@ public class StorefrontDomainVerificationOptions
     [Required]
     public string ExpectedTarget { get; set; } = string.Empty;
 
+    public string[] ApexExpectedTargets { get; set; } = [];
+
     public TimeSpan WorkerInterval { get; set; } = TimeSpan.FromMinutes(5);
 
     public TimeSpan RetryDelay { get; set; } = TimeSpan.FromMinutes(15);
