@@ -89,6 +89,10 @@ public class UpdateEmpresaPublicProfileService : IUpdateEmpresaPublicProfileServ
             DominioPersonalizadoTlsProximaTentativaEm = empresa.DominioPersonalizadoTlsProximaTentativaEm,
             DominioPersonalizadoHttpsProntoEm = empresa.DominioPersonalizadoHttpsProntoEm,
             DominioPersonalizadoAtivadoEm = empresa.DominioPersonalizadoAtivadoEm,
+            DominioPersonalizadoUltimoMonitoramentoSaudavelEm = empresa.DominioPersonalizadoUltimoMonitoramentoSaudavelEm,
+            DominioPersonalizadoUltimoMonitoramentoDegradadoEm = empresa.DominioPersonalizadoUltimoMonitoramentoDegradadoEm,
+            DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo = empresa.DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo,
+            DominioPersonalizadoCanonicoRevertidoParaFallback = empresa.DominioPersonalizadoCanonicoRevertidoParaFallback,
             Publica = empresa.Publica
         };
     }

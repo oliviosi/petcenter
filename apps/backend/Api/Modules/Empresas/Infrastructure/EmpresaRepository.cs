@@ -57,18 +57,24 @@ public class EmpresaRepository : IEmpresaRepository
             .Where(e =>
                 e.Ativo
                 && e.DominioPersonalizadoDesejado != null
-                && e.DominioPersonalizadoStatus != StorefrontCustomDomainStatus.Active
                 && (
-                    (e.DominioPersonalizadoVerificadoEm == null
-                        && e.DominioPersonalizadoProximaTentativaEm != null
-                        && e.DominioPersonalizadoProximaTentativaEm <= referencia)
-                    || (e.DominioPersonalizadoVerificadoEm != null
-                        && e.DominioPersonalizadoAtivo == null
-                        && e.DominioPersonalizadoTlsProximaTentativaEm != null
-                        && e.DominioPersonalizadoTlsProximaTentativaEm <= referencia)))
-            .OrderBy(e => e.DominioPersonalizadoVerificadoEm == null
-                ? e.DominioPersonalizadoProximaTentativaEm
-                : e.DominioPersonalizadoTlsProximaTentativaEm)
+                    (e.DominioPersonalizadoStatus != StorefrontCustomDomainStatus.Active
+                        && (
+                            (e.DominioPersonalizadoVerificadoEm == null
+                                && e.DominioPersonalizadoProximaTentativaEm != null
+                                && e.DominioPersonalizadoProximaTentativaEm <= referencia)
+                            || (e.DominioPersonalizadoVerificadoEm != null
+                                && e.DominioPersonalizadoAtivo == null
+                                && e.DominioPersonalizadoTlsProximaTentativaEm != null
+                                && e.DominioPersonalizadoTlsProximaTentativaEm <= referencia)))
+                    || (e.DominioPersonalizadoStatus == StorefrontCustomDomainStatus.Active
+                        && e.DominioPersonalizadoProximoMonitoramentoEm != null
+                        && e.DominioPersonalizadoProximoMonitoramentoEm <= referencia)))
+            .OrderBy(e => e.DominioPersonalizadoStatus == StorefrontCustomDomainStatus.Active
+                ? e.DominioPersonalizadoProximoMonitoramentoEm
+                : (e.DominioPersonalizadoVerificadoEm == null
+                    ? e.DominioPersonalizadoProximaTentativaEm
+                    : e.DominioPersonalizadoTlsProximaTentativaEm))
             .ThenBy(e => e.CriadoEm)
             .Take(take)
             .ToListAsync();

@@ -766,6 +766,34 @@ function mapAdminCustomDomain(record: JsonRecord): AdminCustomDomain {
       "dominioPersonalizadoAtivadoEm",
       "DominioPersonalizadoAtivadoEm",
     ),
+    revertedToFallback: readBoolean(
+      record,
+      "customDomainCanonicalRevertedToFallback",
+      "CustomDomainCanonicalRevertedToFallback",
+      "dominioPersonalizadoCanonicoRevertidoParaFallback",
+      "DominioPersonalizadoCanonicoRevertidoParaFallback",
+    ),
+    lastHealthyMonitoringAt: readNullableString(
+      record,
+      "customDomainLastHealthyMonitoringAt",
+      "CustomDomainLastHealthyMonitoringAt",
+      "dominioPersonalizadoUltimoMonitoramentoSaudavelEm",
+      "DominioPersonalizadoUltimoMonitoramentoSaudavelEm",
+    ),
+    lastDegradedMonitoringAt: readNullableString(
+      record,
+      "customDomainLastDegradedMonitoringAt",
+      "CustomDomainLastDegradedMonitoringAt",
+      "dominioPersonalizadoUltimoMonitoramentoDegradadoEm",
+      "DominioPersonalizadoUltimoMonitoramentoDegradadoEm",
+    ),
+    lastDegradedMonitoringReason: readNullableString(
+      record,
+      "customDomainLastDegradedMonitoringReason",
+      "CustomDomainLastDegradedMonitoringReason",
+      "dominioPersonalizadoUltimoMonitoramentoDegradadoMotivo",
+      "DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo",
+    ),
   };
 }
 

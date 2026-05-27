@@ -33,5 +33,9 @@ public class GetEmpresaPublicProfileResponse
     public DateTime? DominioPersonalizadoTlsProximaTentativaEm { get; set; }
     public DateTime? DominioPersonalizadoHttpsProntoEm { get; set; }
     public DateTime? DominioPersonalizadoAtivadoEm { get; set; }
+    public DateTime? DominioPersonalizadoUltimoMonitoramentoSaudavelEm { get; set; }
+    public DateTime? DominioPersonalizadoUltimoMonitoramentoDegradadoEm { get; set; }
+    public string? DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo { get; set; }
+    public bool DominioPersonalizadoCanonicoRevertidoParaFallback { get; set; }
     public bool Publica { get; set; }
 }

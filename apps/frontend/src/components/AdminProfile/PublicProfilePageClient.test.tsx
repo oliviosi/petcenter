@@ -57,6 +57,10 @@ const baseProfile = {
     tlsNextRetryAt: null,
     httpsReadyAt: null,
     activatedAt: null,
+    revertedToFallback: false,
+    lastHealthyMonitoringAt: null,
+    lastDegradedMonitoringAt: null,
+    lastDegradedMonitoringReason: null,
   },
   isPublished: false,
 } as const;
@@ -569,5 +573,145 @@ describe("PublicProfilePageClient", () => {
         `Ativação registrada em ${formatDateTimeLabel("2026-01-12T17:31:00Z")}.`,
       )[0],
     ).toBeInTheDocument();
+  });
+
+  it("shows degraded-active messaging when a previously active domain loses readiness", async () => {
+    render(
+      <PublicProfilePageClient
+        profile={{
+          ...baseProfile,
+          slug: "pet-center-vila",
+          description: "Banho e tosa com atendimento humanizado.",
+          city: "São Paulo",
+          neighborhood: "Vila Mariana",
+          contactSummary: "WhatsApp (11) 99999-9999",
+          addressSummary: "Rua Exemplo, 123",
+          customDomain: {
+            ...baseProfile.customDomain,
+            desiredDomain: "agenda.petcenter-vila.com",
+            activeDomain: null,
+            status: "active",
+            dnsStatus: "verified",
+            tlsStatus: "ready",
+            revertedToFallback: true,
+            lastHealthyMonitoringAt: "2024-01-10T10:00:00Z",
+            lastDegradedMonitoringAt: "2024-01-15T14:30:00Z",
+            lastDegradedMonitoringReason: "DNS resolution failed during monitoring",
+          },
+          isPublished: true,
+        }}
+        updatePublicProfileAction={vi.fn(async () => ({
+          success: true,
+          message: "ok",
+        }))}
+      />,
+    );
+
+    expect(screen.getAllByText("Degradado")[0]).toBeInTheDocument();
+    expect(screen.getByText("Domínio estava ativo mas perdeu prontidão")).toBeInTheDocument();
+    expect(screen.getByText("DNS resolution failed during monitoring")).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        /O link hospedado pela petcenter voltou a ser o endereço canônico até a recuperação automática/i,
+      )[0],
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        /A plataforma continua monitorando automaticamente\. Quando o DNS e o HTTPS voltarem a estar totalmente prontos/i,
+      )[0],
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        `Última checagem saudável em ${formatDateTimeLabel("2024-01-10T10:00:00Z")}. Degradação detectada em ${formatDateTimeLabel("2024-01-15T14:30:00Z")}.`,
+      )[0],
+    ).toBeInTheDocument();
+  });
+
+  it("shows shared-host fallback as canonical during degradation and allows copying", async () => {
+    render(
+      <PublicProfilePageClient
+        profile={{
+          ...baseProfile,
+          slug: "pet-center-vila",
+          description: "Banho e tosa com atendimento humanizado.",
+          city: "São Paulo",
+          neighborhood: "Vila Mariana",
+          contactSummary: "WhatsApp (11) 99999-9999",
+          addressSummary: "Rua Exemplo, 123",
+          customDomain: {
+            ...baseProfile.customDomain,
+            desiredDomain: "agenda.petcenter-vila.com",
+            activeDomain: null,
+            status: "active",
+            dnsStatus: "verified",
+            tlsStatus: "ready",
+            revertedToFallback: true,
+            lastHealthyMonitoringAt: "2024-01-10T10:00:00Z",
+            lastDegradedMonitoringAt: "2024-01-15T14:30:00Z",
+            lastDegradedMonitoringReason: "HTTPS certificate expired",
+          },
+          isPublished: true,
+        }}
+        updatePublicProfileAction={vi.fn(async () => ({
+          success: true,
+          message: "ok",
+        }))}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Copiar link" }));
+
+    expect(writeText).toHaveBeenCalledWith(
+      "https://petcenter.test/petshops/pet-center-vila",
+    );
+    expect(screen.getByRole("link", { name: "Abrir vitrine" })).toHaveAttribute(
+      "href",
+      "https://petcenter.test/petshops/pet-center-vila",
+    );
+    expect(screen.getByText("Fallback ativo para compartilhamento")).toBeInTheDocument();
+  });
+
+  it("restores custom domain as canonical after recovery from degraded state", async () => {
+    render(
+      <PublicProfilePageClient
+        profile={{
+          ...baseProfile,
+          slug: "pet-center-vila",
+          description: "Banho e tosa com atendimento humanizado.",
+          city: "São Paulo",
+          neighborhood: "Vila Mariana",
+          contactSummary: "WhatsApp (11) 99999-9999",
+          addressSummary: "Rua Exemplo, 123",
+          customDomain: {
+            ...baseProfile.customDomain,
+            desiredDomain: "agenda.petcenter-vila.com",
+            activeDomain: "agenda.petcenter-vila.com",
+            status: "active",
+            dnsStatus: "verified",
+            tlsStatus: "ready",
+            revertedToFallback: false,
+            lastHealthyMonitoringAt: "2024-01-16T09:00:00Z",
+            lastDegradedMonitoringAt: "2024-01-15T14:30:00Z",
+            lastDegradedMonitoringReason: null,
+            activatedAt: "2024-01-16T09:00:00Z",
+          },
+          isPublished: true,
+        }}
+        updatePublicProfileAction={vi.fn(async () => ({
+          success: true,
+          message: "ok",
+        }))}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Copiar link" }));
+
+    expect(writeText).toHaveBeenCalledWith("https://agenda.petcenter-vila.com");
+    expect(screen.getByRole("link", { name: "Abrir vitrine" })).toHaveAttribute(
+      "href",
+      "https://agenda.petcenter-vila.com",
+    );
+    expect(screen.getByText("Domínio canônico ativo")).toBeInTheDocument();
+    expect(screen.getByText("Domínio personalizado ativo")).toBeInTheDocument();
   });
 });

@@ -39,6 +39,10 @@ function createProfile(
       tlsNextRetryAt: null,
       httpsReadyAt: null,
       activatedAt: null,
+      revertedToFallback: false,
+      lastHealthyMonitoringAt: null,
+      lastDegradedMonitoringAt: null,
+      lastDegradedMonitoringReason: null,
       ...customDomain,
     },
   };
@@ -151,5 +155,68 @@ describe("storefront canonical helpers", () => {
     expect(
       getStorefrontEntryMode("petcenter-vila.com.br", profile.customDomain),
     ).toBe("custom-domain");
+  });
+
+  it("reverts canonical link to shared-host fallback when a previously active domain becomes degraded", () => {
+    const profile = createProfile({
+      desiredDomain: "agenda.petcenter-vila.com",
+      activeDomain: null,
+      status: "active",
+      dnsStatus: "verified",
+      tlsStatus: "ready",
+      revertedToFallback: true,
+      lastHealthyMonitoringAt: "2024-01-10T10:00:00Z",
+      lastDegradedMonitoringAt: "2024-01-15T14:30:00Z",
+      lastDegradedMonitoringReason: "DNS resolution failed",
+    });
+
+    expect(buildCanonicalStorefrontUrl("https://petcenter.test", profile)).toBe(
+      "https://petcenter.test/petshops/pet-center-vila",
+    );
+    expect(
+      getStorefrontEntryMode("agenda.petcenter-vila.com", profile.customDomain),
+    ).toBe("shared-host");
+  });
+
+  it("restores canonical link to custom domain after recovery from degraded state", () => {
+    const profile = createProfile({
+      desiredDomain: "agenda.petcenter-vila.com",
+      activeDomain: "agenda.petcenter-vila.com",
+      status: "active",
+      dnsStatus: "verified",
+      tlsStatus: "ready",
+      revertedToFallback: false,
+      lastHealthyMonitoringAt: "2024-01-16T09:00:00Z",
+      lastDegradedMonitoringAt: "2024-01-15T14:30:00Z",
+      lastDegradedMonitoringReason: null,
+    });
+
+    expect(buildCanonicalStorefrontUrl("https://petcenter.test", profile)).toBe(
+      "https://agenda.petcenter-vila.com",
+    );
+    expect(
+      getStorefrontEntryMode("agenda.petcenter-vila.com", profile.customDomain),
+    ).toBe("custom-domain");
+  });
+
+  it("treats degraded apex domain the same as degraded subdomain", () => {
+    const profile = createProfile({
+      desiredDomain: "petcenter-vila.com.br",
+      activeDomain: null,
+      mode: "apex",
+      status: "active",
+      dnsStatus: "verified",
+      tlsStatus: "ready",
+      revertedToFallback: true,
+      lastDegradedMonitoringAt: "2024-01-15T14:30:00Z",
+      lastDegradedMonitoringReason: "HTTPS certificate expired",
+    });
+
+    expect(buildCanonicalStorefrontUrl("https://petcenter.test", profile)).toBe(
+      "https://petcenter.test/petshops/pet-center-vila",
+    );
+    expect(
+      getStorefrontEntryMode("petcenter-vila.com.br", profile.customDomain),
+    ).toBe("shared-host");
   });
 });

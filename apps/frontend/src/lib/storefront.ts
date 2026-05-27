@@ -67,6 +67,19 @@ function isActiveCustomDomain(
   return customDomain.status === "active" && Boolean(customDomain.activeDomain);
 }
 
+export function isDegradedActive(
+  customDomain: Pick<
+    AdminPublicProfile["customDomain"],
+    "status" | "activeDomain" | "revertedToFallback"
+  >,
+) {
+  return (
+    customDomain.status === "active" &&
+    !customDomain.activeDomain &&
+    customDomain.revertedToFallback
+  );
+}
+
 export function buildCanonicalStorefrontUrl(
   publicAppOrigin: string,
   profile: Pick<AdminPublicProfile, "slug" | "customDomain">,

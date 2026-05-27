@@ -100,7 +100,8 @@ public class UpdateEmpresaPublicProfileServiceTests
             new DateTime(2026, 6, 27, 9, 0, 0, DateTimeKind.Utc));
         empresa.AtivarDominioPersonalizado(
             new DateTime(2026, 6, 27, 10, 0, 0, DateTimeKind.Utc),
-            new DateTime(2026, 6, 27, 10, 0, 0, DateTimeKind.Utc));
+            new DateTime(2026, 6, 27, 10, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 6, 27, 22, 0, 0, DateTimeKind.Utc));
         empresa.PublicarNoCatalogo();
         db.Empresas.Add(empresa);
         await db.SaveChangesAsync();
@@ -130,6 +131,9 @@ public class UpdateEmpresaPublicProfileServiceTests
         Assert.NotNull(response.DominioPersonalizadoAtivadoEm);
         Assert.NotNull(response.DominioPersonalizadoVerificadoEm);
         Assert.NotNull(response.DominioPersonalizadoHttpsProntoEm);
+        Assert.NotNull(response.DominioPersonalizadoUltimoMonitoramentoSaudavelEm);
+        Assert.Null(response.DominioPersonalizadoUltimoMonitoramentoDegradadoEm);
+        Assert.False(response.DominioPersonalizadoCanonicoRevertidoParaFallback);
     }
 
     [Fact]
@@ -148,7 +152,8 @@ public class UpdateEmpresaPublicProfileServiceTests
             new DateTime(2026, 6, 27, 9, 0, 0, DateTimeKind.Utc));
         empresa.AtivarDominioPersonalizado(
             new DateTime(2026, 6, 27, 10, 0, 0, DateTimeKind.Utc),
-            new DateTime(2026, 6, 27, 10, 0, 0, DateTimeKind.Utc));
+            new DateTime(2026, 6, 27, 10, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 6, 27, 22, 0, 0, DateTimeKind.Utc));
         db.Empresas.Add(empresa);
         await db.SaveChangesAsync();
 
@@ -181,6 +186,10 @@ public class UpdateEmpresaPublicProfileServiceTests
         Assert.Null(response.DominioPersonalizadoTlsProvisionamentoIniciadoEm);
         Assert.Null(response.DominioPersonalizadoHttpsProntoEm);
         Assert.Null(response.DominioPersonalizadoAtivadoEm);
+        Assert.Null(response.DominioPersonalizadoUltimoMonitoramentoSaudavelEm);
+        Assert.Null(response.DominioPersonalizadoUltimoMonitoramentoDegradadoEm);
+        Assert.Null(response.DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo);
+        Assert.False(response.DominioPersonalizadoCanonicoRevertidoParaFallback);
     }
 
     [Fact]
@@ -224,6 +233,63 @@ public class UpdateEmpresaPublicProfileServiceTests
         Assert.Null(response.DominioPersonalizadoUltimaFalha);
         Assert.Null(response.DominioPersonalizadoUltimaTentativaEm);
         Assert.Null(response.DominioPersonalizadoProximaTentativaEm);
+        Assert.Null(response.DominioPersonalizadoUltimoMonitoramentoSaudavelEm);
+        Assert.Null(response.DominioPersonalizadoUltimoMonitoramentoDegradadoEm);
+        Assert.Null(response.DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo);
+        Assert.False(response.DominioPersonalizadoCanonicoRevertidoParaFallback);
+    }
+
+    [Fact]
+    public async Task HandleAsync_ShouldReturnDegradedMonitoringFieldsWhenActiveDomainIsDegraded()
+    {
+        using var db = TestData.CreateDbContext();
+        var empresa = new Empresa("Pet Center Vila");
+        empresa.DefinirSlug("pet-center-vila");
+        empresa.DefinirDescricao("Banho e tosa com atendimento humanizado.");
+        empresa.DefinirCidade("São Paulo");
+        empresa.DefinirBairro("Vila Mariana");
+        empresa.DefinirResumoContato("WhatsApp (11) 99999-9999");
+        empresa.DefinirResumoEndereco("Rua Exemplo, 123");
+        empresa.DefinirDominioPersonalizadoDesejado(
+            "agenda.petcenter-vila.com",
+            new DateTime(2026, 6, 27, 9, 0, 0, DateTimeKind.Utc));
+        empresa.AtivarDominioPersonalizado(
+            new DateTime(2026, 6, 27, 10, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 6, 27, 10, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 6, 27, 22, 0, 0, DateTimeKind.Utc));
+        empresa.RegistrarMonitoramentoDegradado(
+            "O certificado TLS expirou.",
+            new DateTime(2026, 6, 28, 10, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 6, 28, 22, 0, 0, DateTimeKind.Utc));
+        empresa.PublicarNoCatalogo();
+        db.Empresas.Add(empresa);
+        await db.SaveChangesAsync();
+
+        var sut = new UpdateEmpresaPublicProfileService(
+            new EmpresaRepository(db),
+            CreateDomainVerificationOptions(),
+            new ManualTimeProvider(new DateTimeOffset(2026, 6, 28, 12, 0, 0, TimeSpan.Zero)));
+
+        var response = await sut.HandleAsync(new UpdateEmpresaPublicProfileRequest
+        {
+            EmpresaId = empresa.Id,
+            Slug = "pet-center-vila",
+            Descricao = "Banho e tosa com atendimento humanizado.",
+            Cidade = "São Paulo",
+            Bairro = "Vila Mariana",
+            ResumoContato = "WhatsApp (11) 99999-9999",
+            ResumoEndereco = "Rua Exemplo, 123",
+            DominioPersonalizadoDesejado = "agenda.petcenter-vila.com",
+            Publica = true
+        });
+
+        Assert.Equal("agenda.petcenter-vila.com", response.DominioPersonalizadoDesejado);
+        Assert.Null(response.DominioPersonalizadoAtivo);
+        Assert.Equal("active", response.DominioPersonalizadoStatus);
+        Assert.NotNull(response.DominioPersonalizadoUltimoMonitoramentoSaudavelEm);
+        Assert.NotNull(response.DominioPersonalizadoUltimoMonitoramentoDegradadoEm);
+        Assert.Equal("O certificado TLS expirou.", response.DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo);
+        Assert.True(response.DominioPersonalizadoCanonicoRevertidoParaFallback);
     }
 
     private static IOptions<StorefrontDomainVerificationOptions> CreateDomainVerificationOptions() =>

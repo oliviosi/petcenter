@@ -24,7 +24,7 @@ The system SHALL communicate whether certificate provisioning has started, wheth
 - **THEN** the system shows that certificate provisioning is the current blocking step before the custom domain can become active
 
 ### Requirement: Tenant can understand domain onboarding state and DNS instructions
-The system SHALL communicate the onboarding state of the desired storefront domain, including the required DNS instructions for the selected domain type, whether DNS verification or certificate readiness is currently pending, actively processing, blocked by a recoverable failure, or complete, and the latest recoverable outcome shown to the tenant.
+The system SHALL communicate the onboarding or recovery state of the desired storefront domain, including the required DNS instructions for the selected domain type, whether DNS verification or certificate readiness is currently pending, actively processing, blocked by a recoverable failure, or complete, and the latest recoverable outcome shown to the tenant, including when a previously active custom domain has become degraded and is being recovered automatically.
 
 #### Scenario: Tenant reviews pending domain setup
 - **WHEN** an authenticated tenant user opens storefront domain onboarding before DNS is correctly configured
@@ -45,6 +45,10 @@ The system SHALL communicate the onboarding state of the desired storefront doma
 #### Scenario: Tenant reviews apex onboarding guidance
 - **WHEN** the desired storefront domain is an apex/root domain
 - **THEN** the system shows onboarding guidance that differs from the subdomain path when the required DNS strategy is different
+
+#### Scenario: Tenant reviews degraded active domain recovery
+- **WHEN** a previously active custom domain has lost readiness after activation
+- **THEN** the system explains that the domain is being recovered automatically and that the shared-host fallback is currently canonical
 
 ### Requirement: Only a fully ready custom domain becomes active
 The system SHALL treat a storefront custom domain as active only after DNS verification and certificate readiness succeed, and SHALL promote that domain automatically only when the full readiness pipeline completes.

@@ -1,13 +1,4 @@
-## Purpose
-Define tenant-facing requirements for TLS provisioning, certificate-readiness tracking, and final HTTPS activation of custom storefront domains after DNS verification succeeds.
-
-## Requirements
-### Requirement: DNS-verified storefront domains enter certificate-readiness provisioning
-The system SHALL transition a desired storefront domain into certificate-readiness provisioning after DNS verification succeeds, whether the verified domain is a subdomain or an apex/root domain, instead of activating the domain immediately.
-
-#### Scenario: DNS success starts TLS readiness
-- **WHEN** automated domain verification confirms that the desired storefront domain has the expected DNS configuration
-- **THEN** the system starts certificate-readiness provisioning for that domain before promoting it to active
+## MODIFIED Requirements
 
 ### Requirement: Certificate-readiness records latest outcome and retry timing
 The system SHALL persist certificate-readiness progress, including the latest provisioning outcome, the next planned retry when readiness is not yet complete, and the completion time when HTTPS becomes ready for both subdomain and apex/root domains, and SHALL continue recording readiness outcomes after activation so degraded HTTPS service can be detected and recovered automatically.

@@ -38,7 +38,11 @@ public class StorefrontDomainVerificationService : IStorefrontDomainVerification
             if (string.IsNullOrWhiteSpace(empresa.DominioPersonalizadoDesejado))
                 continue;
 
-            if (empresa.DominioPersonalizadoVerificadoEm is null)
+            if (empresa.DominioPersonalizadoStatus == StorefrontCustomDomainStatus.Active)
+            {
+                await ProcessarMonitoramentoAsync(empresa, agora, cancellationToken);
+            }
+            else if (empresa.DominioPersonalizadoVerificadoEm is null)
             {
                 await ProcessarDnsAsync(empresa, agora, cancellationToken);
             }
@@ -84,8 +88,38 @@ public class StorefrontDomainVerificationService : IStorefrontDomainVerification
             cancellationToken);
 
         if (resultadoTls.IsReady)
-            empresa.AtivarDominioPersonalizado(agora, agora);
+        {
+            var proximoMonitoramento = agora.Add(_dnsOptions.ActiveMonitoringInterval);
+            empresa.AtivarDominioPersonalizado(agora, agora, proximoMonitoramento);
+        }
         else
             empresa.RegistrarFalhaTlsDominioPersonalizado(resultadoTls.Message, agora, proximaTentativaTls);
+    }
+
+    private async Task ProcessarMonitoramentoAsync(Empresa empresa, DateTime agora, CancellationToken cancellationToken)
+    {
+        var proximoMonitoramento = agora.Add(_dnsOptions.ActiveMonitoringInterval);
+
+        var resultadoDns = await _dnsVerificationService.VerifyAsync(
+            empresa.DominioPersonalizadoDesejado!,
+            cancellationToken);
+
+        if (!resultadoDns.IsVerified)
+        {
+            empresa.RegistrarMonitoramentoDegradado(resultadoDns.Message, agora, proximoMonitoramento);
+            return;
+        }
+
+        var resultadoTls = await _certificateReadinessService.CheckAsync(
+            empresa.DominioPersonalizadoDesejado!,
+            cancellationToken);
+
+        if (!resultadoTls.IsReady)
+        {
+            empresa.RegistrarMonitoramentoDegradado(resultadoTls.Message, agora, proximoMonitoramento);
+            return;
+        }
+
+        empresa.RegistrarMonitoramentoSaudavel(agora, proximoMonitoramento);
     }
 }

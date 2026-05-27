@@ -19,7 +19,8 @@ public class GetPublicEmpresaByHostServiceTests
             new DateTime(2026, 1, 5, 8, 0, 0, DateTimeKind.Utc));
         scenario.Empresa.AtivarDominioPersonalizado(
             new DateTime(2026, 1, 5, 8, 30, 0, DateTimeKind.Utc),
-            new DateTime(2026, 1, 5, 8, 30, 0, DateTimeKind.Utc));
+            new DateTime(2026, 1, 5, 8, 30, 0, DateTimeKind.Utc),
+            new DateTime(2026, 1, 5, 20, 30, 0, DateTimeKind.Utc));
         await db.SaveChangesAsync();
 
         var sut = new GetPublicEmpresaByHostService(

@@ -182,6 +182,10 @@ function createEmptyCustomDomain(): AdminCustomDomain {
     tlsNextRetryAt: null,
     httpsReadyAt: null,
     activatedAt: null,
+    revertedToFallback: false,
+    lastHealthyMonitoringAt: null,
+    lastDegradedMonitoringAt: null,
+    lastDegradedMonitoringReason: null,
   };
 }
 
@@ -354,6 +358,27 @@ function getDomainOnboardingState(
 
   switch (customDomain.status) {
     case "active":
+      if (!customDomain.activeDomain && customDomain.revertedToFallback) {
+        return {
+          badge: { tone: "danger", label: "Degradado" },
+          title: "Domínio estava ativo mas perdeu prontidão",
+          description:
+            customDomain.lastDegradedMonitoringReason ??
+            "O monitoramento pós-ativação detectou que o domínio não está mais totalmente pronto. O DNS pode ter mudado, o HTTPS pode ter expirado, ou a plataforma não consegue mais servir esse hostname com segurança.",
+          guidance: fallbackStorefrontLink
+            ? "O link hospedado pela petcenter voltou a ser o endereço canônico até a recuperação automática restaurar o domínio próprio."
+            : "Defina um slug válido para manter um fallback compartilhável enquanto o domínio está sendo recuperado.",
+          latestOutcome:
+            customDomain.lastHealthyMonitoringAt && customDomain.lastDegradedMonitoringAt
+              ? `Última checagem saudável em ${formatDateTimeLabel(customDomain.lastHealthyMonitoringAt, "instante não informado")}. Degradação detectada em ${formatDateTimeLabel(customDomain.lastDegradedMonitoringAt, "instante não informado")}.`
+              : customDomain.lastDegradedMonitoringAt
+                ? `Degradação detectada em ${formatDateTimeLabel(customDomain.lastDegradedMonitoringAt, "instante não informado")}.`
+                : "O domínio estava ativo mas o monitoramento detectou regressão na prontidão.",
+          retryGuidance:
+            "A plataforma continua monitorando automaticamente. Quando o DNS e o HTTPS voltarem a estar totalmente prontos, o domínio próprio volta a ser canônico sem necessidade de configuração manual.",
+        };
+      }
+
       return {
         badge: { tone: "success", label: "Ativo" },
         title: "Domínio personalizado ativo",
@@ -748,7 +773,7 @@ function getStorefrontLinkState(args: {
   }
 
   if (isPublished && missingRequirementsCount === 0) {
-    if (customDomain.status === "active") {
+    if (customDomain.status === "active" && customDomain.activeDomain) {
       return {
         kind: "active",
         badge: { tone: "success", label: "Domínio canônico ativo" },
@@ -763,22 +788,24 @@ function getStorefrontLinkState(args: {
       badge: { tone: "success", label: "Fallback ativo para compartilhamento" },
       title: "Compartilhe o link atual da vitrine",
       description: fallbackStorefrontLink
-        ? customDomain.status === "tls_failed"
-          ? "O DNS já foi validado, mas o certificado ainda falhou. O host compartilhado segue como URL canônica até a recuperação do HTTPS."
-          : customDomain.status === "provisioning_tls"
-            ? "O DNS já está pronto, mas o certificado ainda está sendo provisionado. O host compartilhado segue como URL canônica até o HTTPS ficar pronto."
-            : customDomain.status === "dns_failed"
-              ? "A última checagem DNS falhou. O host compartilhado segue como URL canônica até a próxima verificação bem-sucedida."
-              : customDomain.status === "verifying_dns"
-                ? "A verificação automática do DNS está em andamento. O host compartilhado segue como URL canônica até a ativação do domínio."
-                : customDomain.status === "pending_setup"
-                  ? "O domínio desejado foi salvo, mas o host compartilhado continua canônico até o DNS ficar pronto."
-                  : "O host compartilhado continua sendo a URL canônica enquanto nenhum domínio próprio ativo estiver disponível."
+        ? customDomain.status === "active" && !customDomain.activeDomain && customDomain.revertedToFallback
+          ? "O domínio estava ativo mas perdeu prontidão. O host compartilhado voltou a ser canônico e está sendo monitorado para recuperação automática."
+          : customDomain.status === "tls_failed"
+            ? "O DNS já foi validado, mas o certificado ainda falhou. O host compartilhado segue como URL canônica até a recuperação do HTTPS."
+            : customDomain.status === "provisioning_tls"
+              ? "O DNS já está pronto, mas o certificado ainda está sendo provisionado. O host compartilhado segue como URL canônica até o HTTPS ficar pronto."
+              : customDomain.status === "dns_failed"
+                ? "A última checagem DNS falhou. O host compartilhado segue como URL canônica até a próxima verificação bem-sucedida."
+                : customDomain.status === "verifying_dns"
+                  ? "A verificação automática do DNS está em andamento. O host compartilhado segue como URL canônica até a ativação do domínio."
+                  : customDomain.status === "pending_setup"
+                    ? "O domínio desejado foi salvo, mas o host compartilhado continua canônico até o DNS ficar pronto."
+                    : "O host compartilhado continua sendo a URL canônica enquanto nenhum domínio próprio ativo estiver disponível."
         : "A vitrine já está pública e o link canônico atual pode ser compartilhado com os clientes.",
     };
   }
 
-  if (customDomain.status === "active") {
+  if (customDomain.status === "active" && customDomain.activeDomain) {
     return {
       kind: "preview",
       badge: { tone: "warning", label: "Preview do domínio ativo" },

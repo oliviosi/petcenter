@@ -35,6 +35,7 @@ public class StorefrontDomainVerificationServiceTests
             {
                 ExpectedTarget = "storefront.petcenter.local",
                 RetryDelay = TimeSpan.FromMinutes(15),
+                ActiveMonitoringInterval = TimeSpan.FromHours(12),
                 BatchSize = 10
             }),
             Options.Create(new StorefrontDomainCertificateReadinessOptions
@@ -60,6 +61,11 @@ public class StorefrontDomainVerificationServiceTests
         Assert.Null(empresaAtualizada.DominioPersonalizadoTlsProximaTentativaEm);
         Assert.Equal(agora.UtcDateTime, empresaAtualizada.DominioPersonalizadoHttpsProntoEm);
         Assert.Equal(agora.UtcDateTime, empresaAtualizada.DominioPersonalizadoAtivadoEm);
+        Assert.Equal(agora.UtcDateTime, empresaAtualizada.DominioPersonalizadoUltimoMonitoramentoSaudavelEm);
+        Assert.Null(empresaAtualizada.DominioPersonalizadoUltimoMonitoramentoDegradadoEm);
+        Assert.Null(empresaAtualizada.DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo);
+        Assert.Equal(agora.UtcDateTime.AddHours(12), empresaAtualizada.DominioPersonalizadoProximoMonitoramentoEm);
+        Assert.False(empresaAtualizada.DominioPersonalizadoCanonicoRevertidoParaFallback);
     }
 
     [Fact]
@@ -91,6 +97,7 @@ public class StorefrontDomainVerificationServiceTests
                 ExpectedTarget = "storefront.petcenter.local",
                 ApexExpectedTargets = ["198.51.100.10", "apex.storefront.petcenter.local"],
                 RetryDelay = TimeSpan.FromMinutes(15),
+                ActiveMonitoringInterval = TimeSpan.FromHours(12),
                 BatchSize = 10
             }),
             Options.Create(new StorefrontDomainCertificateReadinessOptions
@@ -141,6 +148,7 @@ public class StorefrontDomainVerificationServiceTests
             {
                 ExpectedTarget = "storefront.petcenter.local",
                 RetryDelay = retryDelay,
+                ActiveMonitoringInterval = TimeSpan.FromHours(12),
                 BatchSize = 10
             }),
             Options.Create(new StorefrontDomainCertificateReadinessOptions
@@ -201,6 +209,7 @@ public class StorefrontDomainVerificationServiceTests
             {
                 ExpectedTarget = "storefront.petcenter.local",
                 RetryDelay = retryDelay,
+                ActiveMonitoringInterval = TimeSpan.FromHours(12),
                 BatchSize = 10
             }),
             Options.Create(new StorefrontDomainCertificateReadinessOptions
@@ -224,6 +233,214 @@ public class StorefrontDomainVerificationServiceTests
         Assert.Null(empresaAtualizada.DominioPersonalizadoAtivo);
         Assert.Null(empresaAtualizada.DominioPersonalizadoHttpsProntoEm);
         Assert.Null(empresaAtualizada.DominioPersonalizadoAtivadoEm);
+    }
+
+    [Fact]
+    public async Task ProcessPendingAsync_ShouldRecordHealthyMonitoringForActiveDomain()
+    {
+        using var db = TestData.CreateDbContext();
+        var empresa = new Empresa("Pet Center Vila");
+        var ativadoEm = new DateTime(2026, 6, 27, 9, 0, 0, DateTimeKind.Utc);
+        var proximoMonitoramento = ativadoEm.AddHours(12);
+        empresa.DefinirDominioPersonalizadoDesejado("agenda.petcenter-vila.com", ativadoEm);
+        empresa.AtivarDominioPersonalizado(ativadoEm, ativadoEm, proximoMonitoramento);
+        db.Empresas.Add(empresa);
+        await db.SaveChangesAsync();
+
+        var agora = new DateTimeOffset(2026, 6, 27, 21, 0, 0, TimeSpan.Zero);
+        var sut = new StorefrontDomainVerificationService(
+            new EmpresaRepository(db),
+            new FakeStorefrontDomainDnsVerificationService(new StorefrontDomainDnsVerificationResult
+            {
+                IsVerified = true,
+                Message = "Domínio verificado com sucesso."
+            }),
+            new FakeStorefrontDomainCertificateReadinessService(new StorefrontDomainCertificateReadinessResult
+            {
+                IsReady = true,
+                Message = "HTTPS pronto para o domínio."
+            }),
+            Options.Create(new StorefrontDomainVerificationOptions
+            {
+                ExpectedTarget = "storefront.petcenter.local",
+                RetryDelay = TimeSpan.FromMinutes(15),
+                ActiveMonitoringInterval = TimeSpan.FromHours(12),
+                BatchSize = 10
+            }),
+            Options.Create(new StorefrontDomainCertificateReadinessOptions
+            {
+                ProbePath = "/",
+                RetryDelay = TimeSpan.FromMinutes(15)
+            }),
+            new ManualTimeProvider(agora));
+
+        await sut.ProcessPendingAsync();
+
+        var empresaAtualizada = await db.Empresas.FindAsync(empresa.Id);
+        Assert.NotNull(empresaAtualizada);
+        Assert.Equal(StorefrontCustomDomainStatus.Active, empresaAtualizada!.DominioPersonalizadoStatus);
+        Assert.Equal("agenda.petcenter-vila.com", empresaAtualizada.DominioPersonalizadoAtivo);
+        Assert.Equal(agora.UtcDateTime, empresaAtualizada.DominioPersonalizadoUltimoMonitoramentoSaudavelEm);
+        Assert.Null(empresaAtualizada.DominioPersonalizadoUltimoMonitoramentoDegradadoEm);
+        Assert.Null(empresaAtualizada.DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo);
+        Assert.Equal(agora.UtcDateTime.AddHours(12), empresaAtualizada.DominioPersonalizadoProximoMonitoramentoEm);
+        Assert.False(empresaAtualizada.DominioPersonalizadoCanonicoRevertidoParaFallback);
+    }
+
+    [Fact]
+    public async Task ProcessPendingAsync_ShouldRecordDegradedMonitoringAndRevertToFallback()
+    {
+        using var db = TestData.CreateDbContext();
+        var empresa = new Empresa("Pet Center Vila");
+        var ativadoEm = new DateTime(2026, 6, 27, 9, 0, 0, DateTimeKind.Utc);
+        var proximoMonitoramento = ativadoEm.AddHours(12);
+        empresa.DefinirDominioPersonalizadoDesejado("agenda.petcenter-vila.com", ativadoEm);
+        empresa.AtivarDominioPersonalizado(ativadoEm, ativadoEm, proximoMonitoramento);
+        db.Empresas.Add(empresa);
+        await db.SaveChangesAsync();
+
+        var agora = new DateTimeOffset(2026, 6, 27, 21, 0, 0, TimeSpan.Zero);
+        var sut = new StorefrontDomainVerificationService(
+            new EmpresaRepository(db),
+            new FakeStorefrontDomainDnsVerificationService(new StorefrontDomainDnsVerificationResult
+            {
+                IsVerified = false,
+                Message = "O domínio não aponta mais para o destino esperado."
+            }),
+            new FakeStorefrontDomainCertificateReadinessService(new StorefrontDomainCertificateReadinessResult
+            {
+                IsReady = true,
+                Message = "HTTPS pronto para o domínio."
+            }),
+            Options.Create(new StorefrontDomainVerificationOptions
+            {
+                ExpectedTarget = "storefront.petcenter.local",
+                RetryDelay = TimeSpan.FromMinutes(15),
+                ActiveMonitoringInterval = TimeSpan.FromHours(12),
+                BatchSize = 10
+            }),
+            Options.Create(new StorefrontDomainCertificateReadinessOptions
+            {
+                ProbePath = "/",
+                RetryDelay = TimeSpan.FromMinutes(15)
+            }),
+            new ManualTimeProvider(agora));
+
+        await sut.ProcessPendingAsync();
+
+        var empresaAtualizada = await db.Empresas.FindAsync(empresa.Id);
+        Assert.NotNull(empresaAtualizada);
+        Assert.Equal(StorefrontCustomDomainStatus.Active, empresaAtualizada!.DominioPersonalizadoStatus);
+        Assert.Null(empresaAtualizada.DominioPersonalizadoAtivo);
+        Assert.Equal(agora.UtcDateTime, empresaAtualizada.DominioPersonalizadoUltimoMonitoramentoDegradadoEm);
+        Assert.Equal("O domínio não aponta mais para o destino esperado.", empresaAtualizada.DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo);
+        Assert.Equal(agora.UtcDateTime.AddHours(12), empresaAtualizada.DominioPersonalizadoProximoMonitoramentoEm);
+        Assert.True(empresaAtualizada.DominioPersonalizadoCanonicoRevertidoParaFallback);
+    }
+
+    [Fact]
+    public async Task ProcessPendingAsync_ShouldRestoreActiveDomainAfterDegradation()
+    {
+        using var db = TestData.CreateDbContext();
+        var empresa = new Empresa("Pet Center Vila");
+        var ativadoEm = new DateTime(2026, 6, 27, 9, 0, 0, DateTimeKind.Utc);
+        var degradadoEm = new DateTime(2026, 6, 27, 21, 0, 0, DateTimeKind.Utc);
+        var proximoMonitoramento = degradadoEm.AddHours(12);
+        empresa.DefinirDominioPersonalizadoDesejado("agenda.petcenter-vila.com", ativadoEm);
+        empresa.AtivarDominioPersonalizado(ativadoEm, ativadoEm, proximoMonitoramento);
+        empresa.RegistrarMonitoramentoDegradado("O domínio não aponta mais para o destino esperado.", degradadoEm, proximoMonitoramento);
+        db.Empresas.Add(empresa);
+        await db.SaveChangesAsync();
+
+        var agora = new DateTimeOffset(2026, 6, 28, 9, 0, 0, TimeSpan.Zero);
+        var sut = new StorefrontDomainVerificationService(
+            new EmpresaRepository(db),
+            new FakeStorefrontDomainDnsVerificationService(new StorefrontDomainDnsVerificationResult
+            {
+                IsVerified = true,
+                Message = "Domínio verificado com sucesso."
+            }),
+            new FakeStorefrontDomainCertificateReadinessService(new StorefrontDomainCertificateReadinessResult
+            {
+                IsReady = true,
+                Message = "HTTPS pronto para o domínio."
+            }),
+            Options.Create(new StorefrontDomainVerificationOptions
+            {
+                ExpectedTarget = "storefront.petcenter.local",
+                RetryDelay = TimeSpan.FromMinutes(15),
+                ActiveMonitoringInterval = TimeSpan.FromHours(12),
+                BatchSize = 10
+            }),
+            Options.Create(new StorefrontDomainCertificateReadinessOptions
+            {
+                ProbePath = "/",
+                RetryDelay = TimeSpan.FromMinutes(15)
+            }),
+            new ManualTimeProvider(agora));
+
+        await sut.ProcessPendingAsync();
+
+        var empresaAtualizada = await db.Empresas.FindAsync(empresa.Id);
+        Assert.NotNull(empresaAtualizada);
+        Assert.Equal(StorefrontCustomDomainStatus.Active, empresaAtualizada!.DominioPersonalizadoStatus);
+        Assert.Equal("agenda.petcenter-vila.com", empresaAtualizada.DominioPersonalizadoAtivo);
+        Assert.Equal(agora.UtcDateTime, empresaAtualizada.DominioPersonalizadoUltimoMonitoramentoSaudavelEm);
+        Assert.Null(empresaAtualizada.DominioPersonalizadoUltimoMonitoramentoDegradadoEm);
+        Assert.Null(empresaAtualizada.DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo);
+        Assert.Equal(agora.UtcDateTime.AddHours(12), empresaAtualizada.DominioPersonalizadoProximoMonitoramentoEm);
+        Assert.False(empresaAtualizada.DominioPersonalizadoCanonicoRevertidoParaFallback);
+    }
+
+    [Fact]
+    public async Task ProcessPendingAsync_ShouldRecordDegradedMonitoringWhenDnsIsHealthyButTlsFails()
+    {
+        using var db = TestData.CreateDbContext();
+        var empresa = new Empresa("Pet Center Vila");
+        var ativadoEm = new DateTime(2026, 6, 27, 9, 0, 0, DateTimeKind.Utc);
+        var proximoMonitoramento = ativadoEm.AddHours(12);
+        empresa.DefinirDominioPersonalizadoDesejado("agenda.petcenter-vila.com", ativadoEm);
+        empresa.AtivarDominioPersonalizado(ativadoEm, ativadoEm, proximoMonitoramento);
+        db.Empresas.Add(empresa);
+        await db.SaveChangesAsync();
+
+        var agora = new DateTimeOffset(2026, 6, 27, 21, 0, 0, TimeSpan.Zero);
+        var sut = new StorefrontDomainVerificationService(
+            new EmpresaRepository(db),
+            new FakeStorefrontDomainDnsVerificationService(new StorefrontDomainDnsVerificationResult
+            {
+                IsVerified = true,
+                Message = "Domínio verificado com sucesso."
+            }),
+            new FakeStorefrontDomainCertificateReadinessService(new StorefrontDomainCertificateReadinessResult
+            {
+                IsReady = false,
+                Message = "O certificado TLS expirou."
+            }),
+            Options.Create(new StorefrontDomainVerificationOptions
+            {
+                ExpectedTarget = "storefront.petcenter.local",
+                RetryDelay = TimeSpan.FromMinutes(15),
+                ActiveMonitoringInterval = TimeSpan.FromHours(12),
+                BatchSize = 10
+            }),
+            Options.Create(new StorefrontDomainCertificateReadinessOptions
+            {
+                ProbePath = "/",
+                RetryDelay = TimeSpan.FromMinutes(15)
+            }),
+            new ManualTimeProvider(agora));
+
+        await sut.ProcessPendingAsync();
+
+        var empresaAtualizada = await db.Empresas.FindAsync(empresa.Id);
+        Assert.NotNull(empresaAtualizada);
+        Assert.Equal(StorefrontCustomDomainStatus.Active, empresaAtualizada!.DominioPersonalizadoStatus);
+        Assert.Null(empresaAtualizada.DominioPersonalizadoAtivo);
+        Assert.Equal(agora.UtcDateTime, empresaAtualizada.DominioPersonalizadoUltimoMonitoramentoDegradadoEm);
+        Assert.Equal("O certificado TLS expirou.", empresaAtualizada.DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo);
+        Assert.Equal(agora.UtcDateTime.AddHours(12), empresaAtualizada.DominioPersonalizadoProximoMonitoramentoEm);
+        Assert.True(empresaAtualizada.DominioPersonalizadoCanonicoRevertidoParaFallback);
     }
 }
 

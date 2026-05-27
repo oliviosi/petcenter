@@ -1,7 +1,5 @@
-## Purpose
-Define tenant-facing requirements for viewing and sharing the canonical public storefront link across staged custom-domain readiness.
+## MODIFIED Requirements
 
-## Requirements
 ### Requirement: Tenant can view the canonical storefront link
 The system SHALL expose the petshop's canonical public storefront link in the authenticated tenant admin experience using the active custom domain only after DNS verification and certificate readiness have both completed successfully, whether the fully active domain is apex/root or subdomain, or the shared-host storefront route when no fully active custom domain exists or when a previously active custom domain has lost readiness.
 
@@ -35,10 +33,3 @@ The system SHALL communicate whether the canonical storefront link is active, pr
 #### Scenario: Failed readiness keeps fallback canonical
 - **WHEN** the most recent DNS-verification or certificate-readiness attempt for the desired custom domain has failed
 - **THEN** the system keeps the shared-host fallback as the canonical storefront link and explains that further automated recovery is still required before switching URLs
-
-### Requirement: Tenant can copy the active storefront link
-The system SHALL allow the authenticated tenant user to copy the current canonical storefront link for manual sharing, regardless of whether that active link is on the shared host or an active custom domain.
-
-#### Scenario: Tenant copies current canonical link
-- **WHEN** an authenticated tenant user requests the copy action for the active storefront link
-- **THEN** the system provides the current canonical public storefront link for manual sharing

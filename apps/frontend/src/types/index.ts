@@ -112,6 +112,10 @@ export interface AdminCustomDomain {
   tlsNextRetryAt: string | null;
   httpsReadyAt: string | null;
   activatedAt: string | null;
+  revertedToFallback: boolean;
+  lastHealthyMonitoringAt: string | null;
+  lastDegradedMonitoringAt: string | null;
+  lastDegradedMonitoringReason: string | null;
 }
 
 export interface BookingSearchFilters {

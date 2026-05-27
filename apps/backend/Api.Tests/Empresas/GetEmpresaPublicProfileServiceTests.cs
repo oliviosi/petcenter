@@ -69,6 +69,60 @@ public class GetEmpresaPublicProfileServiceTests
         Assert.NotNull(response.DominioPersonalizadoOrientacaoDns.OrientacaoRedirecionamentoWwwOpcional);
     }
 
+    [Fact]
+    public async Task HandleAsync_ShouldExposeActiveDomainMonitoringContext()
+    {
+        using var db = TestData.CreateDbContext();
+        var empresa = new Empresa("Pet Center Vila");
+        var ativadoEm = new DateTime(2026, 6, 27, 9, 0, 0, DateTimeKind.Utc);
+        var proximoMonitoramento = ativadoEm.AddHours(12);
+        empresa.DefinirDominioPersonalizadoDesejado("agenda.petcenter-vila.com", ativadoEm);
+        empresa.AtivarDominioPersonalizado(ativadoEm, ativadoEm, proximoMonitoramento);
+        db.Empresas.Add(empresa);
+        await db.SaveChangesAsync();
+
+        var sut = new GetEmpresaPublicProfileService(
+            new EmpresaRepository(db),
+            CreateDomainVerificationOptions());
+
+        var response = await sut.HandleAsync(empresa.Id);
+
+        Assert.Equal("agenda.petcenter-vila.com", response.DominioPersonalizadoAtivo);
+        Assert.Equal("active", response.DominioPersonalizadoStatus);
+        Assert.Equal(ativadoEm, response.DominioPersonalizadoUltimoMonitoramentoSaudavelEm);
+        Assert.Null(response.DominioPersonalizadoUltimoMonitoramentoDegradadoEm);
+        Assert.Null(response.DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo);
+        Assert.False(response.DominioPersonalizadoCanonicoRevertidoParaFallback);
+    }
+
+    [Fact]
+    public async Task HandleAsync_ShouldExposeDegradedMonitoringContext()
+    {
+        using var db = TestData.CreateDbContext();
+        var empresa = new Empresa("Pet Center Vila");
+        var ativadoEm = new DateTime(2026, 6, 27, 9, 0, 0, DateTimeKind.Utc);
+        var degradadoEm = new DateTime(2026, 6, 27, 21, 0, 0, DateTimeKind.Utc);
+        var proximoMonitoramento = degradadoEm.AddHours(12);
+        empresa.DefinirDominioPersonalizadoDesejado("agenda.petcenter-vila.com", ativadoEm);
+        empresa.AtivarDominioPersonalizado(ativadoEm, ativadoEm, proximoMonitoramento);
+        empresa.RegistrarMonitoramentoDegradado("O domínio não aponta mais para o destino esperado.", degradadoEm, proximoMonitoramento);
+        db.Empresas.Add(empresa);
+        await db.SaveChangesAsync();
+
+        var sut = new GetEmpresaPublicProfileService(
+            new EmpresaRepository(db),
+            CreateDomainVerificationOptions());
+
+        var response = await sut.HandleAsync(empresa.Id);
+
+        Assert.Null(response.DominioPersonalizadoAtivo);
+        Assert.Equal("active", response.DominioPersonalizadoStatus);
+        Assert.Equal(ativadoEm, response.DominioPersonalizadoUltimoMonitoramentoSaudavelEm);
+        Assert.Equal(degradadoEm, response.DominioPersonalizadoUltimoMonitoramentoDegradadoEm);
+        Assert.Equal("O domínio não aponta mais para o destino esperado.", response.DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo);
+        Assert.True(response.DominioPersonalizadoCanonicoRevertidoParaFallback);
+    }
+
     private static IOptions<StorefrontDomainVerificationOptions> CreateDomainVerificationOptions() =>
         Options.Create(new StorefrontDomainVerificationOptions
         {

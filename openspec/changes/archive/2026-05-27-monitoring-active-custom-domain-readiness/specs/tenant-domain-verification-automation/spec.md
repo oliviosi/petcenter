@@ -1,7 +1,5 @@
-## Purpose
-Define tenant-facing requirements for asynchronous verification of custom storefront domains and handoff into certificate-readiness provisioning after DNS verification succeeds.
+## MODIFIED Requirements
 
-## Requirements
 ### Requirement: Desired storefront domains are verified asynchronously
 The system SHALL evaluate eligible desired storefront domains asynchronously after they are saved, using background verification instead of requiring a tenant-triggered foreground check, SHALL support both subdomain and apex/root domains in that flow, and SHALL continue background verification for domains that have already become active so post-activation DNS drift can be detected automatically.
 
@@ -23,10 +21,3 @@ The system SHALL persist the latest DNS-verification outcome for a desired store
 #### Scenario: Monitoring detects DNS drift after activation
 - **WHEN** background DNS verification finds that a previously active custom domain no longer matches the expected configuration
 - **THEN** the system records a degraded DNS outcome and keeps automatic recovery attempts scheduled
-
-### Requirement: Successful automated verification starts certificate-readiness provisioning
-The system SHALL treat successful automated DNS verification as the prerequisite for certificate-readiness provisioning for both subdomain and apex/root domains, and SHALL NOT promote the desired storefront domain directly to active until HTTPS readiness succeeds.
-
-#### Scenario: Verification succeeds in background processing
-- **WHEN** an automated verification attempt confirms that the desired storefront domain matches the expected configuration
-- **THEN** the system records DNS verification success and transitions the domain into certificate-readiness provisioning instead of marking it active immediately

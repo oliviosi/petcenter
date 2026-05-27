@@ -45,6 +45,18 @@ public class EmpresaConfiguration : IEntityTypeConfiguration<Empresa>
             .HasColumnName("dominio_personalizado_https_pronto_em");
         builder.Property(e => e.DominioPersonalizadoAtivadoEm)
             .HasColumnName("dominio_personalizado_ativado_em");
+        builder.Property(e => e.DominioPersonalizadoUltimoMonitoramentoSaudavelEm)
+            .HasColumnName("dominio_personalizado_ultimo_monitoramento_saudavel_em");
+        builder.Property(e => e.DominioPersonalizadoUltimoMonitoramentoDegradadoEm)
+            .HasColumnName("dominio_personalizado_ultimo_monitoramento_degradado_em");
+        builder.Property(e => e.DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo)
+            .HasColumnName("dominio_personalizado_ultimo_monitoramento_degradado_motivo")
+            .HasMaxLength(300);
+        builder.Property(e => e.DominioPersonalizadoProximoMonitoramentoEm)
+            .HasColumnName("dominio_personalizado_proximo_monitoramento_em");
+        builder.Property(e => e.DominioPersonalizadoCanonicoRevertidoParaFallback)
+            .HasColumnName("dominio_personalizado_canonico_revertido_para_fallback")
+            .IsRequired();
         builder.Property(e => e.DominioPersonalizadoStatus)
             .HasColumnName("dominio_personalizado_status")
             .HasConversion<string>()
@@ -66,5 +78,6 @@ public class EmpresaConfiguration : IEntityTypeConfiguration<Empresa>
         builder.HasIndex(e => e.DominioPersonalizadoAtivo).IsUnique();
         builder.HasIndex(e => e.DominioPersonalizadoProximaTentativaEm);
         builder.HasIndex(e => e.DominioPersonalizadoTlsProximaTentativaEm);
+        builder.HasIndex(e => e.DominioPersonalizadoProximoMonitoramentoEm);
     }
 }

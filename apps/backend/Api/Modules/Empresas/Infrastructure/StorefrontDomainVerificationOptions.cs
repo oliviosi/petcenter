@@ -15,6 +15,8 @@ public class StorefrontDomainVerificationOptions
 
     public TimeSpan RetryDelay { get; set; } = TimeSpan.FromMinutes(15);
 
+    public TimeSpan ActiveMonitoringInterval { get; set; } = TimeSpan.FromHours(12);
+
     [Range(1, 500)]
     public int BatchSize { get; set; } = 25;
 }

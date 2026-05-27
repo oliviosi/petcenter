@@ -27,6 +27,11 @@ public partial class Empresa
     public DateTime? DominioPersonalizadoTlsProximaTentativaEm { get; private set; }
     public DateTime? DominioPersonalizadoHttpsProntoEm { get; private set; }
     public DateTime? DominioPersonalizadoAtivadoEm { get; private set; }
+    public DateTime? DominioPersonalizadoUltimoMonitoramentoSaudavelEm { get; private set; }
+    public DateTime? DominioPersonalizadoUltimoMonitoramentoDegradadoEm { get; private set; }
+    public string? DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo { get; private set; }
+    public DateTime? DominioPersonalizadoProximoMonitoramentoEm { get; private set; }
+    public bool DominioPersonalizadoCanonicoRevertidoParaFallback { get; private set; }
     public StorefrontCustomDomainStatus DominioPersonalizadoStatus { get; private set; } =
         StorefrontCustomDomainStatus.Removed;
     public StorefrontCustomDomainDnsStatus DominioPersonalizadoDnsStatus { get; private set; } =
@@ -105,6 +110,11 @@ public partial class Empresa
         DominioPersonalizadoTlsProximaTentativaEm = null;
         DominioPersonalizadoHttpsProntoEm = null;
         DominioPersonalizadoAtivadoEm = null;
+        DominioPersonalizadoUltimoMonitoramentoSaudavelEm = null;
+        DominioPersonalizadoUltimoMonitoramentoDegradadoEm = null;
+        DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo = null;
+        DominioPersonalizadoProximoMonitoramentoEm = null;
+        DominioPersonalizadoCanonicoRevertidoParaFallback = false;
         DominioPersonalizadoStatus = StorefrontCustomDomainStatus.PendingSetup;
         DominioPersonalizadoDnsStatus = StorefrontCustomDomainDnsStatus.PendingSetup;
         DominioPersonalizadoTlsStatus = StorefrontCustomDomainTlsStatus.NotStarted;
@@ -170,12 +180,13 @@ public partial class Empresa
         DominioPersonalizadoStatus = StorefrontCustomDomainStatus.ProvisioningTls;
     }
 
-    public void AtivarDominioPersonalizado(DateTime httpsProntoEmUtc, DateTime ativadoEmUtc)
+    public void AtivarDominioPersonalizado(DateTime httpsProntoEmUtc, DateTime ativadoEmUtc, DateTime proximoMonitoramentoEmUtc)
     {
         if (string.IsNullOrWhiteSpace(DominioPersonalizadoDesejado))
             throw new ArgumentException("Domínio personalizado é obrigatório.");
 
         var httpsProntoEm = GarantirUtc(httpsProntoEmUtc);
+        var ativadoEm = GarantirUtc(ativadoEmUtc);
 
         DominioPersonalizadoAtivo = DominioPersonalizadoDesejado;
         DominioPersonalizadoUltimaFalha = null;
@@ -190,8 +201,14 @@ public partial class Empresa
         DominioPersonalizadoTlsProximaTentativaEm = null;
         DominioPersonalizadoHttpsProntoEm = httpsProntoEm;
         DominioPersonalizadoTlsStatus = StorefrontCustomDomainTlsStatus.Ready;
-        DominioPersonalizadoAtivadoEm = GarantirUtc(ativadoEmUtc);
+        DominioPersonalizadoAtivadoEm = ativadoEm;
         DominioPersonalizadoStatus = StorefrontCustomDomainStatus.Active;
+
+        DominioPersonalizadoUltimoMonitoramentoSaudavelEm = ativadoEm;
+        DominioPersonalizadoUltimoMonitoramentoDegradadoEm = null;
+        DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo = null;
+        DominioPersonalizadoProximoMonitoramentoEm = GarantirUtc(proximoMonitoramentoEmUtc);
+        DominioPersonalizadoCanonicoRevertidoParaFallback = false;
     }
 
     public void RegistrarFalhaDominioPersonalizado(
@@ -257,9 +274,56 @@ public partial class Empresa
         DominioPersonalizadoTlsProximaTentativaEm = null;
         DominioPersonalizadoHttpsProntoEm = null;
         DominioPersonalizadoAtivadoEm = null;
+        DominioPersonalizadoUltimoMonitoramentoSaudavelEm = null;
+        DominioPersonalizadoUltimoMonitoramentoDegradadoEm = null;
+        DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo = null;
+        DominioPersonalizadoProximoMonitoramentoEm = null;
+        DominioPersonalizadoCanonicoRevertidoParaFallback = false;
         DominioPersonalizadoStatus = StorefrontCustomDomainStatus.Removed;
         DominioPersonalizadoDnsStatus = StorefrontCustomDomainDnsStatus.Removed;
         DominioPersonalizadoTlsStatus = StorefrontCustomDomainTlsStatus.NotStarted;
+    }
+
+    public void RegistrarMonitoramentoSaudavel(DateTime monitoramentoEmUtc, DateTime proximoMonitoramentoEmUtc)
+    {
+        if (string.IsNullOrWhiteSpace(DominioPersonalizadoDesejado))
+            throw new ArgumentException("Domínio personalizado é obrigatório.");
+        if (DominioPersonalizadoStatus != StorefrontCustomDomainStatus.Active)
+            throw new ArgumentException("Domínio personalizado ainda não está ativo.");
+
+        DominioPersonalizadoUltimoMonitoramentoSaudavelEm = GarantirUtc(monitoramentoEmUtc);
+        DominioPersonalizadoProximoMonitoramentoEm = GarantirUtc(proximoMonitoramentoEmUtc);
+
+        if (DominioPersonalizadoCanonicoRevertidoParaFallback)
+        {
+            DominioPersonalizadoAtivo = DominioPersonalizadoDesejado;
+            DominioPersonalizadoCanonicoRevertidoParaFallback = false;
+            DominioPersonalizadoUltimoMonitoramentoDegradadoEm = null;
+            DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo = null;
+        }
+    }
+
+    public void RegistrarMonitoramentoDegradado(
+        string motivo,
+        DateTime monitoramentoEmUtc,
+        DateTime proximoMonitoramentoEmUtc)
+    {
+        if (string.IsNullOrWhiteSpace(DominioPersonalizadoDesejado))
+            throw new ArgumentException("Domínio personalizado é obrigatório.");
+        if (DominioPersonalizadoStatus != StorefrontCustomDomainStatus.Active)
+            throw new ArgumentException("Domínio personalizado ainda não está ativo.");
+        if (string.IsNullOrWhiteSpace(motivo))
+            throw new ArgumentException("Motivo é obrigatório.");
+
+        DominioPersonalizadoUltimoMonitoramentoDegradadoEm = GarantirUtc(monitoramentoEmUtc);
+        DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo = motivo.Trim();
+        DominioPersonalizadoProximoMonitoramentoEm = GarantirUtc(proximoMonitoramentoEmUtc);
+
+        if (!DominioPersonalizadoCanonicoRevertidoParaFallback)
+        {
+            DominioPersonalizadoAtivo = null;
+            DominioPersonalizadoCanonicoRevertidoParaFallback = true;
+        }
     }
 
     public void PublicarNoCatalogo()

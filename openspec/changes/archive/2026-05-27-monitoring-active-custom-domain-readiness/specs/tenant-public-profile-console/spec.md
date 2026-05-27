@@ -1,7 +1,5 @@
-## Purpose
-Define tenant-facing admin console requirements for maintaining the petshop public storefront profile and staged custom-domain readiness.
+## MODIFIED Requirements
 
-## Requirements
 ### Requirement: Tenant admin console exposes storefront profile management
 The system SHALL provide an authenticated tenant admin console section for viewing and editing the petshop public storefront profile, including the canonical public storefront link, its current availability state, the onboarding state of any desired custom storefront domain, the latest DNS-verification context available for that domain, the latest certificate-readiness context available for that domain, apex-specific DNS guidance when the desired domain is a root domain, and post-activation monitoring context when a previously active domain becomes degraded.
 
@@ -31,14 +29,3 @@ The system SHALL clearly communicate whether the petshop is currently public or 
 #### Scenario: Tenant reviews degraded active domain
 - **WHEN** a previously active custom domain loses readiness after activation
 - **THEN** the system explains that post-activation monitoring detected a recoverable regression and that the shared-host fallback is currently canonical
-
-### Requirement: Storefront profile section handles validation and recovery clearly
-The system SHALL provide clear validation, success, unpublished, and recoverable error states when the tenant updates the public storefront profile, including recoverable DNS-verification failures and recoverable certificate-readiness failures for the desired storefront domain.
-
-#### Scenario: Public storefront data is incomplete for publication
-- **WHEN** an authenticated tenant user tries to publish the storefront without the required public profile fields
-- **THEN** the system shows explicit validation feedback explaining what must be completed before publication
-
-#### Scenario: Domain verification remains recoverable
-- **WHEN** an authenticated tenant user reviews a desired domain that has not yet passed full readiness
-- **THEN** the system presents that state as recoverable guidance instead of implying the onboarding flow is permanently blocked
