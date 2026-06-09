@@ -8,11 +8,13 @@ public class EmailNotificationProvider : INotificationService
 {
     private readonly IEmpresaRepository _empresaRepository;
     private readonly ILogger<EmailNotificationProvider> _logger;
+    private readonly NotificationOptions _options;
 
-    public EmailNotificationProvider(IEmpresaRepository empresaRepository, ILogger<EmailNotificationProvider> logger)
+    public EmailNotificationProvider(IEmpresaRepository empresaRepository, ILogger<EmailNotificationProvider> logger, Microsoft.Extensions.Options.IOptions<NotificationOptions> options)
     {
         _empresaRepository = empresaRepository;
         _logger = logger;
+        _options = options?.Value ?? new NotificationOptions { MaxAttempts = 3, BaseDelayMs = 500 };
     }
 
     public async Task NotifyDomainStatusChangedAsync(Guid empresaId, string domain, string state, string reason)
@@ -37,8 +39,8 @@ public class EmailNotificationProvider : INotificationService
         var resultado = "failed";
         var enviadaEm = DateTime.UtcNow;
 
-        var maxAttempts = 3;
-        var baseDelayMs = 500; // first-slice default; make configurable later
+        var maxAttempts = _options.MaxAttempts;
+        var baseDelayMs = _options.BaseDelayMs; // configurable via options
 
         for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
