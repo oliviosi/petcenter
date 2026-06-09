@@ -34,7 +34,6 @@ public class EmailNotificationProvider : INotificationService
         // Basic retry/backoff (first-slice): try up to 3 attempts with exponential backoff.
         var categoria = state;
         var tentativas = 0;
-        var sucesso = false;
         var resultado = "failed";
         var enviadaEm = DateTime.UtcNow;
 
