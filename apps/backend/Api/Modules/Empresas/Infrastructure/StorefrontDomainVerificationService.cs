@@ -123,7 +123,7 @@ public class StorefrontDomainVerificationService : IStorefrontDomainVerification
         {
             empresa.RegistrarMonitoramentoDegradado(resultadoTls.Message, agora, proximoMonitoramento);
             await _empresaRepository.UpdateAsync(empresa);
-            await _notification_service.NotifyDomainStatusChangedAsync(empresa.Id, empresa.DominioPersonalizadoDesejado!, "degraded", resultadoTls.Message);
+            await _notificationService.NotifyDomainStatusChangedAsync(empresa.Id, empresa.DominioPersonalizadoDesejado!, "degraded", resultadoTls.Message);
             return;
         }
 
