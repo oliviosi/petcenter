@@ -1,0 +1,11 @@
+name: tenant-custom-domain-notifications
+summary: Entregar canal inicial de notificações (email) para eventos de degradação e recuperação de domínios custom dos tenants.
+apply:
+  requires: ["proposal","design","tasks"]
+artifacts:
+  - id: proposal
+    type: markdown
+  - id: design
+    type: markdown
+  - id: tasks
+    type: markdown
