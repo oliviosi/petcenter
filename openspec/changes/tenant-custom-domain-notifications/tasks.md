@@ -5,7 +5,7 @@
 - [x] 3. [backend] Subscribe NotificationService to `tenant.domain.status.changed` events and implement deduplication logic.
 - [x] 4. [backend] Implement retry/backoff strategy and record delivery outcomes.
 - [x] 5. [backend] Add tests: unit for deduplication, integration for send and outcome persistence.
-6. [frontend] Surface latest notification outcome in `/admin/profile` (already planned in other changes—coordinate).
+- [x] 6. [frontend] Surface latest notification outcome in `/admin/profile` (already planned in other changes—coordinate).
 7. [ops] Add config: NOTIFY_MAX_ATTEMPTS, NOTIFY_RETRY_BASE_MS, EMAIL_FROM_ADDRESS.
 8. [docs] Update OpenSpec and runbook for notification failures.
 
