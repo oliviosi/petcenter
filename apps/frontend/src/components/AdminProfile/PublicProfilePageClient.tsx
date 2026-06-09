@@ -1224,6 +1224,11 @@ export function PublicProfilePageClient({
                       <p className="text-sm font-medium text-content-primary">
                         {domainOnboardingState.latestOutcome}
                       </p>
+                      {profile.customDomain.lastNotificationResult ? (
+                        <p className="mt-1 text-xs text-content-secondary">
+                          Última notificação: {profile.customDomain.lastNotificationResult} ({profile.customDomain.lastNotificationAttempts} tentativas) em {formatDateTimeLabel(profile.customDomain.lastNotificationSentAt, "instante não informado")}.
+                        </p>
+                      ) : null}
                       <p className="text-sm text-content-secondary">
                         {domainOnboardingState.retryGuidance}
                       </p>
@@ -1351,6 +1356,11 @@ export function PublicProfilePageClient({
                 <p className="mt-3 text-sm font-medium text-content-primary">
                   {domainOnboardingState.latestOutcome}
                 </p>
+                {profile.customDomain.lastNotificationResult ? (
+                  <p className="mt-1 text-xs text-content-secondary">
+                    Última notificação: {profile.customDomain.lastNotificationResult} ({profile.customDomain.lastNotificationAttempts} tentativas) em {formatDateTimeLabel(profile.customDomain.lastNotificationSentAt, "instante não informado")}.
+                  </p>
+                ) : null}
                 <p className="mt-2 text-sm text-content-secondary">
                   {domainOnboardingState.retryGuidance}
                 </p>

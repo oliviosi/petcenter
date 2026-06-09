@@ -116,6 +116,12 @@ export interface AdminCustomDomain {
   lastHealthyMonitoringAt: string | null;
   lastDegradedMonitoringAt: string | null;
   lastDegradedMonitoringReason: string | null;
+// Notification metadata (latest)
+lastNotificationCategory: string | null;
+lastNotificationReason: string | null;
+lastNotificationSentAt: string | null;
+lastNotificationResult: string | null;
+lastNotificationAttempts: number;
 }
 
 export interface BookingSearchFilters {

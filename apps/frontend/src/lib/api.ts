@@ -794,6 +794,42 @@ function mapAdminCustomDomain(record: JsonRecord): AdminCustomDomain {
       "dominioPersonalizadoUltimoMonitoramentoDegradadoMotivo",
       "DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo",
     ),
+    // Notification metadata (latest)
+    lastNotificationCategory: readNullableString(
+      record,
+      "customDomainLastNotificationCategory",
+      "CustomDomainLastNotificationCategory",
+      "dominioPersonalizadoUltimaNotificacaoCategoria",
+      "DominioPersonalizadoUltimaNotificacaoCategoria",
+    ),
+    lastNotificationReason: readNullableString(
+      record,
+      "customDomainLastNotificationReason",
+      "CustomDomainLastNotificationReason",
+      "dominioPersonalizadoUltimaNotificacaoMotivo",
+      "DominioPersonalizadoUltimaNotificacaoMotivo",
+    ),
+    lastNotificationSentAt: readNullableString(
+      record,
+      "customDomainLastNotificationSentAt",
+      "CustomDomainLastNotificationSentAt",
+      "dominioPersonalizadoUltimaNotificacaoEnviadaEm",
+      "DominioPersonalizadoUltimaNotificacaoEnviadaEm",
+    ),
+    lastNotificationResult: readNullableString(
+      record,
+      "customDomainLastNotificationResult",
+      "CustomDomainLastNotificationResult",
+      "dominioPersonalizadoUltimaNotificacaoResultado",
+      "DominioPersonalizadoUltimaNotificacaoResultado",
+    ),
+    lastNotificationAttempts: readNumber(
+      record,
+      "customDomainLastNotificationAttempts",
+      "CustomDomainLastNotificationAttempts",
+      "dominioPersonalizadoUltimaNotificacaoTentativas",
+      "DominioPersonalizadoUltimaNotificacaoTentativas",
+    ),
   };
 }
 
