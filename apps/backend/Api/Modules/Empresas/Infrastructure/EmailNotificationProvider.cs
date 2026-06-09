@@ -31,18 +31,43 @@ public class EmailNotificationProvider : INotificationService
             return;
         }
 
-        // TODO: integrate with real email infrastructure. For now, set metadata as 'sent' mock.
+        // Basic retry/backoff (first-slice): try up to 3 attempts with exponential backoff.
         var categoria = state;
-        var resultado = "sent";
-        var tentativas = 1;
+        var tentativas = 0;
+        var sucesso = false;
+        var resultado = "failed";
         var enviadaEm = DateTime.UtcNow;
+
+        var maxAttempts = 3;
+        var baseDelayMs = 500; // first-slice default; make configurable later
+
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            tentativas = attempt;
+            try
+            {
+                // Placeholder send: integrate a real email send here.
+                _logger.LogInformation("(mock) Sending domain notification to Empresa {EmpresaId} (attempt {Attempt}) - {State} {Domain}", empresaId, attempt, state, domain);
+                // Simulate success immediately for now. Replace with actual SMTP/HTTP call.
+                sucesso = true;
+                resultado = "sent";
+                break;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Attempt {Attempt} failed sending domain notification for Empresa {EmpresaId}", attempt, empresaId);
+                // exponential backoff
+                var delay = baseDelayMs * (int)Math.Pow(2, attempt - 1);
+                await Task.Delay(delay);
+            }
+        }
 
         try
         {
-            empresa.RegistrarNotificacaoDominioPersonalizado(categoria, reason, enviadaEm, resultado, tentativas);
+            empresa.RegistrarNotificacaoDominioPersonalizado(categoria, reason, DateTime.UtcNow, resultado, tentativas);
             await _empresaRepository.UpdateAsync(empresa);
 
-            _logger.LogInformation("Recorded domain notification for Empresa {EmpresaId}: {State} {Domain}", empresaId, state, domain);
+            _logger.LogInformation("Recorded domain notification for Empresa {EmpresaId}: {State} {Domain} (result={Resultado} attempts={Attempts})", empresaId, state, domain, resultado, tentativas);
         }
         catch (Exception ex)
         {
