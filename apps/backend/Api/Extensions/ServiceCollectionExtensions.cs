@@ -69,6 +69,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGetPublicEmpresaBySlugService, GetPublicEmpresaBySlugService>();
         services.AddHostedService<StorefrontDomainVerificationWorker>();
 
+        // Notifications
+        services.AddScoped<Api.Modules.Empresas.Infrastructure.INotificationService, Api.Modules.Empresas.Infrastructure.EmailNotificationProvider>();
+
         // Profissionais
         services.AddScoped<IProfissionalRepository, ProfissionalRepository>();
         services.AddScoped<ICreateProfissionalService, CreateProfissionalService>();

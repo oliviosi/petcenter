@@ -38,6 +38,14 @@ public partial class Empresa
         StorefrontCustomDomainDnsStatus.Removed;
     public StorefrontCustomDomainTlsStatus DominioPersonalizadoTlsStatus { get; private set; } =
         StorefrontCustomDomainTlsStatus.NotStarted;
+
+    // Notification metadata (latest)
+    public string? DominioPersonalizadoUltimaNotificacaoCategoria { get; private set; }
+    public string? DominioPersonalizadoUltimaNotificacaoMotivo { get; private set; }
+    public DateTime? DominioPersonalizadoUltimaNotificacaoEnviadaEm { get; private set; }
+    public string? DominioPersonalizadoUltimaNotificacaoResultado { get; private set; }
+    public int DominioPersonalizadoUltimaNotificacaoTentativas { get; private set; }
+
     public bool Publica { get; private set; }
     public bool Ativo { get; private set; } = true;
     public DateTime CriadoEm { get; private set; } = DateTime.UtcNow;
@@ -301,6 +309,20 @@ public partial class Empresa
             DominioPersonalizadoUltimoMonitoramentoDegradadoEm = null;
             DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo = null;
         }
+    }
+
+    public void RegistrarNotificacaoDominioPersonalizado(
+        string categoria,
+        string motivo,
+        DateTime enviadaEmUtc,
+        string resultado,
+        int tentativas)
+    {
+        DominioPersonalizadoUltimaNotificacaoCategoria = string.IsNullOrWhiteSpace(categoria) ? null : categoria.Trim();
+        DominioPersonalizadoUltimaNotificacaoMotivo = string.IsNullOrWhiteSpace(motivo) ? null : motivo.Trim();
+        DominioPersonalizadoUltimaNotificacaoEnviadaEm = GarantirUtc(enviadaEmUtc);
+        DominioPersonalizadoUltimaNotificacaoResultado = string.IsNullOrWhiteSpace(resultado) ? null : resultado.Trim();
+        DominioPersonalizadoUltimaNotificacaoTentativas = tentativas;
     }
 
     public void RegistrarMonitoramentoDegradado(
