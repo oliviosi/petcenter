@@ -17,7 +17,6 @@ public class EmailNotificationProvider : INotificationService
 
     public async Task NotifyDomainStatusChangedAsync(Guid empresaId, string domain, string state, string reason)
     {
-        // Simplified first slice: attempt to record the notification and log the intent.
         var empresa = await _empresaRepository.GetByIdAsync(empresaId);
         if (empresa is null)
         {
@@ -25,7 +24,14 @@ public class EmailNotificationProvider : INotificationService
             return;
         }
 
-        // TODO: integrate with real email infrastructure. For now, set metadata as 'pending' / 'sent' mock.
+        // Deduplicate: if the last notification category matches the new state, skip sending.
+        if (string.Equals(empresa.DominioPersonalizadoUltimaNotificacaoCategoria, state, StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogInformation("Skipping duplicate domain notification for Empresa {EmpresaId}: {State}", empresaId, state);
+            return;
+        }
+
+        // TODO: integrate with real email infrastructure. For now, set metadata as 'sent' mock.
         var categoria = state;
         var resultado = "sent";
         var tentativas = 1;
@@ -33,7 +39,6 @@ public class EmailNotificationProvider : INotificationService
 
         try
         {
-            // Persist notification metadata on the Empresa entity.
             empresa.RegistrarNotificacaoDominioPersonalizado(categoria, reason, enviadaEm, resultado, tentativas);
             await _empresaRepository.UpdateAsync(empresa);
 

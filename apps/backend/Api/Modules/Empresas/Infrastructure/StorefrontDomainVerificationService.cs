@@ -11,6 +11,7 @@ public class StorefrontDomainVerificationService : IStorefrontDomainVerification
     private readonly StorefrontDomainVerificationOptions _dnsOptions;
     private readonly StorefrontDomainCertificateReadinessOptions _tlsOptions;
     private readonly TimeProvider _timeProvider;
+    private readonly INotificationService _notificationService;
 
     public StorefrontDomainVerificationService(
         IEmpresaRepository empresaRepository,
@@ -18,6 +19,7 @@ public class StorefrontDomainVerificationService : IStorefrontDomainVerification
         IStorefrontDomainCertificateReadinessService certificateReadinessService,
         IOptions<StorefrontDomainVerificationOptions> options,
         IOptions<StorefrontDomainCertificateReadinessOptions> certificateOptions,
+        INotificationService notificationService,
         TimeProvider timeProvider)
     {
         _empresaRepository = empresaRepository;
@@ -25,6 +27,7 @@ public class StorefrontDomainVerificationService : IStorefrontDomainVerification
         _certificateReadinessService = certificateReadinessService;
         _dnsOptions = options.Value;
         _tlsOptions = certificateOptions.Value;
+        _notificationService = notificationService;
         _timeProvider = timeProvider;
     }
 
@@ -107,6 +110,8 @@ public class StorefrontDomainVerificationService : IStorefrontDomainVerification
         if (!resultadoDns.IsVerified)
         {
             empresa.RegistrarMonitoramentoDegradado(resultadoDns.Message, agora, proximoMonitoramento);
+            await _empresaRepository.UpdateAsync(empresa);
+            await _notificationService.NotifyDomainStatusChangedAsync(empresa.Id, empresa.DominioPersonalizadoDesejado!, "degraded", resultadoDns.Message);
             return;
         }
 
@@ -117,9 +122,13 @@ public class StorefrontDomainVerificationService : IStorefrontDomainVerification
         if (!resultadoTls.IsReady)
         {
             empresa.RegistrarMonitoramentoDegradado(resultadoTls.Message, agora, proximoMonitoramento);
+            await _empresaRepository.UpdateAsync(empresa);
+            await _notification_service.NotifyDomainStatusChangedAsync(empresa.Id, empresa.DominioPersonalizadoDesejado!, "degraded", resultadoTls.Message);
             return;
         }
 
         empresa.RegistrarMonitoramentoSaudavel(agora, proximoMonitoramento);
+        await _empresaRepository.UpdateAsync(empresa);
+        await _notificationService.NotifyDomainStatusChangedAsync(empresa.Id, empresa.DominioPersonalizadoDesejado!, "healthy", "");
     }
 }
