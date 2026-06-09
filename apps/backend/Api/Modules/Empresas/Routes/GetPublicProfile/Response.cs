@@ -37,5 +37,10 @@ public class GetEmpresaPublicProfileResponse
     public DateTime? DominioPersonalizadoUltimoMonitoramentoDegradadoEm { get; set; }
     public string? DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo { get; set; }
     public bool DominioPersonalizadoCanonicoRevertidoParaFallback { get; set; }
+    public string? DominioPersonalizadoUltimaNotificacaoCategoria { get; set; }
+    public string? DominioPersonalizadoUltimaNotificacaoMotivo { get; set; }
+    public DateTime? DominioPersonalizadoUltimaNotificacaoEnviadaEm { get; set; }
+    public string? DominioPersonalizadoUltimaNotificacaoResultado { get; set; }
+    public int DominioPersonalizadoUltimaNotificacaoTentativas { get; set; }
     public bool Publica { get; set; }
 }

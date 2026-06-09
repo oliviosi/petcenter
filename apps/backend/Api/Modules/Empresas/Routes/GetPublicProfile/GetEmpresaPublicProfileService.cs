@@ -59,6 +59,11 @@ public class GetEmpresaPublicProfileService : IGetEmpresaPublicProfileService
             DominioPersonalizadoUltimoMonitoramentoDegradadoEm = empresa.DominioPersonalizadoUltimoMonitoramentoDegradadoEm,
             DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo = empresa.DominioPersonalizadoUltimoMonitoramentoDegradadoMotivo,
             DominioPersonalizadoCanonicoRevertidoParaFallback = empresa.DominioPersonalizadoCanonicoRevertidoParaFallback,
+            DominioPersonalizadoUltimaNotificacaoCategoria = empresa.DominioPersonalizadoUltimaNotificacaoCategoria,
+            DominioPersonalizadoUltimaNotificacaoMotivo = empresa.DominioPersonalizadoUltimaNotificacaoMotivo,
+            DominioPersonalizadoUltimaNotificacaoEnviadaEm = empresa.DominioPersonalizadoUltimaNotificacaoEnviadaEm,
+            DominioPersonalizadoUltimaNotificacaoResultado = empresa.DominioPersonalizadoUltimaNotificacaoResultado,
+            DominioPersonalizadoUltimaNotificacaoTentativas = empresa.DominioPersonalizadoUltimaNotificacaoTentativas,
             Publica = empresa.Publica
         };
     }

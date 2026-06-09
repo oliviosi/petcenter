@@ -123,6 +123,29 @@ public class GetEmpresaPublicProfileServiceTests
         Assert.True(response.DominioPersonalizadoCanonicoRevertidoParaFallback);
     }
 
+    [Fact]
+    public async Task HandleAsync_ShouldExposeNotificationMetadata()
+    {
+        using var db = TestData.CreateDbContext();
+        var empresa = new Empresa("Pet Center Vila");
+        var sent = new DateTime(2026, 6, 27, 10, 0, 0, DateTimeKind.Utc);
+        empresa.RegistrarNotificacaoDominioPersonalizado("degraded", "DNS mismatch", sent, "sent", 1);
+        db.Empresas.Add(empresa);
+        await db.SaveChangesAsync();
+
+        var sut = new GetEmpresaPublicProfileService(
+            new EmpresaRepository(db),
+            CreateDomainVerificationOptions());
+
+        var response = await sut.HandleAsync(empresa.Id);
+
+        Assert.Equal("degraded", response.DominioPersonalizadoUltimaNotificacaoCategoria);
+        Assert.Equal("DNS mismatch", response.DominioPersonalizadoUltimaNotificacaoMotivo);
+        Assert.Equal(sent, response.DominioPersonalizadoUltimaNotificacaoEnviadaEm);
+        Assert.Equal("sent", response.DominioPersonalizadoUltimaNotificacaoResultado);
+        Assert.Equal(1, response.DominioPersonalizadoUltimaNotificacaoTentativas);
+    }
+
     private static IOptions<StorefrontDomainVerificationOptions> CreateDomainVerificationOptions() =>
         Options.Create(new StorefrontDomainVerificationOptions
         {
