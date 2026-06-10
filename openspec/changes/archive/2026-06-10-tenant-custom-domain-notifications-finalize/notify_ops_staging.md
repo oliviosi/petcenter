@@ -11,6 +11,14 @@ Resumo rápido:
 - Executar psql "${STAGING_DATABASE_URL}" -f openspec/.../migration.sql
 - Validar colunas e rodar smoke tests
 
+Checklist de merge / validação:
+- [ ] PR de ops revisado
+- [ ] Migration aplicada em staging
+- [ ] Backend redeployado com a mesma imagem validada
+- [ ] Contract tests do frontend executados contra staging
+- [ ] Smoke tests e métricas conferidos
+- [ ] Resultado registrado no change log
+
 Marquem aqui quando concluído e coletem os logs de execução (stdout/stderr) para auditoria.
 
 Obrigado.

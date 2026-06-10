@@ -10,7 +10,7 @@ Passos operacionais (copiar/colar):
 
 1) Backup (formato custom):
 ```bash
-pg_dump -Fc "${STAGING_DATABASE_URL}" -f /tmp/backup_pre_migration_$(date +%Y%m%d%H%M).dump
+pg_dump -Fc "${STAGING_DATABASE_URL}" -f "<secure-backup-path>/backup_pre_migration.dump"
 ```
 
 2) Aplicar migration:
@@ -35,6 +35,14 @@ ALTER TABLE empresas DROP COLUMN IF EXISTS dominio_personalizado_ultima_notifica
 - Deploy do backend em staging
 - Rodar smoke: GET /health e acionar workflow de contract tests
 - Verificar métricas: notifications_attempts_total, notifications_sent_total
+
+Checklist de conclusão:
+- [ ] Backup criado em local seguro
+- [ ] Migration aplicada
+- [ ] Colunas verificadas
+- [ ] Backend deployado em staging
+- [ ] Smoke e contract tests executados
+- [ ] Métricas verificadas
 
 Checklist (marcar ao concluir):
 - [ ] Backup criado

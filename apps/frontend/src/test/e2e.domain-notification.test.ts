@@ -1,17 +1,20 @@
-// Playwright-style e2e skeleton using Playwright Test or similar runner
-// This is a placeholder; CI should run Playwright separately against staging.
+import { expect, test } from "@playwright/test";
 
-import { test, expect } from '@playwright/test'
+test.skip(
+  !process.env.STAGING_FRONTEND_URL,
+  "STAGING_FRONTEND_URL is required to run the staging smoke test",
+);
 
-test('domain notification UI reflects degraded state', async ({ page }) => {
-  // Visit storefront or admin UI
-  await page.goto(process.env.STAGING_FRONTEND_URL || 'http://localhost:3000')
+test("domain notification UI reflects degraded state", async ({ page }) => {
+  await page.goto(process.env.STAGING_FRONTEND_URL, { waitUntil: "networkidle" });
 
-  // Try to assert the banner exists (local fixture or staging)
-  const banner = page.locator('[role="status"]');
-  await banner.waitFor({ timeout: 5000 }).catch(() => {});
-  // If present, check content
-  if (await banner.isVisible()) {
-    await expect(banner).toContainText('Domínio');
+  const banner = page.locator('[role="status"]').first();
+  const bannerCount = await page.locator('[role="status"]').count();
+
+  if (bannerCount > 0) {
+    await expect(banner).toContainText(/Domínio personalizado/i);
+    return;
   }
+
+  await expect(page.getByRole("main")).toBeVisible();
 });

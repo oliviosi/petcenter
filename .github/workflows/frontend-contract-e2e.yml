@@ -1,6 +1,7 @@
 name: Frontend contract + e2e
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'apps/frontend/**'
@@ -9,26 +10,40 @@ on:
 jobs:
   contract:
     runs-on: ubuntu-latest
+    env:
+      STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
     steps:
       - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
       - name: Install
+        working-directory: apps/frontend
         run: |
-          cd apps/frontend
           npm ci
       - name: Run Vitest contract
+        working-directory: apps/frontend
         run: |
-          cd apps/frontend
-          npm run test --silent
+          npm run test -- --run src/test/contract.profile.test.ts
 
   e2e:
     runs-on: ubuntu-latest
     needs: contract
+    env:
+      STAGING_FRONTEND_URL: ${{ secrets.STAGING_FRONTEND_URL }}
     steps:
       - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
       - name: Install
+        working-directory: apps/frontend
         run: |
-          cd apps/frontend
           npm ci
-      - name: Run Playwright e2e (placeholder)
+          npx playwright install --with-deps
+      - name: Run Playwright e2e
+        working-directory: apps/frontend
         run: |
-          echo "Run Playwright e2e against STAGING_FRONTEND_URL when configured"
+          npx playwright test src/test/e2e.domain-notification.test.ts --project=chromium --timeout=60000

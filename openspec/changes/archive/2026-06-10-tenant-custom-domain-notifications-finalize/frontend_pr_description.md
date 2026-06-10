@@ -10,8 +10,9 @@ Notas para reviewers:
 
 Checklist sugerido para merge:
 - [ ] Secrets `STAGING_API_URL` e `STAGING_FRONTEND_URL` configurados no repositório.
-- [ ] CI: job que execute `npm ci && npm run test` para os testes de contrato.
-- [ ] CI: job separado para Playwright e2e (opcional, mas recomendado após deploy de staging).
+- [ ] CI: job que execute `npm ci && npm run test -- --run src/test/contract.profile.test.ts`.
+- [ ] CI: job separado para Playwright e2e com `npx playwright install --with-deps` e `npx playwright test src/test/e2e.domain-notification.test.ts`.
+- [ ] Validar staging com `STAGING_API_URL` e `STAGING_FRONTEND_URL` apontando para o deploy aprovado.
 
 Arquivos adicionados:
 - apps/frontend/src/test/contract.profile.test.ts

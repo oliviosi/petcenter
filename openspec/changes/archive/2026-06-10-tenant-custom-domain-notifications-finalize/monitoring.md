@@ -2,14 +2,15 @@
 
 Métricas propostas (Instrumentação no EmailNotificationProvider):
 - notifications_attempts_total (Counter) — incrementado a cada tentativa de envio.
-- notifications_sent_total (Counter) — incrementado ao enviar com sucesso.
-- notifications_failed_total (Counter) — incrementado quando todas as tentativas falham.
+- notifications_sent_total{result="success|failure"} (Counter) — incrementado ao concluir o envio, com label de resultado.
+- notifications_failed_total (Counter) — opcionalmente mantido para compatibilidade com dashboards legados.
 
 Regra de alerta recomendada:
 - Nome: DomainNotificationsHighFailureRate
 - Query (Prometheus):
   ```
-  rate(notifications_failed_total[5m]) / (rate(notifications_attempts_total[5m]) + 1e-9) > 0.20
+  rate(notifications_sent_total{result="failure"}[5m])
+    / (rate(notifications_sent_total[5m]) + 1e-9) > 0.20
   ```
 - Ação: Alert if >20% failures over 5 minutes for any service/instance.
 

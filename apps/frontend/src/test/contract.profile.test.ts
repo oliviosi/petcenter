@@ -1,29 +1,38 @@
-import { describe, it, expect } from 'vitest'
-import fs from 'fs'
-import path from 'path'
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { describe, expect, it } from "vitest";
 
-// Contract test: verifies the public profile endpoint includes optional domain notification fields
-describe('Public profile contract', () => {
-  it('exposes dominio_personalizado_* fields when present', async () => {
-    // If STAGING_API_URL is not set, use local fixture as fallback
+const notificationFields = [
+  "dominio_personalizado_ultima_notificacao_categoria",
+  "dominio_personalizado_ultima_notificacao_motivo",
+  "dominio_personalizado_ultima_notificacao_enviada_em",
+  "dominio_personalizado_ultima_notificacao_resultado",
+  "dominio_personalizado_ultima_notificacao_tentativas",
+] as const;
+
+function readFixtureProfile() {
+  const fixturePath = path.resolve(process.cwd(), "src/test/fixtures/profile.degraded.json");
+
+  return JSON.parse(readFileSync(fixturePath, "utf-8")) as Record<string, unknown>;
+}
+
+function expectNotificationFields(profile: Record<string, unknown>) {
+  for (const field of notificationFields) {
+    expect(profile).toHaveProperty(field);
+  }
+}
+
+describe("Public profile contract", () => {
+  it("exposes dominio_personalizado_* fields when present", async () => {
     if (!process.env.STAGING_API_URL) {
-      const fixture = JSON.parse(fs.readFileSync(path.resolve(__dirname, './fixtures/profile.degraded.json'), 'utf-8'))
-      expect(fixture).toHaveProperty('dominio_personalizado_ultima_notificacao_categoria')
-      expect(fixture).toHaveProperty('dominio_personalizado_ultima_notificacao_motivo')
-      expect(fixture).toHaveProperty('dominio_personalizado_ultima_notificacao_enviada_em')
-      expect(fixture).toHaveProperty('dominio_personalizado_ultima_notificacao_resultado')
-      expect(fixture).toHaveProperty('dominio_personalizado_ultima_notificacao_tentativas')
-      return
+      expectNotificationFields(readFixtureProfile());
+      return;
     }
 
-    const res = await fetch(process.env.STAGING_API_URL + '/api/public/profile')
-    const body = await res.json()
+    const response = await fetch(new URL("/api/public/profile", process.env.STAGING_API_URL));
+    expect(response.ok).toBe(true);
 
-    // fields may be null, but should exist when the backend has populated them
-    expect(body).toHaveProperty('dominio_personalizado_ultima_notificacao_categoria')
-    expect(body).toHaveProperty('dominio_personalizado_ultima_notificacao_motivo')
-    expect(body).toHaveProperty('dominio_personalizado_ultima_notificacao_enviada_em')
-    expect(body).toHaveProperty('dominio_personalizado_ultima_notificacao_resultado')
-    expect(body).toHaveProperty('dominio_personalizado_ultima_notificacao_tentativas')
-  })
-})
+    const body = (await response.json()) as Record<string, unknown>;
+    expectNotificationFields(body);
+  });
+});
