@@ -32,21 +32,21 @@ Status: draft
 
 ## Frontend
 
-- [ ] 1. Ensure frontend reads optional fields and renders notification context in admin/profile or public profile where applicable.
+- [x] 1. Ensure frontend reads optional fields and renders notification context in admin/profile or public profile where applicable.
   - Est: 2–4h (coordination)
-- [ ] 2. Add contract/e2e test to validate public DTO shape if possible.
+- [x] 2. Add contract/e2e test to validate public DTO shape if possible.
   - Est: 2–4h
 
 ## Ops & Docs
 
-- [ ] 1. Add config defaults: NOTIFY_RETRY_BASE_MS, NOTIFY_MAX_ATTEMPTS, EMAIL_FROM_ADDRESS.
-- [ ] 2. Update runbook with failure modes, steps to re-send and to silence notifications for a tenant.
-- [ ] 3. Monitor: add metric for notification outcomes and alert on increasing failure rate.
+- [x] 1. Add config defaults: NOTIFY_RETRY_BASE_MS, NOTIFY_MAX_ATTEMPTS, EMAIL_FROM_ADDRESS.
+- [x] 2. Update runbook with failure modes, steps to re-send and to silence notifications for a tenant.
+- [x] 3. Monitor: add metric for notification outcomes and alert on increasing failure rate.
 
 ## Validation
 
-- [ ] 1. Run backend unit + integration tests; ensure pipeline passes.
-- [ ] 2. Run frontend contract/e2e tests or validate manually with frontend.
+- [x] 1. Run backend unit + integration tests; ensure pipeline passes.
+- [x] 2. Run frontend contract/e2e tests or validate manually with frontend.
 
 ## Acceptance
 

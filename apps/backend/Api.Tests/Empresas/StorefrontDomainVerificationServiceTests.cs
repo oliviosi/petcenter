@@ -7,6 +7,21 @@ namespace Api.Tests.Empresas;
 
 public class StorefrontDomainVerificationServiceTests
 {
+    private static StorefrontDomainVerificationService CreateSut(
+        IEmpresaRepository empresaRepository,
+        IStorefrontDomainDnsVerificationService dnsVerificationService,
+        IStorefrontDomainCertificateReadinessService certificateReadinessService,
+        IOptions<StorefrontDomainVerificationOptions> options,
+        IOptions<StorefrontDomainCertificateReadinessOptions> certificateOptions,
+        TimeProvider timeProvider)
+        => new(empresaRepository, dnsVerificationService, certificateReadinessService, options, certificateOptions, new NoopNotificationService(), timeProvider);
+
+    private sealed class NoopNotificationService : INotificationService
+    {
+        public Task NotifyDomainStatusChangedAsync(Guid empresaId, string domain, string state, string reason)
+            => Task.CompletedTask;
+    }
+
     [Fact]
     public async Task ProcessPendingAsync_ShouldHandOffDnsSuccessToTlsProvisioningAndActivateWhenHttpsIsReady()
     {
@@ -19,7 +34,7 @@ public class StorefrontDomainVerificationServiceTests
         await db.SaveChangesAsync();
 
         var agora = new DateTimeOffset(2026, 6, 27, 9, 30, 0, TimeSpan.Zero);
-        var sut = new StorefrontDomainVerificationService(
+        var sut = CreateSut(
             new EmpresaRepository(db),
             new FakeStorefrontDomainDnsVerificationService(new StorefrontDomainDnsVerificationResult
             {
@@ -80,7 +95,7 @@ public class StorefrontDomainVerificationServiceTests
         await db.SaveChangesAsync();
 
         var agora = new DateTimeOffset(2026, 6, 27, 9, 30, 0, TimeSpan.Zero);
-        var sut = new StorefrontDomainVerificationService(
+        var sut = CreateSut(
             new EmpresaRepository(db),
             new FakeStorefrontDomainDnsVerificationService(new StorefrontDomainDnsVerificationResult
             {
@@ -132,7 +147,7 @@ public class StorefrontDomainVerificationServiceTests
 
         var agora = new DateTimeOffset(2026, 6, 27, 9, 30, 0, TimeSpan.Zero);
         var retryDelay = TimeSpan.FromMinutes(15);
-        var sut = new StorefrontDomainVerificationService(
+        var sut = CreateSut(
             new EmpresaRepository(db),
             new FakeStorefrontDomainDnsVerificationService(new StorefrontDomainDnsVerificationResult
             {
@@ -193,7 +208,7 @@ public class StorefrontDomainVerificationServiceTests
 
         var agora = new DateTimeOffset(2026, 6, 27, 9, 30, 0, TimeSpan.Zero);
         var retryDelay = TimeSpan.FromMinutes(15);
-        var sut = new StorefrontDomainVerificationService(
+        var sut = CreateSut(
             new EmpresaRepository(db),
             new FakeStorefrontDomainDnsVerificationService(new StorefrontDomainDnsVerificationResult
             {
@@ -248,7 +263,7 @@ public class StorefrontDomainVerificationServiceTests
         await db.SaveChangesAsync();
 
         var agora = new DateTimeOffset(2026, 6, 27, 21, 0, 0, TimeSpan.Zero);
-        var sut = new StorefrontDomainVerificationService(
+        var sut = CreateSut(
             new EmpresaRepository(db),
             new FakeStorefrontDomainDnsVerificationService(new StorefrontDomainDnsVerificationResult
             {
@@ -300,7 +315,7 @@ public class StorefrontDomainVerificationServiceTests
         await db.SaveChangesAsync();
 
         var agora = new DateTimeOffset(2026, 6, 27, 21, 0, 0, TimeSpan.Zero);
-        var sut = new StorefrontDomainVerificationService(
+        var sut = CreateSut(
             new EmpresaRepository(db),
             new FakeStorefrontDomainDnsVerificationService(new StorefrontDomainDnsVerificationResult
             {
@@ -353,7 +368,7 @@ public class StorefrontDomainVerificationServiceTests
         await db.SaveChangesAsync();
 
         var agora = new DateTimeOffset(2026, 6, 28, 9, 0, 0, TimeSpan.Zero);
-        var sut = new StorefrontDomainVerificationService(
+        var sut = CreateSut(
             new EmpresaRepository(db),
             new FakeStorefrontDomainDnsVerificationService(new StorefrontDomainDnsVerificationResult
             {
@@ -405,7 +420,7 @@ public class StorefrontDomainVerificationServiceTests
         await db.SaveChangesAsync();
 
         var agora = new DateTimeOffset(2026, 6, 27, 21, 0, 0, TimeSpan.Zero);
-        var sut = new StorefrontDomainVerificationService(
+        var sut = CreateSut(
             new EmpresaRepository(db),
             new FakeStorefrontDomainDnsVerificationService(new StorefrontDomainDnsVerificationResult
             {

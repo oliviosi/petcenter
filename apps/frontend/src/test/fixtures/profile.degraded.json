@@ -3,6 +3,7 @@
   "name": "Petshop Test",
   "dominio_personalizado_ultima_notificacao_categoria": "degraded",
   "dominio_personalizado_ultima_notificacao_motivo": "dns flakey",
+  "dominio_personalizado_ultima_notificacao_enviada_em": "2026-01-12T18:45:00Z",
   "dominio_personalizado_ultima_notificacao_resultado": "failed",
   "dominio_personalizado_ultima_notificacao_tentativas": 3
 }

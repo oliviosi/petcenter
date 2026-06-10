@@ -17,6 +17,7 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { SetupNotice } from "@/components/AdminSetup/SetupNotice";
+import DomainNotificationBanner from "@/components/DomainNotificationBanner";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -186,6 +187,12 @@ function createEmptyCustomDomain(): AdminCustomDomain {
     lastHealthyMonitoringAt: null,
     lastDegradedMonitoringAt: null,
     lastDegradedMonitoringReason: null,
+    // Notification metadata defaults
+    lastNotificationCategory: null,
+    lastNotificationReason: null,
+    lastNotificationSentAt: null,
+    lastNotificationResult: null,
+    lastNotificationAttempts: 0,
   };
 }
 
@@ -974,6 +981,14 @@ export function PublicProfilePageClient({
   return (
     <div className="grid gap-6 lg:grid-cols-3">
       <div className="space-y-6 lg:col-span-2">
+        <DomainNotificationBanner
+          category={profile.customDomain.lastNotificationCategory}
+          reason={profile.customDomain.lastNotificationReason}
+          sentAt={profile.customDomain.lastNotificationSentAt}
+          result={profile.customDomain.lastNotificationResult}
+          attempts={profile.customDomain.lastNotificationAttempts}
+        />
+
         <SetupNotice
           title={publicationState.notice.title}
           description={publicationState.notice.description}

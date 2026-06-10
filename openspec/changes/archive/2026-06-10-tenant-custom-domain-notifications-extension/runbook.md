@@ -19,10 +19,26 @@ Verify behavior
 3. If failure injected (simulate SMTP error), confirm retry is scheduled and attempts increments until NOTIFY_MAX_ATTEMPTS.
 4. Check GET /api/public/profile includes optional DominioPersonalizadoUltimaNotificacao* fields after notification is sent.
 
+Configuration defaults
+- NOTIFY_MAX_ATTEMPTS = 3
+- NOTIFY_RETRY_BASE_MS = 500
+- EMAIL_FROM_ADDRESS = no-reply@petcenter.local
+
+Monitoring
+- Counters emitted by the API:
+  - notifications_attempts_total
+  - notifications_sent_total
+  - notifications_failed_total
+- Alert on failure rate above 20% over 5m.
+
 Troubleshooting
 - No notification records: verify event subscription, background worker, and message bus connectivity.
 - Emails not sent: validate email provider configuration (SMTP creds, from address) and check provider logs.
 - Excessive retries: verify NOTIFY_MAX_ATTEMPTS is set; if broken provider, temporarily set max attempts to 1 and surface to ops team.
+
+Re-send / silence
+- To re-send a failed notification, re-trigger the latest `tenant.domain.status.changed` event for the tenant/domain after fixing the provider.
+- To silence notifications for one tenant, disable the domain alert source for that tenant or temporarily stop the NotificationService subscriber for the tenant scope.
 
 Rollbacks
 - To rollback schema, restore DB backup taken before migration.

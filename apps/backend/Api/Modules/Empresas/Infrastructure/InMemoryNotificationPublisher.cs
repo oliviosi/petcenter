@@ -86,7 +86,7 @@ namespace Api.Modules.Empresas.Infrastructure
             }
         }
 
-        private Task<bool> SimulateSendAsync(NotificationMessage message)
+        protected virtual Task<bool> SimulateSendAsync(NotificationMessage message)
         {
             // Default in-memory simulation: succeed immediately. Tests can replace behavior by mocking the publisher.
             return Task.FromResult(true);

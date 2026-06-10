@@ -61,6 +61,11 @@ const baseProfile = {
     lastHealthyMonitoringAt: null,
     lastDegradedMonitoringAt: null,
     lastDegradedMonitoringReason: null,
+    lastNotificationCategory: null,
+    lastNotificationReason: null,
+    lastNotificationSentAt: null,
+    lastNotificationResult: null,
+    lastNotificationAttempts: null,
   },
   isPublished: false,
 } as const;
@@ -188,6 +193,46 @@ describe("PublicProfilePageClient", () => {
         `A próxima tentativa automática está prevista para ${formatDateTimeLabel("2026-01-12T18:30:00Z")}.`,
       )[0],
     ).toBeInTheDocument();
+  });
+
+  it("shows the latest domain notification context when available", () => {
+    render(
+      <PublicProfilePageClient
+        profile={{
+          ...baseProfile,
+          slug: "pet-center-vila",
+          description: "Banho e tosa com atendimento humanizado.",
+          city: "São Paulo",
+          neighborhood: "Vila Mariana",
+          contactSummary: "WhatsApp (11) 99999-9999",
+          addressSummary: "Rua Exemplo, 123",
+          customDomain: {
+            ...baseProfile.customDomain,
+            desiredDomain: "agenda.petcenter-vila.com",
+            status: "pending_setup",
+            dnsStatus: "pending_setup",
+            lastNotificationCategory: "degraded",
+            lastNotificationReason: "DNS resolution failed during monitoring",
+            lastNotificationSentAt: "2026-01-12T18:45:00Z",
+            lastNotificationResult: "sent",
+            lastNotificationAttempts: 2,
+          },
+          isPublished: true,
+        }}
+        updatePublicProfileAction={vi.fn(async () => ({
+          success: true,
+          message: "ok",
+        }))}
+      />,
+    );
+
+    expect(screen.getByText("Problema detectado no domínio personalizado")).toBeInTheDocument();
+    expect(screen.getByText("DNS resolution failed during monitoring")).toBeInTheDocument();
+    expect(
+      screen.getByText(`Enviada em: ${formatDateTimeLabel("2026-01-12T18:45:00Z")}`),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Último resultado: sent")).toBeInTheDocument();
+    expect(screen.getByText("Tentativas: 2")).toBeInTheDocument();
   });
 
   it("shows apex-specific DNS guidance with optional www redirection advice", () => {

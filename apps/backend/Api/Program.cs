@@ -74,6 +74,24 @@ builder.Services.AddOptions<StorefrontDomainCertificateReadinessOptions>()
     .Validate(options => options.RetryDelay > TimeSpan.Zero, "StorefrontDomainCertificateReadiness:RetryDelay deve ser maior que zero.")
     .Validate(options => options.SuccessStatusCodes.Length > 0, "StorefrontDomainCertificateReadiness:SuccessStatusCodes deve ter ao menos um código.")
     .ValidateOnStart();
+builder.Services.AddOptions<NotificationOptions>()
+    .Bind(builder.Configuration.GetSection("NotificationOptions"))
+    .Configure(options =>
+    {
+        options.MaxAttempts = builder.Configuration.GetValue<int?>("NOTIFY_MAX_ATTEMPTS") ?? options.MaxAttempts;
+        options.BaseDelayMs = builder.Configuration.GetValue<int?>("NOTIFY_RETRY_BASE_MS") ?? options.BaseDelayMs;
+    })
+    .Validate(options => options.MaxAttempts > 0, "NotificationOptions:MaxAttempts deve ser maior que zero.")
+    .Validate(options => options.BaseDelayMs > 0, "NotificationOptions:BaseDelayMs deve ser maior que zero.")
+    .ValidateOnStart();
+builder.Services.AddOptions<EmailNotificationOptions>()
+    .Bind(builder.Configuration.GetSection(EmailNotificationOptions.SectionName))
+    .Configure(options =>
+    {
+        options.FromAddress = builder.Configuration["EMAIL_FROM_ADDRESS"] ?? options.FromAddress;
+    })
+    .Validate(options => !string.IsNullOrWhiteSpace(options.FromAddress), "Email:FromAddress é obrigatório.")
+    .ValidateOnStart();
 builder.Services.AddOptions<BookingQueueOptions>()
     .Bind(builder.Configuration.GetSection(BookingQueueOptions.SectionName))
     .ValidateDataAnnotations()

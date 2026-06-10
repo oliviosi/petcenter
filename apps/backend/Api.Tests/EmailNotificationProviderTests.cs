@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Api.Modules.Empresas.Domain;
 using Api.Modules.Empresas.Infrastructure;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Api.Tests
@@ -46,8 +47,9 @@ namespace Api.Tests
             empresa.RegistrarNotificacaoDominioPersonalizado("degraded", "initial", DateTime.UtcNow, "sent", 1);
             repo.Seed(empresa);
 
-            var logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<EmailNotificationProvider>();
-            var provider = new EmailNotificationProvider(repo, logger);
+            var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
+            var publisher = new InMemoryNotificationPublisher(repo, loggerFactory.CreateLogger<InMemoryNotificationPublisher>(), Options.Create(new NotificationOptions { MaxAttempts = 3, BaseDelayMs = 1 }));
+            var provider = new EmailNotificationProvider(repo, publisher, loggerFactory.CreateLogger<EmailNotificationProvider>());
 
             await provider.NotifyDomainStatusChangedAsync(empresa.Id, "example.com", "degraded", "reason");
 
@@ -62,8 +64,9 @@ namespace Api.Tests
             empresa.DefinirDominioPersonalizadoDesejado("example.org", DateTime.UtcNow);
             repo.Seed(empresa);
 
-            var logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<EmailNotificationProvider>();
-            var provider = new EmailNotificationProvider(repo, logger);
+            var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
+            var publisher = new InMemoryNotificationPublisher(repo, loggerFactory.CreateLogger<InMemoryNotificationPublisher>(), Options.Create(new NotificationOptions { MaxAttempts = 3, BaseDelayMs = 1 }));
+            var provider = new EmailNotificationProvider(repo, publisher, loggerFactory.CreateLogger<EmailNotificationProvider>());
 
             await provider.NotifyDomainStatusChangedAsync(empresa.Id, "example.org", "degraded", "dns failure");
 
