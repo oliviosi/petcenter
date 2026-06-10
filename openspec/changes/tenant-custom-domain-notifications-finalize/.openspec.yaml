@@ -1,0 +1,11 @@
+name: tenant-custom-domain-notifications-finalize
+summary: Finalizar tasks pendentes do change tenant-custom-domain-notifications-extension: frontend, ops e validação.
+apply:
+  requires: ["proposal","design","tasks"]
+artifacts:
+  - id: proposal
+    type: markdown
+  - id: design
+    type: markdown
+  - id: tasks
+    type: markdown
