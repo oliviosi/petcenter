@@ -1,0 +1,8 @@
+{
+  "id": "00000000-0000-0000-0000-000000000001",
+  "name": "Petshop Test",
+  "dominio_personalizado_ultima_notificacao_categoria": "degraded",
+  "dominio_personalizado_ultima_notificacao_motivo": "dns flakey",
+  "dominio_personalizado_ultima_notificacao_resultado": "sent",
+  "dominio_personalizado_ultima_notificacao_tentativas": 3
+}
