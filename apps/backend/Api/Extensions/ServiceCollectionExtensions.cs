@@ -71,12 +71,13 @@ public static class ServiceCollectionExtensions
 
         // Notifications
         services.AddScoped<Api.Modules.Empresas.Infrastructure.INotificationService, Api.Modules.Empresas.Infrastructure.EmailNotificationProvider>();
-        // Notification options (defaults). Can be bound to configuration later.
-        services.Configure<Api.Modules.Empresas.Infrastructure.NotificationOptions>(opts =>
-        {
-            opts.MaxAttempts = 3;
-            opts.BaseDelayMs = 500;
-        });
+                services.AddScoped<Api.Modules.Empresas.Infrastructure.INotificationPublisher, Api.Modules.Empresas.Infrastructure.InMemoryNotificationPublisher>();
+                // Notification options (defaults). Can be bound to configuration later.
+                services.Configure<Api.Modules.Empresas.Infrastructure.NotificationOptions>(opts =>
+                {
+                    opts.MaxAttempts = 3;
+                    opts.BaseDelayMs = 500;
+                });
 
         // Profissionais
         services.AddScoped<IProfissionalRepository, ProfissionalRepository>();

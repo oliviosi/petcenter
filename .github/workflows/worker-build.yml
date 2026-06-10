@@ -1,0 +1,21 @@
+name: Worker build
+
+on:
+  push:
+    paths:
+      - 'apps/backend/**'
+      - 'openspec/changes/async-domain-notifications-retry/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
+      - name: Build worker
+        run: dotnet build apps/backend/Worker/Worker.csproj --configuration Release
+      - name: Publish image (placeholder)
+        run: echo "Build and push image step (configure registry secrets)"
