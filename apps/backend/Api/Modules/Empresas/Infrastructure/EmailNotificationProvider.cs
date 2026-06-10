@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Diagnostics.Metrics;
 using Api.Modules.Empresas.Domain;
 
 namespace Api.Modules.Empresas.Infrastructure;
@@ -9,6 +10,11 @@ public class EmailNotificationProvider : INotificationService
     private readonly IEmpresaRepository _empresaRepository;
     private readonly ILogger<EmailNotificationProvider> _logger;
     private readonly NotificationOptions _options;
+
+    // Metrics
+    private static readonly Meter _meter = new("petcenter.notifications", "1.0");
+    private static readonly Counter<long> _sentCounter = _meter.CreateCounter<long>("notifications_sent_total", description: "Total notifications sent (success/failure)");
+    private static readonly Counter<long> _attemptsCounter = _meter.CreateCounter<long>("notifications_attempts_total", description: "Total notification send attempts");
 
     public EmailNotificationProvider(IEmpresaRepository empresaRepository, ILogger<EmailNotificationProvider> logger, Microsoft.Extensions.Options.IOptions<NotificationOptions> options)
     {
@@ -50,12 +56,14 @@ public class EmailNotificationProvider : INotificationService
                 // Send using provider hook (overridable for tests). Real provider should integrate SMTP/HTTP client here.
                 _logger.LogInformation("Sending domain notification to Empresa {EmpresaId} (attempt {Attempt}) - {State} {Domain}", empresaId, attempt, state, domain);
                 var sendSuccess = await SendEmailAsync(empresaId, domain, state, reason);
+                _attemptsCounter.Add(1);
                 if (sendSuccess)
                 {
                     resultado = "sent";
+                    _sentCounter.Add(1);
                     break;
-                }                resultado = "sent";
-                break;
+                }
+                // transient failure — will retry if attempts remain
             }
             catch (Exception ex)
             {
@@ -64,6 +72,12 @@ public class EmailNotificationProvider : INotificationService
                 var delay = baseDelayMs * (int)Math.Pow(2, attempt - 1);
                 await Task.Delay(delay);
             }
+        }
+
+        if (resultado != "sent")
+        {
+            // Count as failure once all attempts exhausted
+            _sentCounter.Add(1);
         }
 
         try
