@@ -5,8 +5,9 @@ Status: draft
 ## Backend
 
 - [x] 1. Create DB migration to add `tenant_domain_notifications` table (or extend `tenant_domains_status`).
-  - Note: Entity already contains latest notification fields. Added EF mapping in EmpresaConfiguration. Migration generation pending — requires DB connection for `dotnet ef` at design time.
-  - Est: 3–4h (partial)
+  - Note: Entity already contains latest notification fields. Added EF mapping in EmpresaConfiguration.
+  - Migration script created at `openspec/changes/tenant-custom-domain-notifications-extension/migration.sql` for ops to apply via psql or run using EF if desired.
+  - Est: 3–4h (script produced)
 - [x] 2. Implement domain notification repository and model (EF Core entity + mapping).
   - Note: Empresa entity already had notification fields; mapping added in EmpresaConfiguration.
   - Est: 2–4h (done)
