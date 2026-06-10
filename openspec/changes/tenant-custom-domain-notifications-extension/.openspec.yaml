@@ -1,0 +1,13 @@
+name: tenant-custom-domain-notifications-extension
+summary: Extend tenant custom-domain notifications with durable attempt records, retries, and expose latest metadata to public/admin profiles.
+apply:
+  requires: ["proposal","design","tasks","runbook"]
+artifacts:
+  - id: proposal
+    type: markdown
+  - id: design
+    type: markdown
+  - id: tasks
+    type: markdown
+  - id: runbook
+    type: markdown
