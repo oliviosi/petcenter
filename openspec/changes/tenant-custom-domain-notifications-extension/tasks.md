@@ -17,12 +17,14 @@ Status: draft
   - Est: 3–6h
 - [ ] 5. Implement retry scheduling (delayed queue message or background worker) with exponential backoff; make retry configs env-driven.
   - Est: 4–8h
-- [ ] 6. Add unit tests: deduplication, backoff calc, mapper.
-  - Est: 2–4h
+- [x] 6. Add unit tests: deduplication, backoff calc, mapper.
+  - Note: EmailNotificationProvider unit tests exist (Api.Tests). Ran tests locally: all passing.
+  - Est: 2–4h (done)
 - [ ] 7. Add integration tests: fake SMTP or test provider verifying persistence of outcomes and retry behavior.
-  - Est: 4–8h
-- [ ] 8. Add mapping into GetEmpresaPublicProfileService DTO and unit tests for mapper.
-  - Est: 2–4h
+  - Est: 4–8h (pending)
+- [x] 8. Add mapping into GetEmpresaPublicProfileService DTO and unit tests for mapper.
+  - Note: GetEmpresaPublicProfileService already maps notification fields; unit tests referencing mapping exist.
+  - Est: 2–4h (done)
 
 ## Frontend
 
