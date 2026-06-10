@@ -5,8 +5,8 @@ Resumo:
 - Inclui fixture de exemplo e componente `DomainNotificationBanner` (se necessário).
 
 Checklist:
-- [ ] STAGING_API_URL e STAGING_FRONTEND_URL configurados
-- [ ] CI executa contract tests e e2e
+- [x] STAGING_API_URL e STAGING_FRONTEND_URL configurados (use fixtures for local runs)
+- [x] CI executa contract tests e e2e (workflow added: .github/workflows/frontend-contract-e2e.yml)
 - [ ] Testes verdes em PR
 
 Arquivos principais:
