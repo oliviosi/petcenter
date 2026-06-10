@@ -22,8 +22,9 @@ Status: draft
 - [x] 6. Add unit tests: deduplication, backoff calc, mapper.
   - Note: EmailNotificationProvider unit tests exist (Api.Tests). Ran tests locally: all passing.
   - Est: 2–4h (done)
-- [ ] 7. Add integration tests: fake SMTP or test provider verifying persistence of outcomes and retry behavior.
-  - Est: 4–8h (pending)
+- [x] 7. Add integration tests: fake SMTP or test provider verifying persistence of outcomes and retry behavior.
+  - Note: Added Api.Tests.EmailNotificationProviderIntegrationTests to simulate transient failures and verify retries/outcome persistence.
+  - Est: 4–8h (done)
 - [x] 8. Add mapping into GetEmpresaPublicProfileService DTO and unit tests for mapper.
   - Note: GetEmpresaPublicProfileService already maps notification fields; unit tests referencing mapping exist.
   - Est: 2–4h (done)
