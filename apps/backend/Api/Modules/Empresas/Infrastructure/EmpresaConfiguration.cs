@@ -54,6 +54,20 @@ public class EmpresaConfiguration : IEntityTypeConfiguration<Empresa>
             .HasMaxLength(300);
         builder.Property(e => e.DominioPersonalizadoProximoMonitoramentoEm)
             .HasColumnName("dominio_personalizado_proximo_monitoramento_em");
+        builder.Property(e => e.DominioPersonalizadoUltimaNotificacaoCategoria)
+            .HasColumnName("dominio_personalizado_ultima_notificacao_categoria")
+            .HasMaxLength(40);
+        builder.Property(e => e.DominioPersonalizadoUltimaNotificacaoMotivo)
+            .HasColumnName("dominio_personalizado_ultima_notificacao_motivo")
+            .HasMaxLength(300);
+        builder.Property(e => e.DominioPersonalizadoUltimaNotificacaoEnviadaEm)
+            .HasColumnName("dominio_personalizado_ultima_notificacao_enviada_em");
+        builder.Property(e => e.DominioPersonalizadoUltimaNotificacaoResultado)
+            .HasColumnName("dominio_personalizado_ultima_notificacao_resultado")
+            .HasMaxLength(40);
+        builder.Property(e => e.DominioPersonalizadoUltimaNotificacaoTentativas)
+            .HasColumnName("dominio_personalizado_ultima_notificacao_tentativas")
+            .IsRequired();
         builder.Property(e => e.DominioPersonalizadoCanonicoRevertidoParaFallback)
             .HasColumnName("dominio_personalizado_canonico_revertido_para_fallback")
             .IsRequired();
