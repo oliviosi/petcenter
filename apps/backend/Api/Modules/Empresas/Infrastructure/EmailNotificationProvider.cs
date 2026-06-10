@@ -13,7 +13,8 @@ public class EmailNotificationProvider : INotificationService
 
     // Metrics
     private static readonly Meter _meter = new("petcenter.notifications", "1.0");
-    private static readonly Counter<long> _sentCounter = _meter.CreateCounter<long>("notifications_sent_total", description: "Total notifications sent (success/failure)");
+    private static readonly Counter<long> _sentCounter = _meter.CreateCounter<long>("notifications_sent_total", description: "Total notifications successfully sent");
+    private static readonly Counter<long> _failedCounter = _meter.CreateCounter<long>("notifications_failed_total", description: "Total notifications failed after retries");
     private static readonly Counter<long> _attemptsCounter = _meter.CreateCounter<long>("notifications_attempts_total", description: "Total notification send attempts");
 
     public EmailNotificationProvider(IEmpresaRepository empresaRepository, ILogger<EmailNotificationProvider> logger, Microsoft.Extensions.Options.IOptions<NotificationOptions> options)
@@ -77,7 +78,7 @@ public class EmailNotificationProvider : INotificationService
         if (resultado != "sent")
         {
             // Count as failure once all attempts exhausted
-            _sentCounter.Add(1);
+            _failedCounter.Add(1);
         }
 
         try
