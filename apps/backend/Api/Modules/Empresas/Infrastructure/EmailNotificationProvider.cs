@@ -50,7 +50,6 @@ public class EmailNotificationProvider : INotificationService
                 // Placeholder send: integrate a real email send here.
                 _logger.LogInformation("(mock) Sending domain notification to Empresa {EmpresaId} (attempt {Attempt}) - {State} {Domain}", empresaId, attempt, state, domain);
                 // Simulate success immediately for now. Replace with actual SMTP/HTTP call.
-                sucesso = true;
                 resultado = "sent";
                 break;
             }
