@@ -10,13 +10,15 @@ Status: draft
 - [x] 2. Implement domain notification repository and model (EF Core entity + mapping).
   - Note: Empresa entity already had notification fields; mapping added in EmpresaConfiguration.
   - Est: 2–4h (done)
-- [ ] 3. Extend/implement NotificationService subscription to `tenant.domain.status.changed` event.
-  - Deduplication & cycle_id logic.
-  - Est: 4–8h
-- [ ] 4. Wire EmailNotificationProvider (reuse existing email infra). Add transactional persistence (attempts/outcome updates).
-  - Est: 3–6h
-- [ ] 5. Implement retry scheduling (delayed queue message or background worker) with exponential backoff; make retry configs env-driven.
-  - Est: 4–8h
+- [x] 3. Extend/implement NotificationService subscription to `tenant.domain.status.changed` event.
+  - Note: StorefrontDomainVerificationService invokes INotificationService on degraded/healthy transitions; worker runs in background.
+  - Est: 4–8h (done)
+- [x] 4. Wire EmailNotificationProvider (reuse existing email infra). Add transactional persistence (attempts/outcome updates).
+  - Note: EmailNotificationProvider implemented and persisting to Empresa via RegistrarNotificacaoDominioPersonalizado.
+  - Est: 3–6h (done)
+- [x] 5. Implement retry scheduling (delayed queue message or background worker) with exponential backoff; make retry configs env-driven.
+  - Note: Provider uses in-process retry loop with exponential backoff and configurable NotificationOptions. Consider later replacing with delayed job for non-blocking retries.
+  - Est: 4–8h (implemented as in-process retries)
 - [x] 6. Add unit tests: deduplication, backoff calc, mapper.
   - Note: EmailNotificationProvider unit tests exist (Api.Tests). Ran tests locally: all passing.
   - Est: 2–4h (done)
