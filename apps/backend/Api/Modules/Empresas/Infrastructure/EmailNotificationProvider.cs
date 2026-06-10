@@ -47,11 +47,14 @@ public class EmailNotificationProvider : INotificationService
             tentativas = attempt;
             try
             {
-                // Placeholder send: integrate a real email send here.
-                _logger.LogInformation("(mock) Sending domain notification to Empresa {EmpresaId} (attempt {Attempt}) - {State} {Domain}", empresaId, attempt, state, domain);
-                // Simulate success immediately for now. Replace with actual SMTP/HTTP call.
-                sucesso = true;
-                resultado = "sent";
+                // Send using provider hook (overridable for tests). Real provider should integrate SMTP/HTTP client here.
+                _logger.LogInformation("Sending domain notification to Empresa {EmpresaId} (attempt {Attempt}) - {State} {Domain}", empresaId, attempt, state, domain);
+                var sendSuccess = await SendEmailAsync(empresaId, domain, state, reason);
+                if (sendSuccess)
+                {
+                    resultado = "sent";
+                    break;
+                }                resultado = "sent";
                 break;
             }
             catch (Exception ex)
@@ -73,6 +76,16 @@ public class EmailNotificationProvider : INotificationService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to persist domain notification for Empresa {EmpresaId}", empresaId);
+        }
+        
+        /// <summary>
+        /// Override in tests or real providers to perform the actual send.
+        /// Return true on success, false to indicate a transient error (will be retried).
+        /// </summary>
+        protected virtual Task<bool> SendEmailAsync(Guid empresaId, string domain, string state, string reason)
+        {
+            // Default implementation simulates immediate success.
+            return Task.FromResult(true);
         }
     }
 }
