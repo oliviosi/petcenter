@@ -29,6 +29,7 @@ public class AppDbContext : DbContext
     public DbSet<Booking> Bookings => Set<Booking>();
     public DbSet<BookingFeedback> BookingFeedbacks => Set<BookingFeedback>();
     public DbSet<InboxEntry> InboxEntries => Set<InboxEntry>();
+    public DbSet<Api.Modules.Empresas.Domain.DomainNotification> DomainNotifications => Set<Api.Modules.Empresas.Domain.DomainNotification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -41,5 +42,6 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new BookingConfiguration());
         modelBuilder.ApplyConfiguration(new BookingFeedbackConfiguration());
         modelBuilder.ApplyConfiguration(new InboxEntryConfiguration());
+            modelBuilder.ApplyConfiguration(new Api.Modules.Empresas.Infrastructure.DomainNotificationConfiguration());
     }
 }

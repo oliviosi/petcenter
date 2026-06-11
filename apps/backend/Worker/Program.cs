@@ -1,11 +1,10 @@
 using Worker;
-using Api.Modules.Empresas.Infrastructure;
+using Microsoft.Extensions.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-// Register the domain notification consumer and in-memory publisher for local testing
-builder.Services.AddHostedService<DomainNotificationConsumer>();
-builder.Services.AddScoped<INotificationPublisher, InMemoryNotificationPublisher>();
+// Worker project deprecated - no registrations by default.
+// Use NOTIFICATION_RUN_IN_PROCESS in Api to run the consumer in-process if needed.
 
 var host = builder.Build();
 host.Run();

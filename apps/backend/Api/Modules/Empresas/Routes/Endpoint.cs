@@ -77,6 +77,41 @@ public static class EmpresasEndpoints
         })
         .WithName("GetPublicEmpresaBySlug");
 
+        // Admin tenant domain health endpoints
+        var admin = app.MapGroup("/admin/tenants").WithTags("Admin:Tenants");
+
+        admin.MapGet("/{tenantId:guid}/domain-health", async (
+            Guid tenantId,
+            HttpContext httpContext,
+            Api.Modules.Empresas.Infrastructure.IDomainHealthService service) =>
+        {
+            var empresaId = ExtractEmpresaId(httpContext);
+            if (empresaId != tenantId)
+                return Results.Unauthorized();
+
+            var dto = await service.GetDomainHealthAsync(tenantId);
+            return Results.Ok(dto);
+        })
+        .WithName("GetTenantDomainHealth")
+        .RequireAuthorization();
+
+        admin.MapGet("/{tenantId:guid}/domain-health/notifications", async (
+            Guid tenantId,
+            int page,
+            int pageSize,
+            HttpContext httpContext,
+            Api.Modules.Empresas.Infrastructure.IDomainHealthService service) =>
+        {
+            var empresaId = ExtractEmpresaId(httpContext);
+            if (empresaId != tenantId)
+                return Results.Unauthorized();
+
+            var (items, total) = await service.GetNotificationsAsync(tenantId, page <= 0 ? 1 : page, pageSize <= 0 ? 20 : pageSize);
+            return Results.Ok(new { items, total });
+        })
+        .WithName("ListTenantDomainNotifications")
+        .RequireAuthorization();
+
         return app;
     }
 

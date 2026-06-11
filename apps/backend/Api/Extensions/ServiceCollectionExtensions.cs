@@ -71,7 +71,15 @@ public static class ServiceCollectionExtensions
 
         // Notifications
         services.AddScoped<Api.Modules.Empresas.Infrastructure.INotificationService, Api.Modules.Empresas.Infrastructure.EmailNotificationProvider>();
-                services.AddScoped<Api.Modules.Empresas.Infrastructure.INotificationPublisher, Api.Modules.Empresas.Infrastructure.InMemoryNotificationPublisher>();
+        services.AddScoped<Api.Modules.Empresas.Infrastructure.INotificationPublisher, Api.Modules.Empresas.Infrastructure.InMemoryNotificationPublisher>();
+        // Register DomainNotificationConsumer in-process when enabled via env var
+        var runNotificationWorker = string.Equals(System.Environment.GetEnvironmentVariable("NOTIFICATION_RUN_IN_PROCESS"), "true", StringComparison.OrdinalIgnoreCase);
+        if (runNotificationWorker)
+        {
+            services.AddHostedService<Api.Workers.DomainNotificationConsumer>();
+        }
+        // Domain health / dashboard
+        services.AddScoped<Api.Modules.Empresas.Infrastructure.IDomainHealthService, Api.Modules.Empresas.Infrastructure.DomainHealthService>();
 
         // Profissionais
         services.AddScoped<IProfissionalRepository, ProfissionalRepository>();
