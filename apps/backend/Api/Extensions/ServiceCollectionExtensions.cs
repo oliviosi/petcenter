@@ -133,7 +133,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INoShowBookingService, NoShowBookingService>();
         services.AddScoped<IConfirmBookingFromEventService, ConfirmBookingFromEventService>();
         services.AddScoped<IRejectBookingFromEventService, RejectBookingFromEventService>();
-        services.AddHostedService<BookingQueueConsumerService>();
+        // Register booking queue consumer only when enabled (env var BOOKING_RUN_IN_PROCESS=true)
+        var runBookingConsumer = string.Equals(System.Environment.GetEnvironmentVariable("BOOKING_RUN_IN_PROCESS"), "true", System.StringComparison.OrdinalIgnoreCase);
+        if (runBookingConsumer)
+        {
+            services.AddHostedService<BookingQueueConsumerService>();
+        }
 
         return services;
     }

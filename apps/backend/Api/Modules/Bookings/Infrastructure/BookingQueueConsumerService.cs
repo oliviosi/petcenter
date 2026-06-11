@@ -31,62 +31,93 @@ public class BookingQueueConsumerService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await using var connection = await _connectionFactory.CreateConnectionAsync(stoppingToken);
-        await using var channel = await connection.CreateChannelAsync(cancellationToken: stoppingToken);
+        // Attempt to create a connection with retry loop. If RabbitMQ is unavailable, keep retrying
+        // without crashing the host so the API remains available.
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                await using var connection = await _connectionFactory.CreateConnectionAsync(stoppingToken);
+                await using var channel = await connection.CreateChannelAsync(cancellationToken: stoppingToken);
 
-        await channel.ExchangeDeclareAsync(
-            exchange: _options.Exchange,
-            type: _options.ExchangeType,
-            durable: true,
-            autoDelete: false,
-            cancellationToken: stoppingToken);
+                await channel.ExchangeDeclareAsync(
+                    exchange: _options.Exchange,
+                    type: _options.ExchangeType,
+                    durable: true,
+                    autoDelete: false,
+                    cancellationToken: stoppingToken);
 
-        await DeclareAndBindQueueAsync(
-            channel,
-            _options.ConfirmedQueue,
-            _options.ConfirmedRoutingKey,
-            stoppingToken);
+                await DeclareAndBindQueueAsync(
+                    channel,
+                    _options.ConfirmedQueue,
+                    _options.ConfirmedRoutingKey,
+                    stoppingToken);
 
-        await DeclareAndBindQueueAsync(
-            channel,
-            _options.RejectedQueue,
-            _options.RejectedRoutingKey,
-            stoppingToken);
+                await DeclareAndBindQueueAsync(
+                    channel,
+                    _options.RejectedQueue,
+                    _options.RejectedRoutingKey,
+                    stoppingToken);
 
-        var confirmedConsumer = new AsyncEventingBasicConsumer(channel);
-        confirmedConsumer.ReceivedAsync += async (_, eventArgs) =>
-            await HandleMessageAsync(
-                channel,
-                eventArgs,
-                BookingEventNames.Confirmed,
-                payload => HandleConfirmedAsync(payload, stoppingToken));
+                var confirmedConsumer = new AsyncEventingBasicConsumer(channel);
+                confirmedConsumer.ReceivedAsync += async (_, eventArgs) =>
+                    await HandleMessageAsync(
+                        channel,
+                        eventArgs,
+                        BookingEventNames.Confirmed,
+                        payload => HandleConfirmedAsync(payload, stoppingToken));
 
-        var rejectedConsumer = new AsyncEventingBasicConsumer(channel);
-        rejectedConsumer.ReceivedAsync += async (_, eventArgs) =>
-            await HandleMessageAsync(
-                channel,
-                eventArgs,
-                BookingEventNames.Rejected,
-                payload => HandleRejectedAsync(payload, stoppingToken));
+                var rejectedConsumer = new AsyncEventingBasicConsumer(channel);
+                rejectedConsumer.ReceivedAsync += async (_, eventArgs) =>
+                    await HandleMessageAsync(
+                        channel,
+                        eventArgs,
+                        BookingEventNames.Rejected,
+                        payload => HandleRejectedAsync(payload, stoppingToken));
 
-        await channel.BasicConsumeAsync(
-            queue: _options.ConfirmedQueue,
-            autoAck: false,
-            consumer: confirmedConsumer,
-            cancellationToken: stoppingToken);
+                await channel.BasicConsumeAsync(
+                    queue: _options.ConfirmedQueue,
+                    autoAck: false,
+                    consumer: confirmedConsumer,
+                    cancellationToken: stoppingToken);
 
-        await channel.BasicConsumeAsync(
-            queue: _options.RejectedQueue,
-            autoAck: false,
-            consumer: rejectedConsumer,
-            cancellationToken: stoppingToken);
+                await channel.BasicConsumeAsync(
+                    queue: _options.RejectedQueue,
+                    autoAck: false,
+                    consumer: rejectedConsumer,
+                    cancellationToken: stoppingToken);
 
-        _logger.LogInformation(
-            "Booking queue consumers started for queues {ConfirmedQueue} and {RejectedQueue}",
-            _options.ConfirmedQueue,
-            _options.RejectedQueue);
+                _logger.LogInformation(
+                    "Booking queue consumers started for queues {ConfirmedQueue} and {RejectedQueue}",
+                    _options.ConfirmedQueue,
+                    _options.RejectedQueue);
 
-        await Task.Delay(Timeout.Infinite, stoppingToken);
+                // Keep the connection and channel open for the lifetime of the service
+                await Task.Delay(Timeout.Infinite, stoppingToken);
+                return;
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("BookingQueueConsumerService startup canceled.");
+                return;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to connect to RabbitMQ at startup. Will retry in 5s.");
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    _logger.LogInformation("BookingQueueConsumerService retry canceled.");
+                    return;
+                }
+            }
+        }
+
+        _logger.LogWarning("BookingQueueConsumerService did not establish a RabbitMQ connection and will not start consumers.");
+        return;
     }
 
     private async Task HandleMessageAsync(
