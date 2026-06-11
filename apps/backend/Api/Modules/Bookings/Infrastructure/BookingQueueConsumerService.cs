@@ -16,6 +16,7 @@ public class BookingQueueConsumerService : BackgroundService
     private readonly BookingQueueOptions _options;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<BookingQueueConsumerService> _logger;
+    private bool _firstConnectionFailure = false;
 
     public BookingQueueConsumerService(
         IBookingRabbitMqConnectionFactory connectionFactory,
@@ -103,7 +104,19 @@ public class BookingQueueConsumerService : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to connect to RabbitMQ at startup. Will retry in 5s.");
+                // Log a single warning on the first failure, then log at Debug level to avoid noise.
+                // This avoids filling logs when RabbitMQ is intentionally not available in local dev.
+                if (!_firstConnectionFailure)
+                {
+                    // Log informationally on first failure to avoid spamming logs in local dev.
+                    _logger.LogInformation("Failed to connect to RabbitMQ at startup. Will retry in 5s.");
+                    _firstConnectionFailure = true;
+                }
+                else
+                {
+                    _logger.LogDebug(ex, "RabbitMQ not available yet, retrying in 5s.");
+                }
+
                 try
                 {
                     await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
