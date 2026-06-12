@@ -3,5 +3,6 @@ import { NextResponse } from "next/server";
 
 export async function POST() {
   await clearAdminSession();
-  return NextResponse.redirect('/admin/login?reason=session');
+  const redirectUrl = new URL('/admin/login?reason=session', process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost');
+  return NextResponse.redirect(redirectUrl);
 }
