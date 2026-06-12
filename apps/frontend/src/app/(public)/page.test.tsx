@@ -47,7 +47,7 @@ describe("HomePage", () => {
     expect(screen.getByText("Entrada publica por petshop")).toBeInTheDocument();
     expect(
       screen.getByRole("link", {
-        name: "Abrir catalogo secundario",
+        name: "Abrir catálogo",
       }),
     ).toHaveAttribute("href", "/petshops");
     expect(getPublicPetshopByHost).not.toHaveBeenCalled();

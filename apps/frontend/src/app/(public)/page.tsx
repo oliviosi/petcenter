@@ -51,8 +51,11 @@ function NeutralHomePage() {
           </div>
           <div className="flex flex-wrap gap-3">
             <Button href="/petshops" variant="secondary">
-              Abrir catalogo secundario
+              Abrir catálogo
               <ArrowRight className="h-4 w-4" />
+            </Button>
+            <Button href="/admin/login" variant="primary">
+              Entrar
             </Button>
           </div>
         </Card>
