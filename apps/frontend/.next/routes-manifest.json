@@ -132,6 +132,12 @@
       "namedRegex": "^/admin/services(?:/)?$"
     },
     {
+      "page": "/book",
+      "regex": "^/book(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/book(?:/)?$"
+    },
+    {
       "page": "/petshops",
       "regex": "^/petshops(?:/)?$",
       "routeKeys": {},
