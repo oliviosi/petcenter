@@ -2,6 +2,7 @@ import { LogOut, PawPrint } from "lucide-react";
 import { logoutAdminAction } from "@/app/admin/login/actions";
 import { AdminNavigation } from "@/components/layout/AdminNavigation";
 import { Button } from "@/components/ui/Button";
+import Header from "@/components/Header/Header";
 
 interface AdminShellProps {
   companyName: string;
@@ -16,6 +17,10 @@ export function AdminShell({
 }: AdminShellProps) {
   return (
     <div className="flex min-h-screen bg-surface-page">
+      {/* Global Header for small screens */}
+      {/* @ts-expect-error server component */}
+      <Header />
+
       <aside className="hidden w-80 flex-col border-r border-stroke-soft bg-surface-card lg:flex">
         <div className="flex items-center gap-3 border-b border-stroke-soft px-6 py-6">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-solid text-content-primary shadow-soft">

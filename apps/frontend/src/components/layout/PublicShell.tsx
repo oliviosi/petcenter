@@ -1,35 +1,14 @@
 import Link from "next/link";
 import { Heart, PawPrint } from "lucide-react";
 
+import Header from "@/components/Header/Header";
+
 export function PublicShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-surface-page">
-      <header className="border-b border-stroke-soft bg-surface-card">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-6 py-5">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-solid text-content-primary shadow-soft">
-              <PawPrint className="h-5 w-5" />
-            </div>
-            <div className="space-y-1">
-              <p className="inline-flex w-fit rounded-full bg-accent-soft px-3 py-1 text-xs font-medium text-content-accent">
-                Jornada pública
-              </p>
-              <p className="font-heading text-xl font-semibold text-content-primary">
-                petcenter
-              </p>
-            </div>
-          </Link>
-
-          <nav className="flex items-center gap-4 text-sm text-content-secondary">
-            <Link
-              href="/petshops"
-              className="rounded-full border border-stroke-soft bg-surface-muted px-4 py-2 font-medium transition hover:border-stroke-strong hover:text-content-primary"
-            >
-              Catalogo secundario
-            </Link>
-          </nav>
-        </div>
-      </header>
+      {/* Header (server component) */}
+      {/* @ts-expect-error server component */}
+      <Header />
 
       <main className="flex-1">{children}</main>
 
