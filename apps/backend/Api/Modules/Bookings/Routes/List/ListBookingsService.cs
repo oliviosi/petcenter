@@ -35,18 +35,18 @@ public class ListBookingsService : IListBookingsService
             : null;
 
         var bookings = await _bookingRepository.ListByEmpresaAsync(
-            request.EmpresaId,
+                    request.EmpresaId!.Value,
             slotStartFrom,
             slotStartToExclusive,
             normalizedState,
             request.ProfessionalId);
 
         var professionals = await _professionalRepository.ListByIdsAsync(
-            request.EmpresaId,
+                    request.EmpresaId!.Value,
             bookings.Select(b => b.ProfessionalId));
 
         var services = await _serviceRepository.ListByIdsAsync(
-            request.EmpresaId,
+                    request.EmpresaId!.Value,
             bookings.Select(b => b.ServiceId));
 
         var professionalsById = professionals.ToDictionary(p => p.Id);
