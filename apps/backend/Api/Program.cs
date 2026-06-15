@@ -16,7 +16,11 @@ builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// Use FullName-based schema Ids to avoid conflicts between types with same class name in different namespaces
+builder.Services.AddSwaggerGen(options =>
+{
+    options.CustomSchemaIds(type => (type.FullName ?? type.Name).Replace('+', '.'));
+});
 
 builder.Services.AddCors(options =>
 {
@@ -109,12 +113,8 @@ builder.Services.AddModuleServices();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    await app.SeedDevelopmentDataAsync();
-}
+// Swagger and dev seed moved below (after endpoint mapping) so OpenAPI includes all mapped endpoints.
+
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseCors();
@@ -131,5 +131,27 @@ app.MapGet("/health", () => Results.Ok(new
 .WithTags("Health");
 
 app.MapModuleEndpoints();
+
+// Diagnostic: list mapped endpoints at startup to help debug OpenAPI discovery (remove after debugging)
+var _endpointDataSource = app.Services.GetRequiredService<Microsoft.AspNetCore.Routing.EndpointDataSource>();
+Console.WriteLine($"--- Registered endpoints (count: {_endpointDataSource.Endpoints.Count}) ---");
+foreach (var _ep in _endpointDataSource.Endpoints)
+{
+    Console.WriteLine($"Type: {_ep.GetType().FullName}; DisplayName: {_ep.DisplayName}");
+    if (_ep is Microsoft.AspNetCore.Routing.RouteEndpoint _re)
+    {
+        Console.WriteLine($"  RoutePattern: {_re.RoutePattern.RawText}");
+    }
+    Console.WriteLine($"  Metadata: {string.Join(',', _ep.Metadata.Select(m => m.GetType().Name))}");
+}
+Console.WriteLine("--- end endpoints ---");
+
+// Always enable Swagger UI locally to aid debugging; Seed development data only in Development
+app.UseSwagger();
+app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    await app.SeedDevelopmentDataAsync();
+}
 
 app.Run();

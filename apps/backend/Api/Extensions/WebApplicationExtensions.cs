@@ -6,6 +6,7 @@ using Api.Modules.Empresas.Routes;
 using Api.Modules.ProfessionalServiceAssignments.Routes;
 using Api.Modules.Profissionais.Routes;
 using Api.Modules.Servicos.Routes;
+using Api.Modules.Clients.Routes;
 
 namespace Api.Extensions;
 
@@ -14,6 +15,7 @@ public static class WebApplicationExtensions
     public static WebApplication MapModuleEndpoints(this WebApplication app)
     {
         app.MapAuthEndpoints();
+        app.MapClientsEndpoints();
         app.MapEmpresasEndpoints();
         app.MapProfissionaisEndpoints();
         app.MapServicosEndpoints();
