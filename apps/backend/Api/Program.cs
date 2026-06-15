@@ -130,30 +130,13 @@ app.MapGet("/health", () => Results.Ok(new
 .WithName("HealthCheck")
 .WithTags("Health");
 
-// Temporary debug endpoint to verify discovery by Swagger
-app.MapGet("/__debug_test", () => Results.Ok(new { ok = true })).WithName("DebugTest");
-
 app.MapModuleEndpoints();
 
-// Diagnostic: list mapped endpoints at startup to help debug OpenAPI discovery (remove after debugging)
-var _endpointDataSource = app.Services.GetRequiredService<Microsoft.AspNetCore.Routing.EndpointDataSource>();
-Console.WriteLine($"--- Registered endpoints (count: {_endpointDataSource.Endpoints.Count}) ---");
-foreach (var _ep in _endpointDataSource.Endpoints)
-{
-    Console.WriteLine($"Type: {_ep.GetType().FullName}; DisplayName: {_ep.DisplayName}");
-    if (_ep is Microsoft.AspNetCore.Routing.RouteEndpoint _re)
-    {
-        Console.WriteLine($"  RoutePattern: {_re.RoutePattern.RawText}");
-    }
-    Console.WriteLine($"  Metadata: {string.Join(',', _ep.Metadata.Select(m => m.GetType().Name))}");
-}
-Console.WriteLine("--- end endpoints ---");
-
-// Always enable Swagger UI locally to aid debugging; Seed development data only in Development
-app.UseSwagger();
-app.UseSwaggerUI();
+// Enable Swagger UI only in Development so OpenAPI shows mapped endpoints during dev runs.
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwagger();
+    app.UseSwaggerUI();
     await app.SeedDevelopmentDataAsync();
 }
 

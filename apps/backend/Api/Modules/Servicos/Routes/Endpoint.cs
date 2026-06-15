@@ -13,7 +13,7 @@ public static class ServicosEndpoints
 {
     public static WebApplication MapServicosEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/services").WithTags("Services").RequireAuthorization();
+        var group = app.MapGroup("/services").WithTags("Services").WithOpenApi().RequireAuthorization();
 
         group.MapPost("/", async (
             CreateServicoRequest request,

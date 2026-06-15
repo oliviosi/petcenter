@@ -11,7 +11,7 @@ public static class AuthEndpoints
 {
     public static WebApplication MapAuthEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/auth").WithTags("Auth");
+        var group = app.MapGroup("/auth").WithTags("Auth").WithOpenApi();
 
         group.MapPost("/login", async (
             LoginRequest request,

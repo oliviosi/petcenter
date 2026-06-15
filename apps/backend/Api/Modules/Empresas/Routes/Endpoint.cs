@@ -14,7 +14,7 @@ public static class EmpresasEndpoints
 {
     public static WebApplication MapEmpresasEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/petshops").WithTags("Petshops");
+        var group = app.MapGroup("/petshops").WithTags("Petshops").WithOpenApi();
 
         group.MapGet("/public-profile", async (
             HttpContext httpContext,

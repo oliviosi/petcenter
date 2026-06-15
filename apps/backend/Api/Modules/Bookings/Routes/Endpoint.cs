@@ -21,7 +21,7 @@ public static class BookingsEndpoints
 {
     public static WebApplication MapBookingsEndpoints(this WebApplication app)
     {
-        var petshopsGroup = app.MapGroup("/petshops").WithTags("Bookings");
+        var petshopsGroup = app.MapGroup("/petshops").WithTags("Bookings").WithOpenApi();
 
         petshopsGroup.MapGet("/{id:guid}/slots", async (
             Guid id,
@@ -40,7 +40,7 @@ public static class BookingsEndpoints
         })
         .WithName("GetPublicSlots");
 
-        var bookingsGroup = app.MapGroup("/bookings").WithTags("Bookings");
+        var bookingsGroup = app.MapGroup("/bookings").WithTags("Bookings").WithOpenApi();
 
         bookingsGroup.MapPost("/", async (
             CreateBookingRequest request,

@@ -15,7 +15,7 @@ public static class ProfissionaisEndpoints
 {
     public static WebApplication MapProfissionaisEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/professionals").WithTags("Professionals").RequireAuthorization();
+        var group = app.MapGroup("/professionals").WithTags("Professionals").WithOpenApi().RequireAuthorization();
 
         group.MapPost("/", async (
             CreateProfissionalRequest request,

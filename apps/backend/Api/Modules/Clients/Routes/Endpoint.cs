@@ -9,7 +9,7 @@ public static class ClientsEndpoints
 {
     public static WebApplication MapClientsEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/clients").WithTags("Clients");
+        var group = app.MapGroup("/clients").WithTags("Clients").WithOpenApi();
 
         group.MapPost("/register", async (RegisterRequest request, IClientRegisterService service) =>
         {
