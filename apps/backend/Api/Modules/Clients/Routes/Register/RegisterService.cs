@@ -19,7 +19,7 @@ public class RegisterService : IClientRegisterService
     {
         var existing = await _repo.GetByEmailAsync(request.Email);
         if (existing is not null)
-            throw new InvalidOperationException("Email já cadastrado.");
+            throw new Api.Exceptions.ClientAlreadyExistsException(request.Email);
 
         var hash = BCrypt.Net.BCrypt.HashPassword(request.Password);
         var cliente = new Cliente(request.Email, hash, request.Nome);

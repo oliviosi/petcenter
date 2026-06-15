@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { buildBookingPath } from "@/lib/storefront";
@@ -20,6 +20,25 @@ export function ClientLoginForm() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<Values>({
     defaultValues: { email: '', password: '' }
   });
+
+  // handle OAuth return token (server redirects to /login?client_token=...)
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('client_token');
+      if (token) {
+        localStorage.setItem('client_token', token);
+        params.delete('client_token');
+        const url = new URL(window.location.href);
+        url.search = params.toString();
+        window.history.replaceState({}, document.title, url.toString());
+        router.replace('/petshops');
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [router]);
 
   async function onSubmit(values: Values) {
     setFormError(null);
