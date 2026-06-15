@@ -20,7 +20,7 @@ export function AdminShell({
       {/* Global Header for small screens */}
       <Header />
 
-      <aside className="hidden w-80 flex-col border-r border-stroke-soft bg-surface-card lg:flex lg:order-first">
+      <aside className="hidden w-80 flex-col border-r border-stroke-soft bg-surface-card lg:flex">
         <div className="flex items-center gap-3 border-b border-stroke-soft px-6 py-6">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-solid text-content-primary shadow-soft">
             <PawPrint className="h-5 w-5" />
@@ -57,7 +57,7 @@ export function AdminShell({
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col lg:order-last">
+      <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-stroke-soft bg-surface-card px-6 py-4 lg:hidden">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-solid text-content-primary shadow-soft">
