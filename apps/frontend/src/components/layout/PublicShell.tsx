@@ -7,7 +7,6 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-surface-page">
       {/* Header (server component) */}
-      {/* @ts-expect-error server component */}
       <Header />
 
       <main className="flex-1">{children}</main>

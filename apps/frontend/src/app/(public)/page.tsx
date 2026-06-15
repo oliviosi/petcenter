@@ -28,6 +28,8 @@ const highlights = [
   },
 ];
 
+import { ClientRedirect } from "@/components/ClientAuth/ClientRedirect";
+
 function NeutralHomePage() {
   return (
     <PageWrapper
@@ -106,7 +108,12 @@ export default async function HomePage() {
   const publicAppOrigin = process.env.NEXT_PUBLIC_APP_URL?.trim() ?? "";
 
   if (!requestHost || !shouldResolveCustomDomainEntry(requestHost, publicAppOrigin)) {
-    return <NeutralHomePage />;
+    return (
+      <>
+        <ClientRedirect />
+        <NeutralHomePage />
+      </>
+    );
   }
 
   try {

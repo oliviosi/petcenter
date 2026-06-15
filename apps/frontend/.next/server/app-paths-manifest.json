@@ -16,5 +16,8 @@
   "/admin/(dashboard)/profile/page": "app/admin/(dashboard)/profile/page.js",
   "/admin/(dashboard)/services/page": "app/admin/(dashboard)/services/page.js",
   "/admin/login/page": "app/admin/login/page.js",
-  "/admin/page": "app/admin/page.js"
+  "/admin/page": "app/admin/page.js",
+  "/admin/signout/route": "app/admin/signout/route.js",
+  "/login/page": "app/login/page.js",
+  "/register/page": "app/register/page.js"
 }

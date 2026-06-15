@@ -12,6 +12,8 @@ using Api.Modules.Servicos.Domain;
 using Api.Modules.Servicos.Infrastructure;
 using Api.Modules.Usuarios.Domain;
 using Api.Modules.Usuarios.Infrastructure;
+using Api.Modules.Clients.Domain;
+using Api.Modules.Clients.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Infrastructure.Persistence;
@@ -22,6 +24,7 @@ public class AppDbContext : DbContext
 
     public DbSet<Empresa> Empresas => Set<Empresa>();
     public DbSet<Usuario> Usuarios => Set<Usuario>();
+    public DbSet<Cliente> Clientes => Set<Cliente>();
     public DbSet<Profissional> Profissionais => Set<Profissional>();
     public DbSet<Servico> Servicos => Set<Servico>();
     public DbSet<DisponibilidadeProfissional> DisponibilidadesProfissionais => Set<DisponibilidadeProfissional>();
@@ -35,6 +38,7 @@ public class AppDbContext : DbContext
     {
         modelBuilder.ApplyConfiguration(new EmpresaConfiguration());
         modelBuilder.ApplyConfiguration(new UsuarioConfiguration());
+        modelBuilder.ApplyConfiguration(new ClienteConfiguration());
         modelBuilder.ApplyConfiguration(new ProfissionalConfiguration());
         modelBuilder.ApplyConfiguration(new ServicoConfiguration());
         modelBuilder.ApplyConfiguration(new DisponibilidadeConfiguration());

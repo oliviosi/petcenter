@@ -44,6 +44,9 @@ using Api.Modules.Servicos.Routes.Desativar;
 using Api.Modules.Servicos.Routes.List;
 using Api.Modules.Servicos.Routes.Update;
 using Api.Modules.Usuarios.Infrastructure;
+using Api.Modules.Clients.Infrastructure;
+using Api.Modules.Clients.Routes.Register;
+using Api.Modules.Clients.Routes.Login;
 
 namespace Api.Extensions;
 
@@ -56,7 +59,12 @@ public static class ServiceCollectionExtensions
         // Auth / core
         services.AddScoped<IEmpresaRepository, EmpresaRepository>();
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-        services.AddScoped<ILoginService, LoginService>();
+        // Clients (new)
+        services.AddScoped<IClienteRepository, ClienteRepository>();
+        services.AddScoped<IClientRegisterService, RegisterService>();
+        services.AddScoped<IClientLoginService, Api.Modules.Clients.Routes.Login.LoginService>();
+
+        services.AddScoped<ILoginService, Api.Modules.Auth.Routes.Login.LoginService>();
         services.AddScoped<IGetMeService, GetMeService>();
         services.AddScoped<IGetEmpresaPublicProfileService, GetEmpresaPublicProfileService>();
         services.AddScoped<IUpdateEmpresaPublicProfileService, UpdateEmpresaPublicProfileService>();

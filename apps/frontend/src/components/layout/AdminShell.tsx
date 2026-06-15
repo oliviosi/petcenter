@@ -18,7 +18,6 @@ export function AdminShell({
   return (
     <div className="flex min-h-screen bg-surface-page">
       {/* Global Header for small screens */}
-      {/* @ts-expect-error server component */}
       <Header />
 
       <aside className="hidden w-80 flex-col border-r border-stroke-soft bg-surface-card lg:flex">

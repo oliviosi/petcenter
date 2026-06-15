@@ -11,6 +11,7 @@ import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { SlotList } from "@/components/Booking/SlotList";
+import { PetSelector } from "@/components/Booking/PetSelector";
 import { PublicRequestErrorState } from "@/components/PublicRequestErrorState";
 import { bookingSubmissionSchema } from "@/lib/validations/booking";
 import type {
@@ -178,6 +179,14 @@ export function BookingPageClient({
     <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
       <div className="space-y-6">
         <Card className="p-6">
+          {/* Pet selector */}
+          <div className="mb-4">
+            <PetSelector onSelect={(pet) => {
+              setValue("petName", pet.name, { shouldValidate: true });
+              setValue("petSpecies", pet.species, { shouldValidate: true });
+            }} />
+          </div>
+
           <form className="grid gap-4 md:grid-cols-2" onSubmit={handleSearch}>
             <FormField label="Serviço">
               <Select name="serviceId" defaultValue={filterDefaults.serviceId}>

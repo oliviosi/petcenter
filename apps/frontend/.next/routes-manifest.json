@@ -132,16 +132,34 @@
       "namedRegex": "^/admin/services(?:/)?$"
     },
     {
+      "page": "/admin/signout",
+      "regex": "^/admin/signout(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/signout(?:/)?$"
+    },
+    {
       "page": "/book",
       "regex": "^/book(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/book(?:/)?$"
     },
     {
+      "page": "/login",
+      "regex": "^/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/login(?:/)?$"
+    },
+    {
       "page": "/petshops",
       "regex": "^/petshops(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/petshops(?:/)?$"
+    },
+    {
+      "page": "/register",
+      "regex": "^/register(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/register(?:/)?$"
     }
   ],
   "dataRoutes": [],

@@ -16,5 +16,8 @@
   "/admin/(dashboard)/profile/page": "/admin/profile",
   "/admin/(dashboard)/services/page": "/admin/services",
   "/admin/login/page": "/admin/login",
-  "/admin/page": "/admin"
+  "/admin/page": "/admin",
+  "/admin/signout/route": "/admin/signout",
+  "/login/page": "/login",
+  "/register/page": "/register"
 }

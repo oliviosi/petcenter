@@ -188,6 +188,38 @@ namespace Api.Migrations
                     b.ToTable("inbox_entries", (string)null);
                 });
 
+            modelBuilder.Entity("Api.Modules.Clients.Domain.Cliente", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("SenhaHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("clientes", (string)null);
+                });
+
             modelBuilder.Entity("Api.Modules.Disponibilidade.Domain.DisponibilidadeProfissional", b =>
                 {
                     b.Property<Guid>("Id")
