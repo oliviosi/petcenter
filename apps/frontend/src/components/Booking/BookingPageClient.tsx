@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarRange, Clock3 } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -267,24 +268,23 @@ export function BookingPageClient({
             Dados para a solicitação
           </p>
           <h2 className="text-2xl font-semibold text-content-primary">
-            Finalizar pedido de reserva
+            Resumo do Agendamento
           </h2>
-          <p className="text-sm text-content-secondary">
-            Informe os dados do responsável e do pet. O horário só será enviado
-            depois que você selecionar uma opção disponível.
-          </p>
         </div>
 
         <div className="mt-6 rounded-2xl bg-surface-muted p-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-content-primary">
-            <Clock3 className="h-4 w-4 text-content-brand" />
-            Horário selecionado
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-content-primary">Horário selecionado</p>
+              <p className="mt-1 text-sm text-content-secondary">
+                {selectedSlotId ? "Pronto para confirmar." : "Escolha um horário disponível."}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-content-secondary">Duração estimada</p>
+              <p className="text-lg font-semibold text-content-primary">{petshop.services.find(s => s.id === filters.serviceId)?.durationMinutes ?? 0} min</p>
+            </div>
           </div>
-          <p className="mt-2 text-sm text-content-secondary">
-            {selectedSlotId
-              ? "Pronto para enviar a solicitação."
-              : "Escolha um horário disponível para continuar."}
-          </p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
@@ -332,9 +332,25 @@ export function BookingPageClient({
             <p className="text-sm text-content-danger">{submissionError}</p>
           ) : null}
 
-          <Button type="submit" className="w-full" loading={isSubmitting}>
-            Enviar solicitação de reserva
-          </Button>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-content-secondary">Total estimado</p>
+                <p className="text-2xl font-bold text-content-primary">
+                  {formatCurrency(petshop.services.find(s => s.id === filters.serviceId)?.basePrice ?? 0)}
+                </p>
+              </div>
+
+              <Button type="submit" className="w-48 bg-purple-600" loading={isSubmitting}>
+                Confirmar Agendamento
+              </Button>
+            </div>
+
+            <div className="rounded-2xl border border-stroke-soft bg-surface-muted p-4 text-sm text-content-secondary">
+              <strong className="text-content-primary">DICA PRO</strong>
+              <p className="mt-2">Adicione hidratação de pelagem por apenas R$ 25,00 extras no checkout.</p>
+            </div>
+          </div>
         </form>
       </Card>
     </div>

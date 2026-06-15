@@ -46,6 +46,24 @@ public static class AuthEndpoints
         .WithName("GetMe")
         .RequireAuthorization();
 
+        // External OAuth start (Google)
+        group.MapGet("/external/google", (IConfiguration configuration) =>
+        {
+            var clientId = configuration["Google:ClientId"];
+            var redirectUri = configuration["Google:RedirectUri"];
+
+            if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(redirectUri))
+            {
+                return Results.BadRequest(new { title = "Google OAuth não está configurado." });
+            }
+
+            var state = Guid.NewGuid().ToString();
+            var url = $"https://accounts.google.com/o/oauth2/v2/auth?client_id={Uri.EscapeDataString(clientId)}&redirect_uri={Uri.EscapeDataString(redirectUri)}&response_type=code&scope=openid%20email%20profile&access_type=online&state={Uri.EscapeDataString(state)}";
+
+            return Results.Redirect(url);
+        })
+        .WithName("AuthExternalGoogle");
+
         return app;
     }
 }

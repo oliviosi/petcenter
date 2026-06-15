@@ -95,9 +95,17 @@ export function ClientLoginForm() {
           <span className="flex-1 h-px bg-stroke-soft"></span>
         </div>
 
-        <Button type="button" variant="secondary" className="w-full justify-center mb-3">
-          Continuar com Google
-        </Button>
+        <a href="/auth/external/google" className="block w-full">
+          <Button type="button" variant="secondary" className="w-full justify-center mb-3 flex items-center gap-3">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+              <path d="M17.64 9.2045c0-.638-.0573-1.2518-.1645-1.8409H9v3.486h4.844c-.2093 1.128-0.84 2.0874-1.7965 2.732v2.273h2.904c1.699-1.565 2.6945-3.873 2.6945-6.6501z" fill="#4285F4"/>
+              <path d="M9 18c2.43 0 4.4723-.804 5.9638-2.1791l-2.904-2.273c-.8073.5423-1.84.8653-3.0598.8653-2.3496 0-4.3395-1.587-5.0498-3.723H0.9844v2.3356C2.4773 15.83 5.54 18 9 18z" fill="#34A853"/>
+              <path d="M3.9502 10.69A5.398 5.398 0 0 1 3.6 9c0-.626.112-1.23.316-1.79V4.875H0.9844A9.005 9.005 0 0 0 0 9c0 1.456.35 2.832.9844 4.125l2.9658-2.435z" fill="#FBBC05"/>
+              <path d="M9 3.579c1.323 0 2.512.455 3.447 1.346l2.583-2.583C13.468.753 11.428 0 9 0 5.54 0 2.4773 2.17 0.9844 4.875l2.9156 2.335C4.661 5.166 6.651 3.579 9 3.579z" fill="#EA4335"/>
+            </svg>
+            Continuar com Google
+          </Button>
+        </a>
 
         <p className="text-sm text-content-secondary">
           Não tem conta? <a href="/register" className="text-content-brand font-medium">Cadastre-se grátis</a>
