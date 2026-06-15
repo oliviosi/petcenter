@@ -6,3 +6,6 @@ apps/frontend/node_modules/
 apps/frontend/.next/
 **/.next/
 **/node_modules/
+
+# Local settings with secrets (do not commit)
+apps/backend/Api/appsettings.Development.json

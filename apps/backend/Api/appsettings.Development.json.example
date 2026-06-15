@@ -1,0 +1,28 @@
+{
+  "ConnectionStrings": {
+    "Default": "Host=localhost;Port=5432;Database=petcenter;Username=postgres;Password=REPLACE_DB_PASSWORD"
+  },
+  "Jwt": {
+    "Key": "REPLACE_WITH_A_STRONG_RANDOM_KEY",
+    "Issuer": "https://localhost:5001",
+    "Audience": "petcenter_frontend",
+    "ExpiryMinutes": "120"
+  },
+
+  "Google": {
+    "ClientId": "REPLACE_WITH_GOOGLE_CLIENT_ID",
+    "ClientSecret": "REPLACE_WITH_GOOGLE_CLIENT_SECRET",
+    "RedirectUri": "https://localhost:5001/auth/external/google/callback"
+  },
+
+  "Frontend": {
+    "BaseUrl": "https://localhost:3000"
+  },
+
+  "Logging": {
+    "LogLevel": {
+      "Default": "Warning",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  }
+}
