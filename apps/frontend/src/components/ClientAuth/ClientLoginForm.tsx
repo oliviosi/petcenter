@@ -16,6 +16,7 @@ interface Values {
 
 export function ClientLoginForm() {
   const router = useRouter();
+  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? '';
   const [formError, setFormError] = useState<string | null>(null);
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<Values>({
     defaultValues: { email: '', password: '' }
@@ -114,7 +115,7 @@ export function ClientLoginForm() {
           <span className="flex-1 h-px bg-stroke-soft"></span>
         </div>
 
-        <a href="/auth/external/google" className="block w-full">
+        <a href={`${apiBase}/auth/external/google`} className="block w-full">
           <Button type="button" variant="secondary" className="w-full justify-center mb-3 flex items-center gap-3">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
               <path d="M17.64 9.2045c0-.638-.0573-1.2518-.1645-1.8409H9v3.486h4.844c-.2093 1.128-0.84 2.0874-1.7965 2.732v2.273h2.904c1.699-1.565 2.6945-3.873 2.6945-6.6501z" fill="#4285F4"/>

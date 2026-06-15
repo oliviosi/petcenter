@@ -58,7 +58,7 @@ public static class AuthEndpoints
             }
 
             var state = Guid.NewGuid().ToString();
-            var url = $"https://accounts.google.com/o/oauth2/v2/auth?client_id={Uri.EscapeDataString(clientId)}&redirect_uri={Uri.EscapeDataString(redirectUri)}&response_type=code&scope=openid%20email%20profile&access_type=online&state={Uri.EscapeDataString(state)}";
+            var url = $"https://accounts.google.com/o/oauth2/v2/auth?client_id={Uri.EscapeDataString(clientId)}&redirect_uri={Uri.EscapeDataString(redirectUri)}&response_type=code&scope=openid%20email%20profile&access_type=online&hl={Uri.EscapeDataString("pt-BR")}&state={Uri.EscapeDataString(state)}";
 
             return Results.Redirect(url);
         })
