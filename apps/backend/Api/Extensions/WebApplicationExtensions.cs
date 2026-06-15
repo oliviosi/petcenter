@@ -14,14 +14,14 @@ public static class WebApplicationExtensions
 {
     public static WebApplication MapModuleEndpoints(this WebApplication app)
     {
-        app.MapAuthEndpoints();
-        app.MapClientsEndpoints();
-        app.MapEmpresasEndpoints();
-        app.MapProfissionaisEndpoints();
-        app.MapServicosEndpoints();
-        app.MapDisponibilidadeEndpoints();
-        app.MapProfessionalServiceAssignmentsEndpoints();
-        app.MapBookingsEndpoints();
+        Console.WriteLine("Mapping module endpoints: Auth"); app.MapAuthEndpoints();
+        Console.WriteLine("Mapping module endpoints: Clients"); app.MapClientsEndpoints();
+        Console.WriteLine("Mapping module endpoints: Empresas"); app.MapEmpresasEndpoints();
+        Console.WriteLine("Mapping module endpoints: Profissionais"); app.MapProfissionaisEndpoints();
+        Console.WriteLine("Mapping module endpoints: Servicos"); app.MapServicosEndpoints();
+        Console.WriteLine("Mapping module endpoints: Disponibilidade"); app.MapDisponibilidadeEndpoints();
+        Console.WriteLine("Mapping module endpoints: ProfessionalServiceAssignments"); app.MapProfessionalServiceAssignmentsEndpoints();
+        Console.WriteLine("Mapping module endpoints: Bookings"); app.MapBookingsEndpoints();
         return app;
     }
 

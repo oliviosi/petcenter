@@ -1,0 +1,1467 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Api",
+    "version": "1.0"
+  },
+  "paths": {
+    "/admin/tenants/{tenantId}/domain-health": {
+      "get": {
+        "tags": [
+          "Admin:Tenants"
+        ],
+        "operationId": "GetTenantDomainHealth",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/tenants/{tenantId}/domain-health/notifications": {
+      "get": {
+        "tags": [
+          "Admin:Tenants"
+        ],
+        "operationId": "ListTenantDomainNotifications",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": "@{type=integer; format=int32}"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": "@{type=integer; format=int32}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/__debug_test": {
+      "get": {
+        "tags": [
+          "Api"
+        ],
+        "operationId": "DebugTest",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "Login",
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "GetMe",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/auth/external/google": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "AuthExternalGoogle",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/auth/external/google/callback": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "AuthExternalGoogleCallback",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/professionals/{professionalId}/availability": {
+      "post": {
+        "tags": [
+          "Availability"
+        ],
+        "operationId": "CreateDisponibilidade",
+        "parameters": [
+          {
+            "name": "professionalId",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Availability"
+        ],
+        "operationId": "ListDisponibilidade",
+        "parameters": [
+          {
+            "name": "professionalId",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/professionals/{professionalId}/availability/{id}": {
+      "put": {
+        "tags": [
+          "Availability"
+        ],
+        "operationId": "UpdateDisponibilidade",
+        "parameters": [
+          {
+            "name": "professionalId",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Availability"
+        ],
+        "operationId": "DeleteDisponibilidade",
+        "parameters": [
+          {
+            "name": "professionalId",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/petshops/{id}/slots": {
+      "get": {
+        "tags": [
+          "Bookings"
+        ],
+        "operationId": "GetPublicSlots",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          },
+          {
+            "name": "PetshopId",
+            "in": "query",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          },
+          {
+            "name": "ServiceId",
+            "in": "query",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          },
+          {
+            "name": "ProfessionalId",
+            "in": "query",
+            "schema": "@{type=string; format=uuid}"
+          },
+          {
+            "name": "StartDate",
+            "in": "query",
+            "schema": "@{type=string; format=date}"
+          },
+          {
+            "name": "EndDate",
+            "in": "query",
+            "schema": "@{type=string; format=date}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/bookings": {
+      "post": {
+        "tags": [
+          "Bookings"
+        ],
+        "operationId": "CreateBooking",
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Bookings"
+        ],
+        "operationId": "ListBookings",
+        "parameters": [
+          {
+            "name": "EmpresaId",
+            "in": "query",
+            "schema": "@{type=string; format=uuid}"
+          },
+          {
+            "name": "StartDate",
+            "in": "query",
+            "schema": "@{type=string; format=date}"
+          },
+          {
+            "name": "EndDate",
+            "in": "query",
+            "schema": "@{type=string; format=date}"
+          },
+          {
+            "name": "State",
+            "in": "query",
+            "schema": "@{type=string}"
+          },
+          {
+            "name": "ProfessionalId",
+            "in": "query",
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/bookings/{id}/status": {
+      "post": {
+        "tags": [
+          "Bookings"
+        ],
+        "operationId": "CheckBookingStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/bookings/{id}/feedback/eligibility": {
+      "post": {
+        "tags": [
+          "Bookings"
+        ],
+        "operationId": "CheckBookingFeedbackEligibility",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/bookings/{id}/feedback": {
+      "post": {
+        "tags": [
+          "Bookings"
+        ],
+        "operationId": "SubmitBookingFeedback",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/bookings/feedback/summary": {
+      "get": {
+        "tags": [
+          "Bookings"
+        ],
+        "operationId": "GetBookingFeedbackSummary",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/bookings/feedback": {
+      "get": {
+        "tags": [
+          "Bookings"
+        ],
+        "operationId": "ListBookingFeedback",
+        "parameters": [
+          {
+            "name": "StartDate",
+            "in": "query",
+            "schema": "@{type=string; format=date}"
+          },
+          {
+            "name": "EndDate",
+            "in": "query",
+            "schema": "@{type=string; format=date}"
+          },
+          {
+            "name": "ProfessionalId",
+            "in": "query",
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/bookings/{id}": {
+      "get": {
+        "tags": [
+          "Bookings"
+        ],
+        "operationId": "GetBookingById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/bookings/{id}/complete": {
+      "post": {
+        "tags": [
+          "Bookings"
+        ],
+        "operationId": "CompleteBooking",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/bookings/{id}/cancel": {
+      "post": {
+        "tags": [
+          "Bookings"
+        ],
+        "operationId": "CancelBooking",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/bookings/{id}/no-show": {
+      "post": {
+        "tags": [
+          "Bookings"
+        ],
+        "operationId": "NoShowBooking",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/clients/register": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "operationId": "ClientRegister",
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/clients/login": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "operationId": "ClientLogin",
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "operationId": "HealthCheck",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/petshops/public-profile": {
+      "get": {
+        "tags": [
+          "Petshops"
+        ],
+        "operationId": "GetEmpresaPublicProfile",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Petshops"
+        ],
+        "operationId": "UpdateEmpresaPublicProfile",
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/petshops/public": {
+      "get": {
+        "tags": [
+          "Petshops"
+        ],
+        "operationId": "ListPublicEmpresas",
+        "parameters": [
+          {
+            "name": "Nome",
+            "in": "query",
+            "schema": "@{type=string}"
+          },
+          {
+            "name": "Cidade",
+            "in": "query",
+            "schema": "@{type=string}"
+          },
+          {
+            "name": "Bairro",
+            "in": "query",
+            "schema": "@{type=string}"
+          },
+          {
+            "name": "Servico",
+            "in": "query",
+            "schema": "@{type=string}"
+          },
+          {
+            "name": "MinRating",
+            "in": "query",
+            "schema": "@{type=number; format=double}"
+          },
+          {
+            "name": "OrderBy",
+            "in": "query",
+            "schema": "@{type=string}"
+          },
+          {
+            "name": "OrderDirection",
+            "in": "query",
+            "schema": "@{type=string}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/petshops/public/by-host": {
+      "get": {
+        "tags": [
+          "Petshops"
+        ],
+        "operationId": "GetPublicEmpresaByHost",
+        "parameters": [
+          {
+            "name": "host",
+            "in": "query",
+            "required": true,
+            "schema": "@{type=string}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/petshops/public/{slug}": {
+      "get": {
+        "tags": [
+          "Petshops"
+        ],
+        "operationId": "GetPublicEmpresaBySlug",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/professionals": {
+      "post": {
+        "tags": [
+          "Professionals"
+        ],
+        "operationId": "CreateProfissional",
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Professionals"
+        ],
+        "operationId": "ListProfissionais",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/professionals/{id}": {
+      "get": {
+        "tags": [
+          "Professionals"
+        ],
+        "operationId": "GetProfissionalById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Professionals"
+        ],
+        "operationId": "UpdateProfissional",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/professionals/{id}/activate": {
+      "post": {
+        "tags": [
+          "Professionals"
+        ],
+        "operationId": "ActivateProfissional",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/professionals/{id}/deactivate": {
+      "post": {
+        "tags": [
+          "Professionals"
+        ],
+        "operationId": "DeactivateProfissional",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/professionals/{professionalId}/services": {
+      "post": {
+        "tags": [
+          "ProfessionalServiceAssignments"
+        ],
+        "operationId": "CreateProfessionalServiceAssignment",
+        "parameters": [
+          {
+            "name": "professionalId",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "ProfessionalServiceAssignments"
+        ],
+        "operationId": "ListProfessionalServiceAssignments",
+        "parameters": [
+          {
+            "name": "professionalId",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/professionals/{professionalId}/services/{serviceId}": {
+      "delete": {
+        "tags": [
+          "ProfessionalServiceAssignments"
+        ],
+        "operationId": "DeleteProfessionalServiceAssignment",
+        "parameters": [
+          {
+            "name": "professionalId",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          },
+          {
+            "name": "serviceId",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/services": {
+      "post": {
+        "tags": [
+          "Services"
+        ],
+        "operationId": "CreateServico",
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Services"
+        ],
+        "operationId": "ListServicos",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/services/{id}": {
+      "put": {
+        "tags": [
+          "Services"
+        ],
+        "operationId": "UpdateServico",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": "@{schema=}"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/services/{id}/activate": {
+      "post": {
+        "tags": [
+          "Services"
+        ],
+        "operationId": "ActivateServico",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/services/{id}/deactivate": {
+      "post": {
+        "tags": [
+          "Services"
+        ],
+        "operationId": "DeactivateServico",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": "@{type=string; format=uuid}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Api.Modules.Auth.Routes.Login.LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Bookings.Routes.Cancel.CancelBookingRequest": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "empresaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Bookings.Routes.CheckFeedbackEligibility.CheckBookingFeedbackEligibilityRequest": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "feedbackAccessToken": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Bookings.Routes.CheckStatus.CheckBookingStatusRequest": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statusAccessToken": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Bookings.Routes.Complete.CompleteBookingRequest": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "empresaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "finalChargedPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Bookings.Routes.Create.CreateBookingRequest": {
+        "type": "object",
+        "properties": {
+          "petshopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "professionalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serviceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slotStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "slotEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ownerContact": {
+            "type": "string",
+            "nullable": true
+          },
+          "petName": {
+            "type": "string",
+            "nullable": true
+          },
+          "petSpecies": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Bookings.Routes.NoShow.NoShowBookingRequest": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "empresaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Bookings.Routes.SubmitFeedback.SubmitBookingFeedbackRequest": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "feedbackAccessToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "professionalRating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "petshopRating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Clients.Routes.Login.LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Clients.Routes.Register.RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Disponibilidade.Routes.Create.CreateDisponibilidadeRequest": {
+        "type": "object",
+        "properties": {
+          "profissionalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "empresaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "diaSemana": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "horaInicio": {
+            "type": "string",
+            "format": "time"
+          },
+          "horaFim": {
+            "type": "string",
+            "format": "time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Disponibilidade.Routes.Update.UpdateDisponibilidadeRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "profissionalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "empresaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "diaSemana": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "horaInicio": {
+            "type": "string",
+            "format": "time"
+          },
+          "horaFim": {
+            "type": "string",
+            "format": "time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Empresas.Routes.UpdatePublicProfile.UpdateEmpresaPublicProfileRequest": {
+        "type": "object",
+        "properties": {
+          "empresaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "cidade": {
+            "type": "string",
+            "nullable": true
+          },
+          "bairro": {
+            "type": "string",
+            "nullable": true
+          },
+          "resumoContato": {
+            "type": "string",
+            "nullable": true
+          },
+          "resumoEndereco": {
+            "type": "string",
+            "nullable": true
+          },
+          "dominioPersonalizadoDesejado": {
+            "type": "string",
+            "nullable": true
+          },
+          "publica": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.ProfessionalServiceAssignments.Routes.Create.CreateProfessionalServiceAssignmentRequest": {
+        "type": "object",
+        "properties": {
+          "empresaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "professionalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serviceId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Profissionais.Routes.Create.CreateProfissionalRequest": {
+        "type": "object",
+        "properties": {
+          "empresaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "especialidade": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Profissionais.Routes.Update.UpdateProfissionalRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "empresaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "especialidade": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Servicos.Routes.Create.CreateServicoRequest": {
+        "type": "object",
+        "properties": {
+          "empresaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "duracaoMinutos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "precoBase": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Modules.Servicos.Routes.Update.UpdateServicoRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "empresaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "duracaoMinutos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "precoBase": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Admin:Tenants"
+    },
+    {
+      "name": "Api"
+    },
+    {
+      "name": "Auth"
+    },
+    {
+      "name": "Availability"
+    },
+    {
+      "name": "Bookings"
+    },
+    {
+      "name": "Clients"
+    },
+    {
+      "name": "Health"
+    },
+    {
+      "name": "Petshops"
+    },
+    {
+      "name": "Professionals"
+    },
+    {
+      "name": "ProfessionalServiceAssignments"
+    },
+    {
+      "name": "Services"
+    }
+  ]
+}

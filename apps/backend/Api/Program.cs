@@ -130,6 +130,9 @@ app.MapGet("/health", () => Results.Ok(new
 .WithName("HealthCheck")
 .WithTags("Health");
 
+// Temporary debug endpoint to verify discovery by Swagger
+app.MapGet("/__debug_test", () => Results.Ok(new { ok = true })).WithName("DebugTest");
+
 app.MapModuleEndpoints();
 
 // Diagnostic: list mapped endpoints at startup to help debug OpenAPI discovery (remove after debugging)
