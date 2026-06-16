@@ -26,7 +26,15 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
       toSingleValue(resolvedSearchParams.orderDirection) || "desc",
   };
 
-  const petshops = await api.listPublicPetshops(filters);
+  let petshops = [] as ReturnType<typeof api.listPublicPetshops> extends Promise<infer U> ? U : unknown[];
+
+  try {
+    petshops = await api.listPublicPetshops(filters);
+  } catch (err) {
+    // If backend is down or request fails, render empty state instead of throwing
+    console.error('Failed to load public petshops:', err);
+    petshops = [] as any;
+  }
 
   return (
     <PageWrapper

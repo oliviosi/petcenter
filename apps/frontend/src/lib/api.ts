@@ -96,14 +96,21 @@ async function request<T>(
     params?: Record<string, string | undefined>;
   },
 ): Promise<T> {
-  const response = await fetch(withQuery(path, options?.params), {
-    ...options,
-    headers: {
-      Accept: "application/json",
-      ...(options?.body ? { "Content-Type": "application/json" } : {}),
-      ...options?.headers,
-    },
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(withQuery(path, options?.params), {
+      ...options,
+      headers: {
+        Accept: "application/json",
+        ...(options?.body ? { "Content-Type": "application/json" } : {}),
+        ...options?.headers,
+      },
+    });
+  } catch (err: any) {
+    // Network-level failures (e.g. ECONNREFUSED) should be surfaced as a 503-style ApiRequestError
+    throw new ApiRequestError({ title: "Serviço indisponível.", status: 503 });
+  }
 
   if (!response.ok) {
     throw await parseError(response);
