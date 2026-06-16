@@ -112,4 +112,21 @@
   .shadow-soft {
     box-shadow: var(--shadow-soft);
   }
+
+  /* Booking-specific component utilities */
+  .booking-summary {
+    border-radius: var(--booking-card-radius);
+  }
+
+  .pet-card {
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+
+  /* Mobile bottom sticky confirm bar helper */
+  .booking-bottom-action {
+    position: sticky;
+    bottom: 0;
+    padding: 16px;
+    background: linear-gradient(180deg, rgba(248,249,255,0) 0%, rgba(248,249,255,1) 100%);
+  }
 }
