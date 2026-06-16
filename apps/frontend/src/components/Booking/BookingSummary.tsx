@@ -20,8 +20,8 @@ export function BookingSummary({
       </div>
 
       <div className="mt-6">
-        <div className="booking-panel rounded-3xl p-8 flex flex-col justify-between w-full min-h-[460px] text-white">
-          <div>
+        <div className="booking-panel w-full text-white">
+          <div className="space-y-4">
             {children}
           </div>
 
@@ -32,7 +32,7 @@ export function BookingSummary({
                 <p className="headline-sm font-bold text-white">R$ {total}</p>
               </div>
 
-              <Button type="button" className="w-44 rounded-full bg-white text-purple-600 font-button" onClick={onConfirm}>Confirmar</Button>
+              <Button type="button" className="w-48 rounded-full bg-white text-purple-600 font-button shadow-lg" onClick={onConfirm}>Confirmar</Button>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-white/8 p-4 label-md text-white/90">

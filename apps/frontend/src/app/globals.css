@@ -221,12 +221,15 @@
 
   /* Summary panel helper to closely match Stitch layout */
   .booking-panel {
-    border-radius: 1.25rem;
-    padding: 2rem;
-    min-height: 480px;
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    min-height: 520px;
     box-shadow: var(--booking-shadow);
-    background: linear-gradient(180deg, var(--color-accent-solid), rgba(99,14,212,0.92));
+    background: linear-gradient(180deg, #6a1ef0 0%, #4c0eb3 100%);
     color: var(--color-content-inverse);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
 
   /* Mobile bottom sticky confirm bar helper */
