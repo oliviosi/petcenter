@@ -117,18 +117,27 @@
   .booking-summary {
     border-radius: var(--booking-card-radius);
   }
- 
+  
+  /* spacing helpers copied from code.html */
+  .p-md { padding: 1rem; }
+  .px-lg { padding-left: 24px; padding-right: 24px; }
+  .py-sm { padding-top: 12px; padding-bottom: 12px; }
+  .gap-md { gap: 16px; }
+  .gap-lg { gap: 24px; }
+  .mb-md { margin-bottom: 16px; }
+  .mb-lg { margin-bottom: 24px; }
+
   .pet-card {
     transition: transform .12s ease, box-shadow .12s ease;
   }
- 
+  
   .pet-card.selected {
     transform: translateY(-6px);
     box-shadow: var(--booking-shadow);
     border: 2px solid var(--color-accent-solid);
     background: linear-gradient(180deg, rgba(105,14,136,0.04), rgba(105,14,136,0.02));
   }
- 
+  
   .pet-avatar {
     height: 84px;
     width: 84px;
@@ -136,7 +145,7 @@
     object-fit: cover;
     box-shadow: 0 8px 24px rgba(16,16,16,0.08);
   }
- 
+  
   .service-card {
     border-radius: 16px;
     background: var(--color-surface-card);
@@ -144,7 +153,7 @@
     transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     padding: 1rem;
   }
- 
+  
   .service-card.selected {
     border: 1px solid rgba(105,14,136,0.08);
     box-shadow: 0 18px 40px rgba(105,14,136,0.08);

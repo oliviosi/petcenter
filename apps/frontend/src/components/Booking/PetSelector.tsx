@@ -115,8 +115,8 @@ export function PetSelector({
         ))}
 
         <div className="flex-shrink-0 w-36 p-3">
-          <Card className="h-full flex items-center justify-center p-3" onClick={handleOpenNew}>
-            <Button variant="secondary">+ Adicionar Pet</Button>
+          <Card className="h-full flex items-center justify-center p-md rounded-xl shadow-soft" onClick={handleOpenNew}>
+            <Button variant="secondary" className="font-button">+ Adicionar Pet</Button>
           </Card>
         </div>
       </div>

@@ -15,8 +15,8 @@ export function BookingSummary({
   return (
     <div className="booking-summary p-4 lg:sticky lg:top-[6rem] lg:self-start w-full">
       <div className="space-y-2">
-        <p className="label-md text-white/80">Dados para a solicitação</p>
-        <h2 className="headline-md text-white">Resumo do Agendamento</h2>
+        <p className="label-md text-content-secondary">Dados para a solicitação</p>
+        <h2 className="headline-md text-content-primary">Resumo do Agendamento</h2>
       </div>
 
       <div className="mt-6">
