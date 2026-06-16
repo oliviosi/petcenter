@@ -261,7 +261,13 @@ export function BookingPageClient({
 
     const nextParams = new URLSearchParams(searchParams.toString());
     nextParams.set("serviceId", serviceId);
-    // keep other params
+
+    // immediately fetch slots for the new service (keep current date)
+    const sp = new URLSearchParams(searchParams.toString());
+    const startDate = sp.get('startDate') || filterDefaults.startDate;
+    await fetchSlots(serviceId, sp.get('professionalId') || undefined, startDate, startDate);
+
+    // keep other params and update url
     startTransition(() => router.replace(`${bookingPath}?${nextParams.toString()}`));
   }
 

@@ -35,10 +35,6 @@ export function BookingSummary({
               <Button type="button" className="w-48 rounded-full bg-accent text-on-accent font-button shadow-lg" onClick={onConfirm}>Confirmar</Button>
             </div>
 
-            <div className="rounded-2xl border border-stroke-soft bg-surface-muted p-4 label-md text-content-secondary">
-              <strong className="text-content-primary">DICA PRO</strong>
-              <p className="mt-2 body-md">Adicione hidratação de pelagem por apenas R$ 25,00 extras no checkout.</p>
-            </div>
           </div>
         </div>
       </div>
