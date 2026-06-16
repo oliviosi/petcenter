@@ -14,9 +14,9 @@
 
 ## 3. Page Integration
 
-- [ ] 3.1 Update `BookingPageClient.tsx` to use the new components and layout (desktop two-column, mobile single column)
-- [ ] 3.2 Ensure selected service/pet/date/time update the booking form fields correctly
-- [ ] 3.3 Preserve existing submission flow and error handling
+- [x] 3.1 Update `BookingPageClient.tsx` to use the new components and layout (desktop two-column, mobile single column)
+- [x] 3.2 Ensure selected service/pet/date/time update the booking form fields correctly
+- [x] 3.3 Preserve existing submission flow and error handling
 
 ## 4. Styles & Visual QA
 
