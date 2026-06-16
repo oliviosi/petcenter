@@ -18,7 +18,9 @@ export function AdminShell({
   return (
     <div className="flex min-h-screen bg-surface-page">
       {/* Global Header for small screens */}
-      <Header />
+      <div className="lg:hidden">
+        <Header />
+      </div>
 
       <aside className="hidden w-80 flex-col border-r border-stroke-soft bg-surface-card lg:flex">
         <div className="flex items-center gap-3 border-b border-stroke-soft px-6 py-6">
