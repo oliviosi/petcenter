@@ -18,6 +18,10 @@
   "/admin/login/page": "/admin/login",
   "/admin/page": "/admin",
   "/admin/signout/route": "/admin/signout",
+  "/bookings/page": "/bookings",
   "/login/page": "/login",
-  "/register/page": "/register"
+  "/professionals/page": "/professionals",
+  "/profile/page": "/profile",
+  "/register/page": "/register",
+  "/services/page": "/services"
 }

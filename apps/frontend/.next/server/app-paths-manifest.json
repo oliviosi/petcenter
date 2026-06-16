@@ -18,6 +18,10 @@
   "/admin/login/page": "app/admin/login/page.js",
   "/admin/page": "app/admin/page.js",
   "/admin/signout/route": "app/admin/signout/route.js",
+  "/bookings/page": "app/bookings/page.js",
   "/login/page": "app/login/page.js",
-  "/register/page": "app/register/page.js"
+  "/professionals/page": "app/professionals/page.js",
+  "/profile/page": "app/profile/page.js",
+  "/register/page": "app/register/page.js",
+  "/services/page": "app/services/page.js"
 }
