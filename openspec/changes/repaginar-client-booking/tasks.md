@@ -20,7 +20,7 @@
 
 ## 4. Styles & Visual QA
 
-- [ ] 4.1 Add component-level styles and shadows matching DESIGN.md (use tailwind + semantic classes)
+- [x] 4.1 Add component-level styles and shadows matching DESIGN.md (use tailwind + semantic classes)
 - [ ] 4.2 Add a small set of visual regression snapshots for desktop and mobile
 - [ ] 4.3 Manual QA checklist: keyboard navigation, aria labels, touch target sizes
 
