@@ -31,8 +31,8 @@ export function ServiceCard({
           <p className="label-md text-content-secondary mt-1">{(service as any).descricao ?? ''}</p>
         </div>
         <div className="text-right">
-          <p className="body-md text-content-secondary">{formatCurrency((service as any).basePrice ?? (service as any).precoBase ?? 0)}</p>
-          <p className="headline-sm font-semibold text-content-primary mt-2">{(service as any).durationMinutes ?? (service as any).duracaoMinutos ?? 0} min</p>
+          <p className="headline-sm text-content-primary">{formatCurrency((service as any).basePrice ?? (service as any).precoBase ?? 0)}</p>
+          <p className="body-md text-content-secondary mt-2">{(service as any).durationMinutes ?? (service as any).duracaoMinutos ?? 0} min</p>
         </div>
       </div>
     </button>

@@ -120,10 +120,6 @@ export function PetSelector({
           </div>
         ))}
 
-        <div className="bg-surface-container-low border-2 border-dashed border-outline-variant p-md rounded-xl flex flex-col items-center justify-center text-on-surface-variant hover:border-accent hover:text-accent transition-all cursor-pointer" onClick={handleOpenNew}>
-          <span className="material-symbols-outlined text-[32px] mb-xs" aria-hidden>pets</span>
-          <span className="font-label-md label-md text-center">Adicionar Pet</span>
-        </div>
       </div>
 
       {open && (

@@ -55,6 +55,22 @@ export function BookingPageClient({
   const [clientSlotsError, setClientSlotsError] = useState<string | null>(null);
   const searchParamsString = searchParams.toString();
 
+  async function fetchSlots(serviceId?: string, professionalId?: string, startDate?: string, endDate?: string) {
+    setClientSlotsError(null);
+    try {
+      const result = await api.getPublicSlots(petshop.id, {
+        serviceId: serviceId || filters.serviceId,
+        professionalId: professionalId || undefined,
+        startDate: startDate || filterDefaults.startDate,
+        endDate: endDate || filterDefaults.endDate,
+      });
+      setClientSlots(result);
+    } catch (err: any) {
+      setClientSlotsError(err?.message ?? "Erro ao buscar horários");
+      setClientSlots([]);
+    }
+  }
+
   const professionalLookup = useMemo(
     () =>
       Object.fromEntries(
@@ -118,6 +134,29 @@ export function BookingPageClient({
     setValue("professionalName", "", { shouldValidate: false });
     setValue("slotStart", "", { shouldValidate: false });
     setValue("slotEnd", "", { shouldValidate: false });
+
+    // if client is logged in, derive email from token for ownerContact
+    try {
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('client_token');
+        if (token) {
+          const parts = token.split('.');
+          if (parts.length >= 2) {
+            try {
+              const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+              const email = payload?.email || payload?.sub || payload?.preferred_username || "";
+              if (email) {
+                setValue('ownerContact', email, { shouldValidate: false });
+              }
+            } catch (e) {
+              // ignore decode errors
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
   }, [filters.serviceId, serviceLookup, setValue, slots]);
 
   // Client-side fetch when search params change (DatePickerHorizontal or user form updates)
@@ -131,21 +170,10 @@ export function BookingPageClient({
 
     let cancelled = false;
     setClientSlotsError(null);
+
     (async () => {
-      try {
-        const result = await api.getPublicSlots(petshop.id, {
-          serviceId,
-          professionalId: professionalId || undefined,
-          startDate,
-          endDate,
-        });
-        if (cancelled) return;
-        setClientSlots(result);
-      } catch (err: any) {
-        if (cancelled) return;
-        setClientSlotsError(err?.message ?? "Erro ao buscar horários");
-        setClientSlots([]);
-      }
+      await fetchSlots(serviceId, professionalId, startDate, endDate);
+      if (cancelled) return;
     })();
 
     return () => {
@@ -288,7 +316,7 @@ export function BookingPageClient({
 
             <FormField label="Data inicial">
               <div className="flex items-center gap-3">
-                <DatePickerHorizontal
+                   <DatePickerHorizontal
                   days={7}
                   selected={filterDefaults.startDate}
                   onSelect={(iso) => {
@@ -296,6 +324,10 @@ export function BookingPageClient({
                     const nextParams = new URLSearchParams(searchParams.toString());
                     nextParams.set('startDate', iso);
                     nextParams.set('endDate', iso);
+
+                    // immediately fetch slots for the selected day and update URL
+                    fetchSlots(filters.serviceId, undefined, iso, iso);
+
                     startTransition(() => router.replace(`${bookingPath}?${nextParams.toString()}`));
                   }}
                 />
@@ -375,61 +407,59 @@ export function BookingPageClient({
             <input type="hidden" {...register("professionalName")} />
             <input type="hidden" {...register("slotStart")} />
             <input type="hidden" {...register("slotEnd")} />
-
-            <FormField
-              label="Contato do responsável"
-              hint="Pode ser telefone ou e-mail para retorno."
-              error={errors.ownerContact?.message}
-            >
-              <Input
-                {...register("ownerContact")}
-                placeholder="(11) 99999-9999 ou voce@email.com"
-              />
-            </FormField>
-
-            <FormField label="Nome do pet" error={errors.petName?.message}>
-              <Input {...register("petName")} placeholder="Ex.: Amora" />
-            </FormField>
-
-            <FormField label="Espécie do pet" error={errors.petSpecies?.message}>
-              <Input {...register("petSpecies")} placeholder="Ex.: Cachorro" />
-            </FormField>
-
-          {errors.serviceId?.message ? (
-            <p className="text-xs text-content-danger">{errors.serviceId.message}</p>
-          ) : null}
-          {errors.professionalId?.message ? (
-            <p className="text-xs text-content-danger">
-              {errors.professionalId.message}
-            </p>
-          ) : null}
-          {errors.slotStart?.message ? (
-            <p className="text-xs text-content-danger">{errors.slotStart.message}</p>
-          ) : null}
-          {submissionError ? (
-            <p className="text-sm text-content-danger">{submissionError}</p>
-          ) : null}
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-content-secondary">Total estimado</p>
-                <p className="text-2xl font-bold text-content-primary">
-                  {formatCurrency(petshop.services.find(s => s.id === filters.serviceId)?.basePrice ?? 0)}
-                </p>
-              </div>
-
-              <Button type="submit" className="w-48 rounded-full bg-accent text-on-accent font-button" loading={isSubmitting}>
-                Confirmar Agendamento
-              </Button>
-            </div>
-
-            <div className="rounded-2xl border border-stroke-soft bg-surface-muted p-4 text-sm text-content-secondary">
-              <strong className="text-content-primary">DICA PRO</strong>
-              <p className="mt-2">Adicione hidratação de pelagem por apenas R$ 25,00 extras no checkout.</p>
-            </div>
-          </div>
-        </form>
++            <input type="hidden" {...register("ownerContact")} />
+ 
+-            <FormField label="Nome do pet" error={errors.petName?.message}>
+-              <Input {...register("petName")} placeholder="Ex.: Amora" />
+-            </FormField>
+-
+-            <FormField label="Espécie do pet" error={errors.petSpecies?.message}>
+-              <Input {...register("petSpecies")} placeholder="Ex.: Cachorro" />
+-            </FormField>
++            <FormField label="Nome do pet" error={errors.petName?.message}>
++              <Input {...register("petName")} placeholder="Ex.: Amora" />
++            </FormField>
++
++            <FormField label="Espécie do pet" error={errors.petSpecies?.message}>
++              <Input {...register("petSpecies")} placeholder="Ex.: Cachorro" />
++            </FormField>
+ 
+            {errors.serviceId?.message ? (
+              <p className="text-xs text-content-danger">{errors.serviceId.message}</p>
+            ) : null}
+            {errors.professionalId?.message ? (
+              <p className="text-xs text-content-danger">
+                {errors.professionalId.message}
+              </p>
+            ) : null}
+            {errors.slotStart?.message ? (
+              <p className="text-xs text-content-danger">{errors.slotStart.message}</p>
+            ) : null}
+            {submissionError ? (
+              <p className="text-sm text-content-danger">{submissionError}</p>
+            ) : null}
+-
+-          <div className="space-y-3">
+-            <div className="flex items-center justify-between">
+-              <div>
+-                <p className="text-sm text-content-secondary">Total estimado</p>
+-                <p className="text-2xl font-bold text-content-primary">
+-                  {formatCurrency(petshop.services.find(s => s.id === filters.serviceId)?.basePrice ?? 0)}
+-                </p>
+-              </div>
+-
+-              <Button type="submit" className="w-48 rounded-full bg-accent text-on-accent font-button" loading={isSubmitting}>
+-                Confirmar Agendamento
+-              </Button>
+-            </div>
+-
+-            <div className="rounded-2xl border border-stroke-soft bg-surface-muted p-4 text-sm text-content-secondary">
+-              <strong className="text-content-primary">DICA PRO</strong>
+-              <p className="mt-2">Adicione hidratação de pelagem por apenas R$ 25,00 extras no checkout.</p>
+-            </div>
+-          </div>
+-        </form>
++          </form>
           </BookingSummary>
         </div>
       </div>
