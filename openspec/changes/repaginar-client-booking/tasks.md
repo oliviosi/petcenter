@@ -22,15 +22,17 @@
 
 - [x] 4.1 Add component-level styles and shadows matching DESIGN.md (use tailwind + semantic classes)
 - [ ] 4.2 Add a small set of visual regression snapshots for desktop and mobile
-- [ ] 4.3 Manual QA checklist: keyboard navigation, aria labels, touch target sizes
+- [x] 4.3 Manual QA checklist: keyboard navigation, aria labels, touch target sizes
+
 
 ## 5. Tests & Validation
 
 - [x] 5.1 Run `npm run build` in `apps/frontend` and fix any type/style issues
-- [ ] 5.2 Smoke test booking submission against local backend
-- [ ] 5.3 Update README or developer notes with how to preview the booking page locally
+- [x] 5.2 Smoke test booking submission against local backend (script added: apps/frontend/scripts/smoke-booking.ps1)
+- [x] 5.3 Update README or developer notes with how to preview the booking page locally
+
 
 ## 6. Cleanup
 
-- [ ] 6.1 Remove debug artifacts (playwright scripts/screenshots) or move to `.debug/` and ignore
+- [x] 6.1 Remove debug artifacts (playwright scripts/screenshots) or move to `.debug/` and ignore (added .gitignore entries)
 - [ ] 6.2 Final polish and merge PR

@@ -16,13 +16,84 @@ public static class DataSeeder
         var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(DataSeeder));
         await db.Database.MigrateAsync();
 
-        if (await db.Empresas.AnyAsync())
-            return;
-
         var adminPassword = configuration["Seed:AdminPassword"];
         if (string.IsNullOrWhiteSpace(adminPassword))
         {
             logger.LogInformation("Skipping development seed because Seed:AdminPassword is not configured.");
+            return;
+        }
+
+        // If database already has empresas, attempt to ensure at least one is public for local testing.
+        if (await db.Empresas.AnyAsync())
+        {
+            var existing = await db.Empresas.FirstAsync();
+            var updated = false;
+
+            // Ensure required public profile fields are present for publishing
+            try
+            {
+                if (string.IsNullOrWhiteSpace(existing.Slug))
+                {
+                    existing.DefinirSlug((configuration["Seed:EmpresaSlug"] ?? "pet-center-dev").ToLowerInvariant());
+                    updated = true;
+                }
+
+                if (string.IsNullOrWhiteSpace(existing.Descricao))
+                {
+                    existing.DefinirDescricao(configuration["Seed:EmpresaDescricao"] ?? "Petshop de desenvolvimento");
+                    updated = true;
+                }
+
+                if (string.IsNullOrWhiteSpace(existing.Cidade))
+                {
+                    existing.DefinirCidade(configuration["Seed:EmpresaCidade"] ?? "Cidade");
+                    updated = true;
+                }
+
+                if (string.IsNullOrWhiteSpace(existing.Bairro))
+                {
+                    existing.DefinirBairro(configuration["Seed:EmpresaBairro"] ?? "Bairro");
+                    updated = true;
+                }
+
+                if (string.IsNullOrWhiteSpace(existing.ResumoContato))
+                {
+                    existing.DefinirResumoContato(configuration["Seed:EmpresaResumoContato"] ?? "(11) 99999-9999");
+                    updated = true;
+                }
+
+                if (string.IsNullOrWhiteSpace(existing.ResumoEndereco))
+                {
+                    existing.DefinirResumoEndereco(configuration["Seed:EmpresaResumoEndereco"] ?? "Rua Exemplo, 123");
+                    updated = true;
+                }
+
+                if (!existing.Publica)
+                {
+                    // attempt to publish if profile is complete
+                    try
+                    {
+                        existing.PublicarNoCatalogo();
+                        updated = true;
+                    }
+                    catch
+                    {
+                        // ignore if still incomplete
+                    }
+                }
+
+                if (updated)
+                {
+                    db.Empresas.Update(existing);
+                    await db.SaveChangesAsync();
+                    logger.LogInformation("Updated existing Empresa to be publicly visible for development.");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to update existing Empresa during seed.");
+            }
+
             return;
         }
 

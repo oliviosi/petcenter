@@ -169,3 +169,33 @@ Se o runner padrão do Vitest apresentar instabilidade no ambiente local, rode o
 cd apps/frontend
 npx vitest run --pool forks --maxWorkers=1
 ```
+
+## Preview da tela de booking (cliente)
+
+Para pré-visualizar e testar o fluxo de booking do cliente localmente:
+
+1. Inicie o backend (na raiz do repositório):
+
+```bash
+dotnet run --project apps/backend/Api
+```
+
+2. Certifique-se que o banco foi seedado (defina Seed:AdminPassword como variável de ambiente se necessário). O seed cria uma empresa de desenvolvimento que aparece em `/petshops/public`.
+
+3. No frontend, instale dependências e rode em dev:
+
+```bash
+cd apps/frontend
+npm install
+npm run dev
+```
+
+4. Executar um smoke test de booking (PowerShell script fornecido):
+
+```powershell
+# a partir da raiz do repositório
+pwsh -File apps/frontend/scripts/smoke-booking.ps1
+```
+
+O script tentará obter um petshop público, buscar slots disponíveis e submeter uma reserva de teste. Ele mostrará o payload e a resposta do servidor. Use-o apenas em ambiente de desenvolvimento contra a API local.
+

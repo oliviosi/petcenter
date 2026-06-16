@@ -9,3 +9,10 @@ apps/frontend/.next/
 
 # Local settings with secrets (do not commit)
 apps/backend/Api/appsettings.Development.json
+
+# Debug artifacts from local frontend dev (can be re-generated)
+apps/frontend/debug_*
+apps/frontend/admin_profile_debug.png
+apps/frontend/debug_admin_rendered.html
+apps/frontend/debug_main_content.html
+
