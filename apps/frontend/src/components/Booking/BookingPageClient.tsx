@@ -362,7 +362,8 @@ export function BookingPageClient({
             </div>
           </div>
         </form>
-      </Card>
-    </div>
+          </BookingSummary>
+        </div>
+      </div>
   );
 }

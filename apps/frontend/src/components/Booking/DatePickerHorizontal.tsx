@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { format } from "date-fns";
 
 export function DatePickerHorizontal({
   days = 7,
@@ -33,8 +32,8 @@ export function DatePickerHorizontal({
               className={"px-4 py-2 rounded-full min-w-[72px] text-center " + (isSelected ? "bg-primary text-on-primary" : "bg-surface-muted text-content-primary hover:shadow-soft")}
               aria-pressed={isSelected}
             >
-              <div className="text-xs text-content-secondary">{format(d, 'EEE')}</div>
-              <div className="text-sm font-medium">{format(d, 'dd/MM')}</div>
+              <div className="text-xs text-content-secondary">{d.toLocaleDateString('pt-BR', { weekday: 'short' })}</div>
+              <div className="text-sm font-medium">{d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
             </button>
           );
         })}

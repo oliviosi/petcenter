@@ -26,7 +26,7 @@
 
 ## 5. Tests & Validation
 
-- [ ] 5.1 Run `npm run build` in `apps/frontend` and fix any type/style issues
+- [x] 5.1 Run `npm run build` in `apps/frontend` and fix any type/style issues
 - [ ] 5.2 Smoke test booking submission against local backend
 - [ ] 5.3 Update README or developer notes with how to preview the booking page locally
 
