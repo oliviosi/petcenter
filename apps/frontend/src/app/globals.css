@@ -219,6 +219,24 @@
   .label-md { font-family: var(--font-sans); font-size: var(--text-sm); font-weight: 600; }
   .font-button { font-family: var(--font-heading); font-size: var(--text-base); font-weight: 600; }
 
+  /* Select / combobox fixes to preserve rounded corners on focus and remove square native artifact */
+  select, .select-rounded select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    background-clip: padding-box;
+  }
+
+  /* make focus visual nicer and keep rounded corners */
+  select:focus {
+    box-shadow: 0 6px 18px rgba(99,14,212,0.08);
+    border-color: var(--color-accent-solid);
+    outline: none;
+    border-radius: var(--radius-xl);
+  }
+
   /* Summary panel helper to closely match Stitch layout */
   .booking-panel {
     border-radius: 1.5rem;

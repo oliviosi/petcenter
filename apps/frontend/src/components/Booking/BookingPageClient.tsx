@@ -57,16 +57,30 @@ export function BookingPageClient({
 
   async function fetchSlots(serviceId?: string, professionalId?: string, startDate?: string, endDate?: string) {
     setClientSlotsError(null);
+
+    const svc = serviceId || filters.serviceId;
+    const start = startDate || filterDefaults.startDate;
+    const end = endDate || filterDefaults.endDate;
+
+    // require service and date to fetch slots
+    if (!svc || !start) {
+      setClientSlots([]);
+      setClientSlotsError('Escolha um serviço e um dia.');
+      return;
+    }
+
     try {
       const result = await api.getPublicSlots(petshop.id, {
-        serviceId: serviceId || filters.serviceId,
+        serviceId: svc,
         professionalId: professionalId || undefined,
-        startDate: startDate || filterDefaults.startDate,
-        endDate: endDate || filterDefaults.endDate,
+        startDate: start,
+        endDate: end || start,
       });
       setClientSlots(result);
     } catch (err: any) {
-      setClientSlotsError(err?.message ?? "Erro ao buscar horários");
+      // surface friendly message when backend returns known errors
+      const message = err?.message || (err?.title ?? null) || "Erro ao buscar horários";
+      setClientSlotsError(message);
       setClientSlots([]);
     }
   }
