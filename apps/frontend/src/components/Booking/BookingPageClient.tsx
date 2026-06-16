@@ -176,29 +176,61 @@ export function BookingPageClient({
     );
   }
 
+  // helper: select service card and trigger search
+  async function selectService(serviceId: string) {
+    setValue("serviceId", serviceId, { shouldValidate: true });
+    setValue("serviceName", serviceLookup[serviceId] ?? "", { shouldValidate: true });
+
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.set("serviceId", serviceId);
+    // keep other params
+    startTransition(() => router.replace(`${bookingPath}?${nextParams.toString()}`));
+  }
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+    <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
       <div className="space-y-6">
         <Card className="p-6">
           {/* Pet selector */}
           <div className="mb-4">
-            <PetSelector onSelect={(pet) => {
-              setValue("petName", pet.name, { shouldValidate: true });
-              setValue("petSpecies", pet.species, { shouldValidate: true });
-            }} />
+            <PetSelector
+              onSelect={(pet) => {
+                setValue("petName", pet.name, { shouldValidate: true });
+                setValue("petSpecies", pet.species, { shouldValidate: true });
+              }}
+            />
+          </div>
+
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-content-primary mb-3">Serviços</h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {petshop.services.map((service) => {
+                const selected = service.id === (filters.serviceId || (serviceLookup ? undefined : undefined));
+                return (
+                  <button
+                    key={service.id}
+                    type="button"
+                    onClick={() => selectService(service.id)}
+                    className={"text-left rounded-2xl border p-4 transition duration-150 " + (service.id === filters.serviceId ? "border-stroke-brand bg-surface-brand-soft" : "border-transparent hover:border-stroke-strong")}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-content-primary">{service.name}</p>
+                        <p className="text-xs text-content-secondary mt-1">{service.descricao ?? ''}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-content-secondary">R$ {""}</p>
+                        <p className="text-lg font-semibold text-content-primary mt-2">                        {formatCurrency(service.basePrice)}</p>
+                                                <p className="text-xs text-content-secondary">{service.durationMinutes} min</p>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <form className="grid gap-4 md:grid-cols-2" onSubmit={handleSearch}>
-            <FormField label="Serviço">
-              <Select name="serviceId" defaultValue={filterDefaults.serviceId}>
-                {petshop.services.map((service) => (
-                  <option key={service.id} value={service.id}>
-                    {service.name}
-                  </option>
-                ))}
-              </Select>
-            </FormField>
-
             <FormField
               label="Profissional"
               hint="Opcional. Use quando quiser restringir a busca."
@@ -262,7 +294,7 @@ export function BookingPageClient({
         )}
       </div>
 
-      <Card className="p-6">
+      <Card className="p-6 lg:sticky lg:top-24">
         <div className="space-y-2">
           <p className="text-sm font-medium text-content-secondary">
             Dados para a solicitação
