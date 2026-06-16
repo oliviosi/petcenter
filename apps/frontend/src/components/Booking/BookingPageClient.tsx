@@ -13,6 +13,9 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { SlotList } from "@/components/Booking/SlotList";
 import { PetSelector } from "@/components/Booking/PetSelector";
+import { ServiceCard } from "@/components/Booking/ServiceCard";
+import { DatePickerHorizontal } from "@/components/Booking/DatePickerHorizontal";
+import { BookingSummary } from "@/components/Booking/BookingSummary";
 import { PublicRequestErrorState } from "@/components/PublicRequestErrorState";
 import { bookingSubmissionSchema } from "@/lib/validations/booking";
 import type {
@@ -204,29 +207,14 @@ export function BookingPageClient({
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-content-primary mb-3">Serviços</h3>
             <div className="grid gap-3 sm:grid-cols-2">
-              {petshop.services.map((service) => {
-                const selected = service.id === (filters.serviceId || (serviceLookup ? undefined : undefined));
-                return (
-                  <button
-                    key={service.id}
-                    type="button"
-                    onClick={() => selectService(service.id)}
-                    className={"text-left rounded-2xl border p-4 transition duration-150 " + (service.id === filters.serviceId ? "border-stroke-brand bg-surface-brand-soft" : "border-transparent hover:border-stroke-strong")}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-content-primary">{service.name}</p>
-                        <p className="text-xs text-content-secondary mt-1">{service.descricao ?? ''}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-content-secondary">R$ {""}</p>
-                        <p className="text-lg font-semibold text-content-primary mt-2">                        {formatCurrency(service.basePrice)}</p>
-                                                <p className="text-xs text-content-secondary">{service.durationMinutes} min</p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
+              {petshop.services.map((service) => (
+                <ServiceCard
+                  key={service.id}
+                  service={service as any}
+                  selected={service.id === filters.serviceId}
+                  onClick={() => selectService(service.id)}
+                />
+              ))}
             </div>
           </div>
 
@@ -294,60 +282,50 @@ export function BookingPageClient({
         )}
       </div>
 
-      <Card className="p-6 lg:sticky lg:top-24">
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-content-secondary">
-            Dados para a solicitação
-          </p>
-          <h2 className="text-2xl font-semibold text-content-primary">
-            Resumo do Agendamento
-          </h2>
-        </div>
-
-        <div className="mt-6 rounded-2xl bg-surface-muted p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-content-primary">Horário selecionado</p>
-              <p className="mt-1 text-sm text-content-secondary">
-                {selectedSlotId ? "Pronto para confirmar." : "Escolha um horário disponível."}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-content-secondary">Duração estimada</p>
-              <p className="text-lg font-semibold text-content-primary">{petshop.services.find(s => s.id === filters.serviceId)?.durationMinutes ?? 0} min</p>
-            </div>
+      <div className="lg:col-span-4">
+        <BookingSummary
+          total={petshop.services.find(s => s.id === filters.serviceId)?.basePrice ?? 0}
+          onConfirm={() => handleSubmit(onSubmit)()}
+        >
+          <div className="mt-2">
+            <p className="text-sm font-medium text-content-primary">Horário selecionado</p>
+            <p className="mt-1 text-sm text-content-secondary">{selectedSlotId ? "Pronto para confirmar." : "Escolha um horário disponível."}</p>
           </div>
-        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-          <input type="hidden" {...register("petshopId")} />
-          <input type="hidden" {...register("petshopSlug")} />
-          <input type="hidden" {...register("petshopName")} />
-          <input type="hidden" {...register("serviceId")} />
-          <input type="hidden" {...register("serviceName")} />
-          <input type="hidden" {...register("professionalId")} />
-          <input type="hidden" {...register("professionalName")} />
-          <input type="hidden" {...register("slotStart")} />
-          <input type="hidden" {...register("slotEnd")} />
+          <div className="mt-4 text-right">
+            <p className="text-sm text-content-secondary">Duração estimada</p>
+            <p className="text-lg font-semibold text-content-primary">{petshop.services.find(s => s.id === filters.serviceId)?.durationMinutes ?? 0} min</p>
+          </div>
 
-          <FormField
-            label="Contato do responsável"
-            hint="Pode ser telefone ou e-mail para retorno."
-            error={errors.ownerContact?.message}
-          >
-            <Input
-              {...register("ownerContact")}
-              placeholder="(11) 99999-9999 ou voce@email.com"
-            />
-          </FormField>
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+            <input type="hidden" {...register("petshopId")} />
+            <input type="hidden" {...register("petshopSlug")} />
+            <input type="hidden" {...register("petshopName")} />
+            <input type="hidden" {...register("serviceId")} />
+            <input type="hidden" {...register("serviceName")} />
+            <input type="hidden" {...register("professionalId")} />
+            <input type="hidden" {...register("professionalName")} />
+            <input type="hidden" {...register("slotStart")} />
+            <input type="hidden" {...register("slotEnd")} />
 
-          <FormField label="Nome do pet" error={errors.petName?.message}>
-            <Input {...register("petName")} placeholder="Ex.: Amora" />
-          </FormField>
+            <FormField
+              label="Contato do responsável"
+              hint="Pode ser telefone ou e-mail para retorno."
+              error={errors.ownerContact?.message}
+            >
+              <Input
+                {...register("ownerContact")}
+                placeholder="(11) 99999-9999 ou voce@email.com"
+              />
+            </FormField>
 
-          <FormField label="Espécie do pet" error={errors.petSpecies?.message}>
-            <Input {...register("petSpecies")} placeholder="Ex.: Cachorro" />
-          </FormField>
+            <FormField label="Nome do pet" error={errors.petName?.message}>
+              <Input {...register("petName")} placeholder="Ex.: Amora" />
+            </FormField>
+
+            <FormField label="Espécie do pet" error={errors.petSpecies?.message}>
+              <Input {...register("petSpecies")} placeholder="Ex.: Cachorro" />
+            </FormField>
 
           {errors.serviceId?.message ? (
             <p className="text-xs text-content-danger">{errors.serviceId.message}</p>
