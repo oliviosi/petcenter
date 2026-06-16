@@ -45,6 +45,7 @@ export function BookingPageClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [selectedPet, setSelectedPet] = useState<{ name: string; species: string; avatar?: string } | null>(null);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [isSearching, startTransition] = useTransition();
 
@@ -200,6 +201,7 @@ export function BookingPageClient({
               onSelect={(pet) => {
                 setValue("petName", pet.name, { shouldValidate: true });
                 setValue("petSpecies", pet.species, { shouldValidate: true });
+                setSelectedPet({ name: pet.name, species: pet.species, avatar: pet.avatar });
               }}
             />
           </div>
@@ -287,6 +289,20 @@ export function BookingPageClient({
           total={petshop.services.find(s => s.id === filters.serviceId)?.basePrice ?? 0}
           onConfirm={() => handleSubmit(onSubmit)()}
         >
+          {selectedPet && (
+            <div className="flex items-center gap-3">
+              {selectedPet.avatar ? (
+                <img src={selectedPet.avatar} alt={selectedPet.name} className="h-12 w-12 rounded-md object-cover" />
+              ) : (
+                <div className="h-12 w-12 rounded-md bg-surface-muted" />
+              )}
+              <div>
+                <p className="text-sm font-medium text-content-primary">{selectedPet.name}</p>
+                <p className="text-xs text-content-secondary">{selectedPet.species}</p>
+              </div>
+            </div>
+          )}
+
           <div className="mt-2">
             <p className="text-sm font-medium text-content-primary">Horário selecionado</p>
             <p className="mt-1 text-sm text-content-secondary">{selectedSlotId ? "Pronto para confirmar." : "Escolha um horário disponível."}</p>
