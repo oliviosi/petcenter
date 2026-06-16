@@ -46,31 +46,33 @@ export function SlotList({
             <Card
               className={
                 isSelected
-                  ? "border-stroke-brand bg-surface-brand-soft p-5"
-                  : "p-5 hover:border-stroke-strong"
+                  ? "slot-card selected"
+                  : "slot-card hover:shadow-soft"
               }
             >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="space-y-3">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-content-primary">
+              <div className="flex items-start justify-between gap-3">
+                <div className="">
+                  <div className="">
+                    <p className="headline-sm text-content-primary mb-1">
                       {formatDayLabel(slot.slotStart)}
                     </p>
-                    <p className="text-sm text-content-secondary">
+                    <p className="body-md text-content-secondary">
                       {formatTimeRange(slot.slotStart, slot.slotEnd)}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-content-secondary">
+                  <div className="flex items-center gap-2 text-sm text-content-secondary mt-3">
                     <UserRound className="h-4 w-4 text-content-subtle" />
-                    <span>
+                    <span className="label-md text-content-secondary">
                       {professionalLookup[slot.professionalId] || "Profissional disponível"}
                     </span>
                   </div>
                 </div>
 
-                <Badge tone={isSelected ? "brand" : "neutral"}>
-                  {isSelected ? "Horário selecionado" : "Disponível"}
-                </Badge>
+                <div className="flex items-center">
+                  <span className={`slot-badge ${isSelected ? 'bg-accent text-on-accent' : 'bg-surface-card text-content-secondary'}`}>
+                    {isSelected ? "Horário selecionado" : "Disponível"}
+                  </span>
+                </div>
               </div>
             </Card>
           </button>

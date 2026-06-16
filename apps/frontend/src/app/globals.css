@@ -161,30 +161,48 @@
   }
  
   .date-pill {
-    min-width: 84px;
+    min-width: 96px;
     border-radius: 999px;
-    padding: 8px 14px;
+    padding: 10px 16px;
     transition: transform .12s ease, box-shadow .12s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
   }
- 
+  
+  .date-pill .weekday { font-size: 12px; color: var(--color-content-secondary); }
+  .date-pill .day { font-size: 16px; font-weight: 600; }
+  
   .date-pill.selected {
     background: var(--color-accent-soft);
     color: var(--color-content-accent);
     box-shadow: 0 10px 30px rgba(105,14,136,0.06);
+    transform: translateY(-4px);
   }
- 
+  
   .time-pill {
     min-width: 88px;
-    border-radius: 10px;
-    padding: 10px 12px;
+    border-radius: 12px;
+    padding: 10px 14px;
     background: var(--color-surface-card);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
- 
+  
   .time-pill.selected {
     background: var(--color-accent-solid);
     color: var(--color-content-inverse);
     box-shadow: 0 8px 30px rgba(105,14,136,0.08);
+    transform: translateY(-3px);
   }
+
+  /* slot card styles */
+  .slot-card { border-radius: 1rem; padding: 1rem; }
+  .slot-card.selected { background: linear-gradient(180deg, rgba(99,14,212,0.04), rgba(99,14,212,0.02)); box-shadow: 0 18px 40px rgba(99,14,212,0.06); border: 1px solid rgba(99,14,212,0.06); }
+  .slot-badge { padding: 6px 10px; border-radius: 999px; font-weight: 600; font-size: 12px; }
+
  
   /* Accent / utility helpers mapped to design tokens */
   .bg-accent { background: var(--color-accent-solid); }

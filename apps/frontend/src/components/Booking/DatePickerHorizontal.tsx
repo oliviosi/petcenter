@@ -39,8 +39,8 @@ export function DatePickerHorizontal({
               className={"date-pill text-center " + (isSelected ? "selected" : "")}
               aria-pressed={isSelected}
             >
-              <div className="text-xs text-content-secondary">{d.toLocaleDateString('pt-BR', { weekday: 'short' })}</div>
-              <div className="text-sm font-medium">{d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
+                  <div className="weekday">{d.toLocaleDateString('pt-BR', { weekday: 'short' })}</div>
+              <div className="day">{d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
             </button>
           );
         })}
