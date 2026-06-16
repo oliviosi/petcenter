@@ -33,8 +33,8 @@
 
   --color-focus-ring: #a94ec9;
 
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-poppins), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Plus Jakarta Sans", "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
 
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -49,16 +49,16 @@
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.25rem;
-  --radius-2xl: 1.75rem;
+  --radius-2xl: 2rem;
 
-  --shadow-card: 0 28px 60px -34px rgb(36 31 24 / 0.24);
-  --shadow-soft: 0 16px 32px -28px rgb(36 31 24 / 0.2);
+  --shadow-card: 0 24px 48px rgba(16, 16, 16, 0.12);
+  --shadow-soft: 0 12px 28px rgba(16, 16, 16, 0.08);
 
   /* Booking-specific tokens */
   --booking-summary-top-offset: 6rem; /* lg sticky offset */
   --booking-confirm-height: 72px; /* fixed bottom confirm on mobile */
   --booking-card-radius: var(--radius-lg);
-  --booking-shadow: 0 8px 30px rgba(124,58,237,0.12);
+  --booking-shadow: 0 20px 60px rgba(99,14,212,0.12);
   --datepill-selected-bg: var(--color-primary);
   --datepill-selected-color: var(--on-primary);
 }
