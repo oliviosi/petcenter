@@ -18,11 +18,18 @@ export function DatePickerHorizontal({
     return d;
   });
 
+  function toIsoLocal(d: Date) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
   return (
     <div className="overflow-x-auto hide-scrollbar">
       <div className="flex gap-3">
         {dates.map((d) => {
-          const iso = d.toISOString().slice(0, 10);
+          const iso = toIsoLocal(d);
           const isSelected = selected === iso;
           return (
             <button
