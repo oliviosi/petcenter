@@ -27,12 +27,12 @@ export function ServiceCard({
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="16" height="16" rx="4" fill="rgba(99,14,212,0.08)"/></svg>
         </div>
         <div className="flex-1">
-          <p className="text-sm font-medium text-content-primary">{service.name}</p>
-          <p className="text-xs text-content-secondary mt-1">{(service as any).descricao ?? ''}</p>
+          <p className="headline-sm font-medium text-content-primary">{service.name}</p>
+          <p className="label-md text-content-secondary mt-1">{(service as any).descricao ?? ''}</p>
         </div>
         <div className="text-right">
-          <p className="text-sm text-content-secondary">{formatCurrency((service as any).basePrice ?? (service as any).precoBase ?? 0)}</p>
-          <p className="text-lg font-semibold text-content-primary mt-2">{(service as any).durationMinutes ?? (service as any).duracaoMinutos ?? 0} min</p>
+          <p className="body-md text-content-secondary">{formatCurrency((service as any).basePrice ?? (service as any).precoBase ?? 0)}</p>
+          <p className="headline-sm font-semibold text-content-primary mt-2">{(service as any).durationMinutes ?? (service as any).duracaoMinutos ?? 0} min</p>
         </div>
       </div>
     </button>

@@ -249,7 +249,7 @@ export function BookingPageClient({
           </div>
 
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-content-primary mb-3">Serviços</h3>
+            <h3 className="headline-sm text-content-primary mb-3">Serviços</h3>
             <div className="grid gap-3 sm:grid-cols-2">
               {petshop.services.map((service) => (
                 <ServiceCard
@@ -355,8 +355,8 @@ export function BookingPageClient({
                 <div className="h-12 w-12 rounded-md bg-surface-muted" />
               )}
               <div>
-                <p className="text-sm font-medium text-content-primary">{selectedPet.name}</p>
-                <p className="text-xs text-content-secondary">{selectedPet.species}</p>
+                <p className="body-md font-medium text-content-primary">{selectedPet.name}</p>
+                <p className="label-md text-content-secondary">{selectedPet.species}</p>
               </div>
             </div>
           )}

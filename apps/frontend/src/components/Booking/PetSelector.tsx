@@ -95,8 +95,8 @@ export function PetSelector({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-content-primary">Selecione o Pet</h3>
-        <Button onClick={handleOpenNew} variant="ghost" size="sm">+ New Pet</Button>
+        <h3 className="headline-sm text-content-primary">Selecione o Pet</h3>
+        <Button onClick={handleOpenNew} variant="ghost" size="sm" className="font-button">+ New Pet</Button>
       </div>
 
       <div className="flex gap-4 overflow-x-auto hide-scrollbar py-2">
@@ -108,8 +108,8 @@ export function PetSelector({
               <div className="pet-avatar mb-3 mx-auto bg-surface-muted" />
             )}
             <div className="text-center">
-              <p className="text-sm font-medium text-content-primary">{pet.name}</p>
-              <p className="text-xs text-content-secondary">{pet.species}</p>
+              <p className="body-md font-medium text-content-primary">{pet.name}</p>
+              <p className="label-md text-content-secondary">{pet.species}</p>
             </div>
           </div>
         ))}
