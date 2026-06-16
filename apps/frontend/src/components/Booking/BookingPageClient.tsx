@@ -328,15 +328,17 @@ export function BookingPageClient({
             onRetry={() => router.refresh()}
           />
         ) : (
-          <SlotList
-            slots={clientSlots ?? slots}
-            selectedSlotId={selectedSlotId}
-            professionalLookup={professionalLookup}
-            onSelect={handleSlotSelect}
-          />
-          {clientSlotsError ? (
-            <div className="text-sm text-content-danger mt-2">{clientSlotsError}</div>
-          ) : null}
+          <>
+            <SlotList
+              slots={clientSlots ?? slots}
+              selectedSlotId={selectedSlotId}
+              professionalLookup={professionalLookup}
+              onSelect={handleSlotSelect}
+            />
+            {clientSlotsError ? (
+              <div className="text-sm text-content-danger mt-2">{clientSlotsError}</div>
+            ) : null}
+          </>
         )}
       </div>
 
