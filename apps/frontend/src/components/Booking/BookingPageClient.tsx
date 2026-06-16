@@ -413,59 +413,32 @@ export function BookingPageClient({
             <input type="hidden" {...register("professionalName")} />
             <input type="hidden" {...register("slotStart")} />
             <input type="hidden" {...register("slotEnd")} />
-+            <input type="hidden" {...register("ownerContact")} />
- 
--            <FormField label="Nome do pet" error={errors.petName?.message}>
--              <Input {...register("petName")} placeholder="Ex.: Amora" />
--            </FormField>
--
--            <FormField label="Espécie do pet" error={errors.petSpecies?.message}>
--              <Input {...register("petSpecies")} placeholder="Ex.: Cachorro" />
--            </FormField>
-+            <FormField label="Nome do pet" error={errors.petName?.message}>
-+              <Input {...register("petName")} placeholder="Ex.: Amora" />
-+            </FormField>
-+
-+            <FormField label="Espécie do pet" error={errors.petSpecies?.message}>
-+              <Input {...register("petSpecies")} placeholder="Ex.: Cachorro" />
-+            </FormField>
- 
+            <input type="hidden" {...register("ownerContact")} />
+
+            <FormField label="Nome do pet" error={errors.petName?.message}>
+             <Input {...register("petName")} placeholder="Ex.: Amora" />
+            </FormField>
+
+            <FormField label="Espécie do pet" error={errors.petSpecies?.message}>
+             <Input {...register("petSpecies")} placeholder="Ex.: Cachorro" />
+            </FormField>
+
             {errors.serviceId?.message ? (
-              <p className="text-xs text-content-danger">{errors.serviceId.message}</p>
+             <p className="text-xs text-content-danger">{errors.serviceId.message}</p>
             ) : null}
             {errors.professionalId?.message ? (
-              <p className="text-xs text-content-danger">
-                {errors.professionalId.message}
-              </p>
+             <p className="text-xs text-content-danger">
+               {errors.professionalId.message}
+             </p>
             ) : null}
             {errors.slotStart?.message ? (
-              <p className="text-xs text-content-danger">{errors.slotStart.message}</p>
+             <p className="text-xs text-content-danger">{errors.slotStart.message}</p>
             ) : null}
             {submissionError ? (
-              <p className="text-sm text-content-danger">{submissionError}</p>
+             <p className="text-sm text-content-danger">{submissionError}</p>
             ) : null}
--
--          <div className="space-y-3">
--            <div className="flex items-center justify-between">
--              <div>
--                <p className="text-sm text-content-secondary">Total estimado</p>
--                <p className="text-2xl font-bold text-content-primary">
--                  {formatCurrency(petshop.services.find(s => s.id === filters.serviceId)?.basePrice ?? 0)}
--                </p>
--              </div>
--
--              <Button type="submit" className="w-48 rounded-full bg-accent text-on-accent font-button" loading={isSubmitting}>
--                Confirmar Agendamento
--              </Button>
--            </div>
--
--            <div className="rounded-2xl border border-stroke-soft bg-surface-muted p-4 text-sm text-content-secondary">
--              <strong className="text-content-primary">DICA PRO</strong>
--              <p className="mt-2">Adicione hidratação de pelagem por apenas R$ 25,00 extras no checkout.</p>
--            </div>
--          </div>
--        </form>
-+          </form>
+
+          </form>
           </BookingSummary>
         </div>
       </div>
