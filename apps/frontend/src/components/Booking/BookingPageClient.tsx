@@ -242,11 +242,22 @@ export function BookingPageClient({
             </FormField>
 
             <FormField label="Data inicial">
-              <Input
-                name="startDate"
-                type="date"
-                defaultValue={filterDefaults.startDate}
-              />
+              <div className="flex items-center gap-3">
+                <DatePickerHorizontal
+                  days={7}
+                  selected={filterDefaults.startDate}
+                  onSelect={(iso) => {
+                    // update search params and trigger server-side re-fetch
+                    const nextParams = new URLSearchParams(searchParams.toString());
+                    nextParams.set('startDate', iso);
+                    // ensure endDate remains or set default window
+                    if (!nextParams.get('endDate')) {
+                      nextParams.set('endDate', iso);
+                    }
+                    startTransition(() => router.replace(`${bookingPath}?${nextParams.toString()}`));
+                  }}
+                />
+              </div>
             </FormField>
 
             <FormField label="Data final">
@@ -370,7 +381,7 @@ export function BookingPageClient({
                 </p>
               </div>
 
-              <Button type="submit" className="w-48 bg-purple-600" loading={isSubmitting}>
+              <Button type="submit" className="w-48 rounded-full bg-white text-purple-600" loading={isSubmitting}>
                 Confirmar Agendamento
               </Button>
             </div>
