@@ -53,7 +53,16 @@
 
   --shadow-card: 0 28px 60px -34px rgb(36 31 24 / 0.24);
   --shadow-soft: 0 16px 32px -28px rgb(36 31 24 / 0.2);
+
+  /* Booking-specific tokens */
+  --booking-summary-top-offset: 6rem; /* lg sticky offset */
+  --booking-confirm-height: 72px; /* fixed bottom confirm on mobile */
+  --booking-card-radius: var(--radius-lg);
+  --booking-shadow: 0 8px 30px rgba(124,58,237,0.12);
+  --datepill-selected-bg: var(--color-primary);
+  --datepill-selected-color: var(--on-primary);
 }
+
 
 @layer base {
   * {
