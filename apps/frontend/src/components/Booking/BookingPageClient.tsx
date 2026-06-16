@@ -18,6 +18,7 @@ import { DatePickerHorizontal } from "@/components/Booking/DatePickerHorizontal"
 import { BookingSummary } from "@/components/Booking/BookingSummary";
 import { PublicRequestErrorState } from "@/components/PublicRequestErrorState";
 import { bookingSubmissionSchema } from "@/lib/validations/booking";
+import { api } from "@/lib/api";
 import type {
   BookingSearchFilters,
   PublicBookingSlot,
@@ -49,6 +50,10 @@ export function BookingPageClient({
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [isSearching, startTransition] = useTransition();
+
+  const [clientSlots, setClientSlots] = useState<PublicBookingSlot[] | null>(null);
+  const [clientSlotsError, setClientSlotsError] = useState<string | null>(null);
+  const searchParamsString = searchParams.toString();
 
   const professionalLookup = useMemo(
     () =>
@@ -104,6 +109,40 @@ export function BookingPageClient({
     setValue("slotStart", "", { shouldValidate: false });
     setValue("slotEnd", "", { shouldValidate: false });
   }, [filters.serviceId, serviceLookup, setValue, slots]);
+
+  // Client-side fetch when search params change (DatePickerHorizontal or user form updates)
+  useEffect(() => {
+    // parse params from URL
+    const sp = new URLSearchParams(searchParamsString);
+    const serviceId = sp.get("serviceId") || filters.serviceId;
+    const professionalId = sp.get("professionalId") || undefined;
+    const startDate = sp.get("startDate") || filterDefaults.startDate;
+    const endDate = sp.get("endDate") || filterDefaults.endDate;
+
+    let cancelled = false;
+    setClientSlotsError(null);
+    (async () => {
+      try {
+        const result = await api.getPublicSlots(petshop.id, {
+          serviceId,
+          professionalId: professionalId || undefined,
+          startDate,
+          endDate,
+        });
+        if (cancelled) return;
+        setClientSlots(result);
+      } catch (err: any) {
+        if (cancelled) return;
+        setClientSlotsError(err?.message ?? "Erro ao buscar horários");
+        setClientSlots([]);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParamsString, petshop.id, filters.serviceId, filterDefaults.startDate, filterDefaults.endDate]);
+
 
   const filterDefaults = useMemo(
     () => ({
@@ -290,11 +329,14 @@ export function BookingPageClient({
           />
         ) : (
           <SlotList
-            slots={slots}
+            slots={clientSlots ?? slots}
             selectedSlotId={selectedSlotId}
             professionalLookup={professionalLookup}
             onSelect={handleSlotSelect}
           />
+          {clientSlotsError ? (
+            <div className="text-sm text-content-danger mt-2">{clientSlotsError}</div>
+          ) : null}
         )}
       </div>
 
