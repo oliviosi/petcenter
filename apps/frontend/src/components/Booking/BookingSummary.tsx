@@ -20,7 +20,7 @@ export function BookingSummary({
       </div>
 
       <div className="mt-6">
-        <div className="booking-panel w-full text-white">
+        <div className="booking-panel w-full">
           <div className="space-y-4">
             {children}
           </div>
@@ -28,15 +28,15 @@ export function BookingSummary({
           <div className="mt-6 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="label-md text-white/80">Total estimado</p>
-                <p className="headline-sm font-bold text-white">R$ {total}</p>
+                <p className="label-md text-content-secondary">Total estimado</p>
+                <p className="headline-sm font-bold text-content-primary">R$ {total}</p>
               </div>
 
-              <Button type="button" className="w-48 rounded-full bg-white text-purple-600 font-button shadow-lg" onClick={onConfirm}>Confirmar</Button>
+              <Button type="button" className="w-48 rounded-full bg-accent text-on-accent font-button shadow-lg" onClick={onConfirm}>Confirmar</Button>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/8 p-4 label-md text-white/90">
-              <strong className="text-white">DICA PRO</strong>
+            <div className="rounded-2xl border border-stroke-soft bg-surface-muted p-4 label-md text-content-secondary">
+              <strong className="text-content-primary">DICA PRO</strong>
               <p className="mt-2 body-md">Adicione hidratação de pelagem por apenas R$ 25,00 extras no checkout.</p>
             </div>
           </div>

@@ -204,7 +204,6 @@ export function BookingPageClient({
       serviceId: String(formData.get("serviceId") ?? ""),
       professionalId: String(formData.get("professionalId") ?? ""),
       startDate: String(formData.get("startDate") ?? ""),
-      endDate: String(formData.get("endDate") ?? ""),
     };
 
     Object.entries(nextValues).forEach(([key, value]) => {
@@ -214,6 +213,13 @@ export function BookingPageClient({
         nextParams.delete(key);
       }
     });
+
+    // ensure endDate equals startDate for the API (single-day selection)
+    if (nextParams.get('startDate')) {
+      nextParams.set('endDate', nextParams.get('startDate')!);
+    } else {
+      nextParams.delete('endDate');
+    }
 
     startTransition(() =>
       router.replace(`${bookingPath}?${nextParams.toString()}`),
@@ -286,25 +292,14 @@ export function BookingPageClient({
                   days={7}
                   selected={filterDefaults.startDate}
                   onSelect={(iso) => {
-                    // update search params and trigger server-side re-fetch
+                    // single-date selection: set both startDate and endDate to the chosen day
                     const nextParams = new URLSearchParams(searchParams.toString());
                     nextParams.set('startDate', iso);
-                    // ensure endDate remains or set default window
-                    if (!nextParams.get('endDate')) {
-                      nextParams.set('endDate', iso);
-                    }
+                    nextParams.set('endDate', iso);
                     startTransition(() => router.replace(`${bookingPath}?${nextParams.toString()}`));
                   }}
                 />
               </div>
-            </FormField>
-
-            <FormField label="Data final">
-              <Input
-                name="endDate"
-                type="date"
-                defaultValue={filterDefaults.endDate}
-              />
             </FormField>
 
             <div className="md:col-span-2 flex flex-wrap items-center gap-3">
@@ -313,8 +308,7 @@ export function BookingPageClient({
                 Buscar horários
               </Button>
               <p className="text-sm text-content-secondary">
-                Consulte um intervalo curto para encontrar horários livres com
-                mais rapidez.
+                Escolha um dia para ver horários disponíveis abaixo.
               </p>
             </div>
           </form>
@@ -425,7 +419,7 @@ export function BookingPageClient({
                 </p>
               </div>
 
-              <Button type="submit" className="w-48 rounded-full bg-white text-purple-600" loading={isSubmitting}>
+              <Button type="submit" className="w-48 rounded-full bg-accent text-on-accent font-button" loading={isSubmitting}>
                 Confirmar Agendamento
               </Button>
             </div>
