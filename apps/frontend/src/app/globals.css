@@ -117,11 +117,73 @@
   .booking-summary {
     border-radius: var(--booking-card-radius);
   }
-
+ 
   .pet-card {
     transition: transform .12s ease, box-shadow .12s ease;
   }
-
+ 
+  .pet-card.selected {
+    transform: translateY(-6px);
+    box-shadow: var(--booking-shadow);
+    border: 2px solid var(--color-accent-solid);
+    background: linear-gradient(180deg, rgba(105,14,136,0.04), rgba(105,14,136,0.02));
+  }
+ 
+  .pet-avatar {
+    height: 84px;
+    width: 84px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 8px 24px rgba(16,16,16,0.08);
+  }
+ 
+  .service-card {
+    border-radius: 16px;
+    background: var(--color-surface-card);
+    box-shadow: 0 8px 20px rgba(124,58,237,0.06);
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    padding: 1rem;
+  }
+ 
+  .service-card.selected {
+    border: 1px solid rgba(105,14,136,0.08);
+    box-shadow: 0 18px 40px rgba(105,14,136,0.08);
+    transform: translateY(-4px);
+  }
+ 
+  .date-pill {
+    min-width: 84px;
+    border-radius: 999px;
+    padding: 8px 14px;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+ 
+  .date-pill.selected {
+    background: var(--color-accent-soft);
+    color: var(--color-content-accent);
+    box-shadow: 0 10px 30px rgba(105,14,136,0.06);
+  }
+ 
+  .time-pill {
+    min-width: 88px;
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: var(--color-surface-card);
+  }
+ 
+  .time-pill.selected {
+    background: var(--color-accent-solid);
+    color: var(--color-content-inverse);
+    box-shadow: 0 8px 30px rgba(105,14,136,0.08);
+  }
+ 
+  /* Accent / utility helpers mapped to design tokens */
+  .bg-accent { background: var(--color-accent-solid); }
+  .text-on-accent { color: var(--color-content-inverse); }
+  .bg-brand { background: var(--color-brand-solid); }
+  .text-on-brand { color: var(--color-content-inverse); }
+  .border-stroke-brand { border-color: var(--color-stroke-brand); }
+ 
   /* Mobile bottom sticky confirm bar helper */
   .booking-bottom-action {
     position: sticky;

@@ -13,13 +13,13 @@ export function BookingSummary({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="booking-summary">
+    <div className="booking-summary p-4 lg:sticky lg:top-[6rem]">
       <div className="space-y-2">
         <p className="text-sm text-content-secondary">Dados para a solicitação</p>
         <h2 className="text-2xl font-semibold text-content-primary">Resumo do Agendamento</h2>
       </div>
 
-      <div className="mt-6 rounded-2xl bg-surface-muted p-4 shadow-soft">
+      <div className="mt-6 rounded-2xl bg-surface-card p-6 shadow-card">
         {children}
       </div>
 
@@ -30,7 +30,7 @@ export function BookingSummary({
             <p className="text-2xl font-bold text-content-primary">R$ {total}</p>
           </div>
 
-          <Button type="button" className="w-48" onClick={onConfirm}>Confirmar Agendamento</Button>
+          <Button type="button" className="w-48 bg-accent text-on-accent" onClick={onConfirm}>Confirmar Agendamento</Button>
         </div>
 
         <div className="rounded-2xl border border-stroke-soft bg-surface-muted p-4 text-sm text-content-secondary">

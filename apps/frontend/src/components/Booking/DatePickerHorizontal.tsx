@@ -29,7 +29,7 @@ export function DatePickerHorizontal({
               key={iso}
               type="button"
               onClick={() => onSelect?.(iso)}
-              className={"px-4 py-2 rounded-full min-w-[72px] text-center " + (isSelected ? "bg-primary text-on-primary" : "bg-surface-muted text-content-primary hover:shadow-soft")}
+              className={"date-pill text-center " + (isSelected ? "selected" : "")}
               aria-pressed={isSelected}
             >
               <div className="text-xs text-content-secondary">{d.toLocaleDateString('pt-BR', { weekday: 'short' })}</div>

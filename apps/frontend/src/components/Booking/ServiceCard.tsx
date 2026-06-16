@@ -20,7 +20,7 @@ export function ServiceCard({
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={"text-left rounded-2xl border p-4 transition duration-150 w-full " + (selected ? "border-stroke-brand bg-surface-brand-soft" : "border-transparent hover:border-stroke-strong")}
+      className={"service-card w-full text-left " + (selected ? "selected" : "hover:-translate-y-0.5 hover:shadow-soft")}
     >
       <div className="flex items-start justify-between">
         <div>
