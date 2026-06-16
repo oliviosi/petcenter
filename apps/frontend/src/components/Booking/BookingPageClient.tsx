@@ -74,6 +74,16 @@ export function BookingPageClient({
     [petshop.services],
   );
 
+  const filterDefaults = useMemo(
+    () => ({
+      serviceId: filters.serviceId,
+      professionalId: filters.professionalId,
+      startDate: filters.startDate,
+      endDate: filters.endDate,
+    }),
+    [filters],
+  );
+
   const {
     register,
     handleSubmit,
@@ -143,16 +153,6 @@ export function BookingPageClient({
     };
   }, [searchParamsString, petshop.id, filters.serviceId, filterDefaults.startDate, filterDefaults.endDate]);
 
-
-  const filterDefaults = useMemo(
-    () => ({
-      serviceId: filters.serviceId,
-      professionalId: filters.professionalId,
-      startDate: filters.startDate,
-      endDate: filters.endDate,
-    }),
-    [filters],
-  );
 
   function handleSlotSelect(slot: PublicBookingSlot) {
     const slotId = `${slot.professionalId}-${slot.slotStart}`;
