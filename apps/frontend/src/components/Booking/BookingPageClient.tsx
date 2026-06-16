@@ -232,8 +232,8 @@ export function BookingPageClient({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-      <div className="space-y-6">
+    <div className="grid gap-6 lg:grid-cols-12">
+      <div className="space-y-6 lg:col-span-8">
         <Card className="p-6">
           {/* Pet selector */}
           <div className="mb-4">
