@@ -6,11 +6,11 @@
 
 ## 2. Components
 
-- [ ] 2.1 Implement `PetChip` and `PetSelector` components under `apps/frontend/src/components/Booking/`
-- [ ] 2.2 Implement `ServiceCard` component with selectable state and accessible semantics
-- [ ] 2.3 Implement `DatePickerHorizontal` component (7–14 day window, keyboard accessible)
-- [ ] 2.4 Implement `TimePill` and `TimeList` components for available times
-- [ ] 2.5 Implement `BookingSummary` component with sticky behavior and responsive variants
+- [x] 2.1 Implement `PetChip` and `PetSelector` components under `apps/frontend/src/components/Booking/`
+- [x] 2.2 Implement `ServiceCard` component with selectable state and accessible semantics
+- [x] 2.3 Implement `DatePickerHorizontal` component (7–14 day window, keyboard accessible)
+- [x] 2.4 Implement `TimePill` and `TimeList` components for available times
+- [x] 2.5 Implement `BookingSummary` component with sticky behavior and responsive variants
 
 ## 3. Page Integration
 
