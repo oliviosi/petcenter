@@ -1,8 +1,8 @@
 ## 1. Scaffolding & Tokens
 
-- [ ] 1.1 Add design tokens file `apps/frontend/src/styles/design-tokens.json` and map basic colors/spacing/typography from DESIGN.md
-- [ ] 1.2 Update `apps/frontend/tailwind.config.js` to reference semantic tokens and add new font families
-- [ ] 1.3 Add CSS variables to `apps/frontend/src/app/globals.css` for the booking scope
+- [x] 1.1 Add design tokens file `apps/frontend/src/styles/design-tokens.json` and map basic colors/spacing/typography from DESIGN.md
+- [x] 1.2 Update `apps/frontend/tailwind.config.js` to reference semantic tokens and add new font families (project uses Tailwind CSS-first; updated globals.css instead)
+- [x] 1.3 Add CSS variables to `apps/frontend/src/app/globals.css` for the booking scope
 
 ## 2. Components
 
