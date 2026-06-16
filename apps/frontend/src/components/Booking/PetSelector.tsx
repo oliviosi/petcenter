@@ -99,25 +99,30 @@ export function PetSelector({
         <Button onClick={handleOpenNew} variant="ghost" size="sm" className="font-button">+ New Pet</Button>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto hide-scrollbar py-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-md">
         {pets.map((pet) => (
-          <div key={pet.id} className={`pet-card flex-shrink-0 w-36 p-3 cursor-pointer ${selected === pet.id ? 'selected' : ''}`} onClick={() => handleSelectPet(pet)} role="button" aria-pressed={selected === pet.id}>
-            {pet.avatar ? (
-              <img src={pet.avatar} alt={pet.name} className="pet-avatar mb-3 mx-auto" />
-            ) : (
-              <div className="pet-avatar mb-3 mx-auto bg-surface-muted" />
-            )}
+          <div key={pet.id} className={`pet-card group cursor-pointer bg-surface-container-lowest p-md rounded-xl shadow-[0px_4px_20px_rgba(124,58,237,0.08)] border-2 border-transparent transition-all hover:scale-[1.02] active:scale-95 ${selected === pet.id ? 'selected' : ''}`} onClick={() => handleSelectPet(pet)} role="button" aria-pressed={selected === pet.id}>
+            <div className="relative mb-md">
+              {pet.avatar ? (
+                <img src={pet.avatar} alt={pet.name} className="w-full aspect-square object-cover rounded-xl" />
+              ) : (
+                <div className="w-full aspect-square rounded-xl bg-surface-muted" />
+              )}
+
+              <div className={`absolute top-2 right-2 bg-accent text-on-accent p-xs rounded-full ${selected === pet.id ? 'opacity-100' : 'opacity-0'} transition-opacity`}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </div>
+            </div>
             <div className="text-center">
               <p className="body-md font-medium text-content-primary">{pet.name}</p>
-              <p className="label-md text-content-secondary">{pet.species}</p>
+              <span className="label-md text-label-md text-on-surface-variant bg-surface-container px-sm py-1 rounded-full inline-block">{pet.species}</span>
             </div>
           </div>
         ))}
 
-        <div className="flex-shrink-0 w-36 p-3">
-          <Card className="h-full flex items-center justify-center p-md rounded-xl shadow-soft" onClick={handleOpenNew}>
-            <Button variant="secondary" className="font-button">+ Adicionar Pet</Button>
-          </Card>
+        <div className="bg-surface-container-low border-2 border-dashed border-outline-variant p-md rounded-xl flex flex-col items-center justify-center text-on-surface-variant hover:border-accent hover:text-accent transition-all cursor-pointer" onClick={handleOpenNew}>
+          <span className="material-symbols-outlined text-[32px] mb-xs" aria-hidden>pets</span>
+          <span className="font-label-md label-md text-center">Adicionar Pet</span>
         </div>
       </div>
 

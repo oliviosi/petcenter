@@ -20,9 +20,9 @@ export function ServiceCard({
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`service-card ${selected ? 'selected' : ''}`}>
+      className={`service-card group cursor-pointer p-md rounded-xl ${selected ? 'selected' : ''}`}>
       <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-xl bg-surface-muted flex items-center justify-center">
+            <div className="h-14 w-14 rounded-xl bg-surface-muted flex items-center justify-center shadow-soft">
           {/* icon placeholder */}
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="16" height="16" rx="4" fill="rgba(99,14,212,0.08)"/></svg>
         </div>
