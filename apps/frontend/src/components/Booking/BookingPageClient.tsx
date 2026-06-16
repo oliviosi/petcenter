@@ -45,7 +45,8 @@ export function BookingPageClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
-  const [selectedPet, setSelectedPet] = useState<{ name: string; species: string; avatar?: string } | null>(null);
+  const [selectedPet, setSelectedPet] = useState<{ id?: string; name: string; species: string; avatar?: string } | null>(null);
+  const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [isSearching, startTransition] = useTransition();
 
@@ -198,10 +199,12 @@ export function BookingPageClient({
           {/* Pet selector */}
           <div className="mb-4">
             <PetSelector
+              selectedId={selectedPetId}
               onSelect={(pet) => {
                 setValue("petName", pet.name, { shouldValidate: true });
                 setValue("petSpecies", pet.species, { shouldValidate: true });
-                setSelectedPet({ name: pet.name, species: pet.species, avatar: pet.avatar });
+                setSelectedPet({ id: pet.id, name: pet.name, species: pet.species, avatar: pet.avatar });
+                setSelectedPetId(pet.id);
               }}
             />
           </div>

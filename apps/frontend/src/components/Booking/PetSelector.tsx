@@ -13,8 +13,10 @@ interface Pet {
 
 export function PetSelector({
   onSelect,
+  selectedId,
 }: {
   onSelect: (pet: Pet) => void;
+  selectedId?: string | null;
 }) {
   const [pets, setPets] = useState<Pet[]>([]);
   const [open, setOpen] = useState(false);
@@ -22,6 +24,11 @@ export function PetSelector({
   const [species, setSpecies] = useState("");
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>(undefined);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [selected, setSelected] = useState<string | null>(selectedId ?? null);
+
+  useEffect(() => {
+    if (selectedId) setSelected(selectedId);
+  }, [selectedId]);
 
   useEffect(() => {
     try {
@@ -76,7 +83,13 @@ export function PetSelector({
     setPets(updated);
     persist(updated);
     setOpen(false);
+    setSelected(newPet.id);
     onSelect(newPet);
+  }
+
+  function handleSelectPet(pet: Pet) {
+    setSelected(pet.id);
+    onSelect(pet);
   }
 
   return (
@@ -86,24 +99,26 @@ export function PetSelector({
         <Button onClick={handleOpenNew} variant="ghost" size="sm">+ New Pet</Button>
       </div>
 
-      <div className="flex gap-3 items-start">
+      <div className="flex gap-4 overflow-x-auto hide-scrollbar py-2">
         {pets.map((pet) => (
-          <Card key={pet.id} className="flex cursor-pointer items-center gap-3 p-3" onClick={() => onSelect(pet)}>
+          <div key={pet.id} className={`pet-card flex-shrink-0 w-36 p-3 cursor-pointer ${selected === pet.id ? 'selected' : ''}`} onClick={() => handleSelectPet(pet)} role="button" aria-pressed={selected === pet.id}>
             {pet.avatar ? (
-              <img src={pet.avatar} alt={pet.name} className="h-12 w-12 rounded-lg object-cover" />
+              <img src={pet.avatar} alt={pet.name} className="pet-avatar mb-3 mx-auto" />
             ) : (
-              <div className="h-12 w-12 rounded-lg bg-surface-muted" />
+              <div className="pet-avatar mb-3 mx-auto bg-surface-muted" />
             )}
-            <div>
+            <div className="text-center">
               <p className="text-sm font-medium text-content-primary">{pet.name}</p>
               <p className="text-xs text-content-secondary">{pet.species}</p>
             </div>
-          </Card>
+          </div>
         ))}
 
-        <Card className="flex items-center justify-center p-3" onClick={handleOpenNew}>
-          <Button variant="secondary">+ Adicionar Pet</Button>
-        </Card>
+        <div className="flex-shrink-0 w-36 p-3">
+          <Card className="h-full flex items-center justify-center p-3" onClick={handleOpenNew}>
+            <Button variant="secondary">+ Adicionar Pet</Button>
+          </Card>
+        </div>
       </div>
 
       {open && (
