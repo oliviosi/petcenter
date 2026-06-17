@@ -7,6 +7,11 @@ $apiBase = $env:API_BASE_URL
 if ([string]::IsNullOrWhiteSpace($apiBase)) { $apiBase = 'http://127.0.0.1:5000' }
 Write-Output "Using API base: $apiBase"
 
+$adminEmail = $env:DEV_ADMIN_EMAIL
+if ([string]::IsNullOrWhiteSpace($adminEmail)) { $adminEmail = 'admin@petcenter.dev' }
+$adminPassword = $env:DEV_ADMIN_PASSWORD
+if ([string]::IsNullOrWhiteSpace($adminPassword)) { $adminPassword = '1234567az' }
+
 try {
     $pub = Invoke-RestMethod -Uri "$apiBase/petshops/public" -TimeoutSec 10 -ErrorAction Stop
 } catch {
@@ -20,9 +25,31 @@ if ($pub -is [System.Array]) { $petshop = $pub[0] } else { $petshop = $pub }
 if (-not $petshop) { Write-Error 'No public petshop found.'; exit 1 }
 Write-Output "Using Petshop: $($petshop.nome) ($($petshop.id))"
 
-# Get slots for petshop
+# Determine serviceId: prefer env SERVICE_ID, otherwise login as admin and list services
+$serviceId = $env:SERVICE_ID
+if ([string]::IsNullOrWhiteSpace($serviceId)) {
+    Write-Output 'Service ID not provided; logging in as admin to discover services.'
+    try {
+        $loginResp = Invoke-RestMethod -Uri "$apiBase/auth/login" -Method Post -Body (@{ Email = $adminEmail; Password = $adminPassword } | ConvertTo-Json) -ContentType 'application/json' -TimeoutSec 10 -ErrorAction Stop
+        $token = $loginResp.Token
+    } catch {
+        Write-Error "Admin login failed: $($_.Exception.Message)"; exit 1
+    }
+
+    try {
+        $services = Invoke-RestMethod -Uri "$apiBase/services" -Headers @{ Authorization = "Bearer $token" } -TimeoutSec 10 -ErrorAction Stop
+    } catch {
+        Write-Error "Failed to list services: $($_.Exception.Message)"; exit 1
+    }
+
+    if (-not $services -or $services.Count -eq 0) { Write-Error 'No services found for this tenant.'; exit 1 }
+    $serviceId = $services[0].id
+    Write-Output "Discovered serviceId: $serviceId"
+}
+
+# Get slots for petshop (pass serviceId)
 try {
-    $slots = Invoke-RestMethod -Uri "$apiBase/petshops/$($petshop.id)/slots" -TimeoutSec 20 -ErrorAction Stop
+    $slots = Invoke-RestMethod -Uri "$apiBase/petshops/$($petshop.id)/slots?ServiceId=$serviceId" -TimeoutSec 20 -ErrorAction Stop
 } catch {
     Write-Error "Failed to get slots: $($_.Exception.Message)"
     exit 1
