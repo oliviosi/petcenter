@@ -6,6 +6,8 @@ using Api.Modules.Profissionais.Domain;
 using Api.Modules.Profissionais.Infrastructure;
 using Api.Modules.Servicos.Domain;
 using Api.Modules.Servicos.Infrastructure;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Api.Modules.Bookings.Routes.Create;
 
@@ -19,6 +21,7 @@ public class CreateBookingService : ICreateBookingService
     private readonly IBookingEventPublisher _eventPublisher;
     private readonly IBookingStatusAccessTokenService _bookingStatusAccessTokenService;
     private readonly IBookingFeedbackAccessTokenService _feedbackAccessTokenService;
+    private readonly ILogger<CreateBookingService> _logger = NullLogger<CreateBookingService>.Instance;
 
     public CreateBookingService(
         IEmpresaRepository empresaRepository,
@@ -89,17 +92,24 @@ public class CreateBookingService : ICreateBookingService
 
         await _bookingRepository.AddAsync(booking);
 
-        await _eventPublisher.PublishRequestedAsync(new BookingRequestedMessage
+        try
         {
-            BookingId = booking.Id,
-            EmpresaId = booking.EmpresaId,
-            ProfessionalId = booking.ProfessionalId,
-            ServiceId = booking.ServiceId,
-            ClientId = booking.ClientId,
-            RequestedAt = booking.RequestedAt,
-            SlotStart = booking.SlotStart,
-            SlotEnd = booking.SlotEnd
-        });
+            await _eventPublisher.PublishRequestedAsync(new BookingRequestedMessage
+            {
+                BookingId = booking.Id,
+                EmpresaId = booking.EmpresaId,
+                ProfessionalId = booking.ProfessionalId,
+                ServiceId = booking.ServiceId,
+                ClientId = booking.ClientId,
+                RequestedAt = booking.RequestedAt,
+                SlotStart = booking.SlotStart,
+                SlotEnd = booking.SlotEnd
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Booking event publish failed; continuing without queue publish.");
+        }
 
         return new CreateBookingResponse
         {
