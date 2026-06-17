@@ -47,9 +47,15 @@ describe("HomePage", () => {
     expect(screen.getByText("Entrada publica por petshop")).toBeInTheDocument();
     expect(
       screen.getByRole("link", {
-        name: "Abrir catálogo",
+        name: "Sou cliente — Entrar / Criar conta",
       }),
-    ).toHaveAttribute("href", "/petshops");
+    ).toHaveAttribute("href", "/login");
+
+    expect(
+      screen.getByRole("link", {
+        name: "Sou dono de petshop — Cadastre sua loja",
+      }),
+    ).toHaveAttribute("href", "/register");
     expect(getPublicPetshopByHost).not.toHaveBeenCalled();
   });
 
