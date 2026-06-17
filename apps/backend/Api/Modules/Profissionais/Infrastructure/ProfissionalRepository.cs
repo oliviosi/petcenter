@@ -35,7 +35,7 @@ public class ProfissionalRepository : IProfissionalRepository
     {
         var professionalIds = ids.Distinct().ToArray();
         if (professionalIds.Length == 0)
-            return [];
+                    return new List<Profissional>();
 
         return await _db.Profissionais.AsNoTracking()
             .Where(p => p.EmpresaId == empresaId && professionalIds.Contains(p.Id))

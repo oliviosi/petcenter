@@ -35,7 +35,7 @@ public class ServicoRepository : IServicoRepository
     {
         var serviceIds = ids.Distinct().ToArray();
         if (serviceIds.Length == 0)
-            return [];
+                    return new List<Servico>();
 
         return await _db.Servicos.AsNoTracking()
             .Where(s => s.EmpresaId == empresaId && serviceIds.Contains(s.Id))

@@ -39,13 +39,13 @@ public class BookingAvailabilityService : IBookingAvailabilityService
 
         var service = await _serviceRepository.GetByIdAsync(query.ServiceId, petshop.Id);
         if (service is null || !service.Ativo)
-            return [];
+                    return new List<AvailableSlot>();
 
         if (query.ProfessionalId.HasValue)
         {
             var professional = await _professionalRepository.GetByIdAsync(query.ProfessionalId.Value, petshop.Id);
             if (professional is null || !professional.Ativo)
-                return [];
+                        return new List<AvailableSlot>();
         }
 
         var assignments = await _assignmentRepository.ListByServiceAsync(
@@ -54,7 +54,7 @@ public class BookingAvailabilityService : IBookingAvailabilityService
             query.ProfessionalId);
 
         if (assignments.Count == 0)
-            return [];
+                    return new List<AvailableSlot>();
 
         var activeProfessionals = await _professionalRepository.ListAtivosByEmpresaAsync(petshop.Id);
         var activeProfessionalIds = activeProfessionals.Select(p => p.Id).ToHashSet();
@@ -65,11 +65,11 @@ public class BookingAvailabilityService : IBookingAvailabilityService
             .ToArray();
 
         if (professionalIds.Length == 0)
-            return [];
+                    return new List<AvailableSlot>();
 
         var availabilities = await _availabilityRepository.ListByProfissionaisAsync(professionalIds);
         if (availabilities.Count == 0)
-            return [];
+                    return new List<AvailableSlot>();
 
         var intervalStart = ToUtc(query.StartDate, TimeOnly.MinValue);
         var intervalEndExclusive = ToUtc(query.EndDate.AddDays(1), TimeOnly.MinValue);
@@ -95,7 +95,7 @@ public class BookingAvailabilityService : IBookingAvailabilityService
             if (!availabilitiesByProfessional.TryGetValue(professionalId, out var professionalAvailabilities))
                 continue;
 
-            var professionalBookings = confirmedByProfessional.GetValueOrDefault(professionalId, []);
+            var professionalBookings = confirmedByProfessional.GetValueOrDefault(professionalId, new List<Domain.Booking>());
 
             for (var date = query.StartDate; date <= query.EndDate; date = date.AddDays(1))
             {

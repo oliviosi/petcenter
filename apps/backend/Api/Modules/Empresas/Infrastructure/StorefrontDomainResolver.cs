@@ -14,7 +14,7 @@ public class StorefrontDomainResolver : IStorefrontDomainResolver
         }
         catch (SocketException)
         {
-            return [];
+                    return new HashSet<IPAddress>();
         }
     }
 }

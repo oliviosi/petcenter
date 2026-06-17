@@ -30,7 +30,7 @@ public class DisponibilidadeRepository : IDisponibilidadeRepository
     {
         var ids = profissionalIds.Distinct().ToArray();
         if (ids.Length == 0)
-            return [];
+                    return new List<DisponibilidadeProfissional>();
 
         return await _db.DisponibilidadesProfissionais.AsNoTracking()
             .Where(d => ids.Contains(d.ProfissionalId))

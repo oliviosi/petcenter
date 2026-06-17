@@ -82,7 +82,7 @@ public class BookingRepository : IBookingRepository
     {
         var ids = professionalIds.Distinct().ToArray();
         if (ids.Length == 0)
-            return [];
+                    return new List<Booking>();
 
         return await _db.Bookings.AsNoTracking()
             .Where(b =>

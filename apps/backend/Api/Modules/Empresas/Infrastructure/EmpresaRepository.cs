@@ -127,7 +127,7 @@ public class EmpresaRepository : IEmpresaRepository
     {
         var ids = empresaIds.Distinct().ToArray();
         if (ids.Length == 0)
-            return [];
+                    return new Dictionary<Guid, EmpresaPublicRatingSummary>();
 
         var summaries = await _db.BookingFeedbacks.AsNoTracking()
             .Where(feedback => ids.Contains(feedback.EmpresaId))
