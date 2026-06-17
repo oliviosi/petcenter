@@ -1,0 +1,63 @@
+name: Tenant Domain Health API Smoke Checks
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke-checks:
+    name: Smoke check domain-health endpoints against Staging
+    runs-on: ubuntu-latest
+    env:
+      STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
+      TENANT_ID: ${{ secrets.STAGING_TEST_TENANT_ID }}
+      ADMIN_BEARER: ${{ secrets.STAGING_ADMIN_BEARER }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install jq
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq curl
+
+      - name: Validate presence of env secrets
+        run: |
+          if [ -z "${STAGING_API_URL}" ] || [ -z "${TENANT_ID}" ] || [ -z "${ADMIN_BEARER}" ]; then
+            echo "Required secrets STAGING_API_URL, STAGING_TEST_TENANT_ID, STAGING_ADMIN_BEARER must be set in repo secrets.";
+            exit 1;
+          fi
+
+      - name: GET domain-health summary
+        run: |
+          set -euo pipefail
+          echo "Calling ${STAGING_API_URL}/admin/tenants/${TENANT_ID}/domain-health"
+          resp=$(curl -sS -H "Authorization: Bearer ${ADMIN_BEARER}" "${STAGING_API_URL%/}/admin/tenants/${TENANT_ID}/domain-health")
+          echo "$resp" | jq . > /dev/null
+          has_total=$(echo "$resp" | jq 'has("totalNotifications")')
+          has_failed=$(echo "$resp" | jq 'has("failedNotifications")')
+          if [ "$has_total" != "true" ] || [ "$has_failed" != "true" ]; then
+            echo "Response missing expected fields: $resp";
+            exit 1;
+          fi
+          echo "Summary OK"
+
+      - name: GET domain-health notifications (pagination)
+        run: |
+          set -euo pipefail
+          echo "Calling notifications endpoint"
+          resp=$(curl -sS -H "Authorization: Bearer ${ADMIN_BEARER}" "${STAGING_API_URL%/}/admin/tenants/${TENANT_ID}/domain-health/notifications?page=1&pageSize=1")
+          echo "$resp" | jq . > /dev/null
+          has_items=$(echo "$resp" | jq 'has("items")')
+          has_total=$(echo "$resp" | jq 'has("total")')
+          if [ "$has_items" != "true" ] || [ "$has_total" != "true" ]; then
+            echo "Notifications response missing expected fields: $resp";
+            exit 1;
+          fi
+          echo "Notifications endpoint OK"
+
+      - name: GET domain-health notifications with filters (category/outcome)
+        run: |
+          set -euo pipefail
+          echo "Calling notifications endpoint with category filter (should return 200 even if empty)"
+          resp=$(curl -sS -H "Authorization: Bearer ${ADMIN_BEARER}" "${STAGING_API_URL%/}/admin/tenants/${TENANT_ID}/domain-health/notifications?page=1&pageSize=1&category=degraded&outcome=failed")
+          echo "$resp" | jq . > /dev/null
+          echo "Filtered notifications OK"
