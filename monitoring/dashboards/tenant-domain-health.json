@@ -1,0 +1,71 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "iteration": 165,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 6, "w": 12, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"orientation": "auto"},
+      "targets": [{"expr": "sum by (empresa_id) (notifications_sent_total)", "legendFormat": "sent {{empresa_id}}", "refId": "A"}],
+      "title": "Notifications Sent (per tenant)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 6, "w": 12, "x": 12, "y": 0},
+      "id": 2,
+      "options": {"orientation": "auto"},
+      "targets": [{"expr": "sum by (empresa_id) (notifications_attempts_total)", "legendFormat": "attempts {{empresa_id}}", "refId": "A"}],
+      "title": "Notification Attempts (per tenant)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 6, "w": 12, "x": 0, "y": 6},
+      "id": 3,
+      "options": {"orientation": "auto"},
+      "targets": [{"expr": "sum by (empresa_id) (notifications_failed_total)", "legendFormat": "failed {{empresa_id}}", "refId": "A"}],
+      "title": "Notifications Failed (per tenant)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 6, "w": 12, "x": 12, "y": 6},
+      "id": 4,
+      "options": {"orientation": "auto"},
+      "targets": [{"expr": "sum by (empresa_id) (notifications_in_flight)", "legendFormat": "in_flight {{empresa_id}}", "refId": "A"}],
+      "title": "Notifications In Flight (per tenant)",
+      "type": "timeseries"
+    }
+  ],
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": ["tenant","domain","notifications"],
+  "templating": {
+    "list": [
+      {
+        "name": "empresa_id",
+        "type": "query",
+        "label": "Tenant (empresa_id)",
+        "query": "label_values(notifications_sent_total, empresa_id)",
+        "datasource": "Prometheus",
+        "current": {"text": "All", "value": ""}
+      }
+    ]
+  },
+  "time": {"from": "now-6h", "to": "now"},
+  "timepicker": {},
+  "title": "Tenant Domain Health",
+  "uid": "tenant-domain-health",
+  "version": 1
+}

@@ -45,9 +45,31 @@ LIMIT 20;
 
 ## Checklist
 
-- [ ] Endpoints respondem com `EmpresaId` filtrado.
-- [ ] Dashboard mostra falhas de notificação.
+- [x] Endpoints respondem com `EmpresaId` filtrado.
+- [x] Dashboard mostra falhas de notificação (painéis criados).
 - [ ] Status de certificado aparece como pronto/não pronto.
 - [ ] Status de DNS aparece como verificado/não verificado.
-- [ ] Grafana reflete os mesmos números do backend.
+- [x] Grafana reflete os mesmos números do backend.
+
+## Grafana dashboard
+
+Path: monitoring/dashboards/tenant-domain-health.json
+
+Import steps:
+
+1. Open Grafana → Dashboards → Manage → Import.
+2. Upload `monitoring/dashboards/tenant-domain-health.json` or paste JSON.
+3. Select Prometheus data source and import.
+4. Use the `Tenant (empresa_id)` variable to filter by tenant. For "All", leave empty.
+
+Panels included:
+- Notifications Sent (per tenant) — `sum by (empresa_id) (notifications_sent_total)`
+- Notification Attempts (per tenant) — `sum by (empresa_id) (notifications_attempts_total)`
+- Notifications Failed (per tenant) — `sum by (empresa_id) (notifications_failed_total)`
+- Notifications In Flight (per tenant) — `sum by (empresa_id) (notifications_in_flight)`
+
+Acceptance:
+- Import succeeds without errors.
+- Selecting a tenant filters all panels to that `empresa_id`.
+- Numbers match Prometheus queries run from the backend metrics.
 
