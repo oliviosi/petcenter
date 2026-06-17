@@ -11,5 +11,5 @@ public record DomainHealthDto(int TotalNotifications, int FailedNotifications, I
 public interface IDomainHealthService
 {
     Task<DomainHealthDto> GetDomainHealthAsync(Guid empresaId, int recent = 20);
-    Task<(IEnumerable<DomainHealthNotificationDto> Items, int Total)> GetNotificationsAsync(Guid empresaId, int page, int pageSize);
+    Task<(IEnumerable<DomainHealthNotificationDto> Items, int Total)> GetNotificationsAsync(Guid empresaId, int page, int pageSize, string? category = null, string? outcome = null);
 }

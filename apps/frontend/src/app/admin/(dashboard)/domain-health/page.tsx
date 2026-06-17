@@ -9,11 +9,21 @@ interface Props {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function DomainHealthPage({}: Props) {
+export default async function DomainHealthPage({ searchParams }: Props) {
   const session = await requireAdminSession();
+  const params = await searchParams;
+  const page = Number(Array.isArray(params.page) ? params.page[0] : params.page ?? 1);
+  const pageSize = Number(Array.isArray(params.pageSize) ? params.pageSize[0] : params.pageSize ?? 20);
+  const category = Array.isArray(params.category) ? params.category[0] : params.category ?? "";
+  const outcome = Array.isArray(params.outcome) ? params.outcome[0] : params.outcome ?? "";
 
   try {
-    const dto = await api.getAdminTenantDomainHealth(session.empresaId, session.token);
+    const [dto, notificationsResp] = await Promise.all([
+      api.getAdminTenantDomainHealth(session.empresaId, session.token),
+      api.listAdminTenantDomainNotifications(session.empresaId, page, pageSize, session.token, category || undefined, outcome || undefined),
+    ]);
+
+    const notifications = notificationsResp.items;
 
     return (
       <PageWrapper
@@ -36,12 +46,42 @@ export default async function DomainHealthPage({}: Props) {
           </div>
 
           <div className="card p-4">
-            <h3 className="text-sm font-medium text-text-primary">Últimas notificações</h3>
+            <h3 className="text-sm font-medium text-text-primary">Filtros</h3>
+            <form method="get" className="mt-3 flex gap-3 items-end">
+              <div>
+                <label className="text-xs text-text-secondary">Categoria</label>
+                <input name="category" defaultValue={category} className="block mt-1" />
+              </div>
+              <div>
+                <label className="text-xs text-text-secondary">Resultado</label>
+                <select name="outcome" defaultValue={outcome} className="block mt-1">
+                  <option value="">Todos</option>
+                  <option value="success">success</option>
+                  <option value="failed">failed</option>
+                  <option value="pending">pending</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-text-secondary">Página</label>
+                <input name="page" defaultValue={String(page)} className="block mt-1 w-20" />
+              </div>
+              <div>
+                <label className="text-xs text-text-secondary">Tamanho</label>
+                <input name="pageSize" defaultValue={String(pageSize)} className="block mt-1 w-20" />
+              </div>
+              <div>
+                <button className="btn btn-primary">Aplicar</button>
+              </div>
+            </form>
+          </div>
+
+          <div className="card p-4">
+            <h3 className="text-sm font-medium text-text-primary">Notificações</h3>
             <div className="mt-3 divide-y divide-border-default">
-              {dto.recentNotifications.length === 0 ? (
-                <div className="p-4 text-sm text-text-secondary">Nenhuma notificação recente.</div>
+              {notifications.length === 0 ? (
+                <div className="p-4 text-sm text-text-secondary">Nenhuma notificação encontrada.</div>
               ) : (
-                dto.recentNotifications.map((n) => (
+                notifications.map((n) => (
                   <div key={n.id} className="p-3">
                     <div className="flex justify-between">
                       <div className="text-sm font-medium">{n.category}</div>

@@ -29,10 +29,19 @@ public class DomainHealthService : IDomainHealthService
         return new DomainHealthDto(total, failed, items);
     }
 
-    public async Task<(IEnumerable<DomainHealthNotificationDto> Items, int Total)> GetNotificationsAsync(Guid empresaId, int page, int pageSize)
+    public async Task<(IEnumerable<DomainHealthNotificationDto> Items, int Total)> GetNotificationsAsync(Guid empresaId, int page, int pageSize, string? category = null, string? outcome = null)
     {
         if (page < 1) page = 1;
-        var query = _db.DomainNotifications.Where(d => d.EmpresaId == empresaId).OrderByDescending(d => d.CreatedAt);
+        var query = _db.DomainNotifications.Where(d => d.EmpresaId == empresaId);
+
+        if (!string.IsNullOrWhiteSpace(category))
+            query = query.Where(d => d.Category == category);
+
+        if (!string.IsNullOrWhiteSpace(outcome))
+            query = query.Where(d => d.Outcome == outcome);
+
+        query = query.OrderByDescending(d => d.CreatedAt);
+
         var total = await query.CountAsync();
         var items = await query.Skip((page - 1) * pageSize).Take(pageSize)
             .Select(d => new DomainHealthNotificationDto(d.Id, d.CreatedAt, d.Category, d.Reason, d.Outcome, d.Attempts))

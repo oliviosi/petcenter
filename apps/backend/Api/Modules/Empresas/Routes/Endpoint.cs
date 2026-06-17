@@ -99,6 +99,8 @@ public static class EmpresasEndpoints
             Guid tenantId,
             int page,
             int pageSize,
+            string? category,
+            string? outcome,
             HttpContext httpContext,
             Api.Modules.Empresas.Infrastructure.IDomainHealthService service) =>
         {
@@ -106,7 +108,7 @@ public static class EmpresasEndpoints
             if (empresaId != tenantId)
                 return Results.Unauthorized();
 
-            var (items, total) = await service.GetNotificationsAsync(tenantId, page <= 0 ? 1 : page, pageSize <= 0 ? 20 : pageSize);
+            var (items, total) = await service.GetNotificationsAsync(tenantId, page <= 0 ? 1 : page, pageSize <= 0 ? 20 : pageSize, category, outcome);
             return Results.Ok(new { items, total });
         })
         .WithName("ListTenantDomainNotifications")

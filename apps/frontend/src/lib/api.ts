@@ -1482,7 +1482,7 @@ export const api = {
     };
   },
 
-  async listAdminTenantDomainNotifications(tenantId: string, page: number, pageSize: number, token: string) {
+  async listAdminTenantDomainNotifications(tenantId: string, page: number, pageSize: number, token: string, category?: string, outcome?: string) {
     const response = await request<unknown>(`/admin/tenants/${tenantId}/domain-health/notifications`, {
       method: "GET",
       cache: "no-store",
@@ -1490,6 +1490,8 @@ export const api = {
       params: {
         page,
         pageSize,
+        category: category || undefined,
+        outcome: outcome || undefined,
       },
     });
 
@@ -1502,6 +1504,7 @@ export const api = {
       attempts: number;
     }>; total: number };
   },
+
 
   async getAdminBookingById(id: string, token: string) {
     const response = await request<unknown[]>("/bookings/feedback", {
