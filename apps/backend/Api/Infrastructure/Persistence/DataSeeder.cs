@@ -142,6 +142,42 @@ public static class DataSeeder
                 await db.SaveChangesAsync();
                 logger.LogInformation("Seeded dev service, professional and availability for local testing.");
             }
+            else
+            {
+                // If services exist, ensure at least one professional is assigned to one of them and has availability.
+                var existingAssignments = await db.ProfessionalServiceAssignments.AnyAsync(a => a.EmpresaId == empresa.Id);
+                if (!existingAssignments)
+                {
+                    var servico = existingServices.First();
+                    var profissional = await db.Profissionais.FirstOrDefaultAsync(p => p.EmpresaId == empresa.Id);
+                    if (profissional == null)
+                    {
+                        profissional = new Api.Modules.Profissionais.Domain.Profissional(empresa.Id, "Profissional Dev");
+                        db.Profissionais.Add(profissional);
+                        await db.SaveChangesAsync();
+                    }
+
+                    // ensure availability exists
+                    var hasAvailability = await db.DisponibilidadesProfissionais.AnyAsync(d => d.ProfissionalId == profissional.Id);
+                    if (!hasAvailability)
+                    {
+                        var disponibilidade = new Api.Modules.Disponibilidade.Domain.DisponibilidadeProfissional(
+                            profissional.Id,
+                            DateTime.UtcNow.DayOfWeek,
+                            TimeOnly.Parse("09:00"),
+                            TimeOnly.Parse("17:00"));
+                        db.DisponibilidadesProfissionais.Add(disponibilidade);
+                    }
+
+                    var assignment = new Api.Modules.ProfessionalServiceAssignments.Domain.ProfessionalServiceAssignment(
+                        empresa.Id,
+                        profissional.Id,
+                        servico.Id);
+                    db.ProfessionalServiceAssignments.Add(assignment);
+                    await db.SaveChangesAsync();
+                    logger.LogInformation("Linked existing service to a professional and seeded availability for development.");
+                }
+            }
         }
         catch (Exception ex)
         {
