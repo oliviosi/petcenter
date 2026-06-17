@@ -108,7 +108,16 @@ public class CreateBookingService : ICreateBookingService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Booking event publish failed; continuing without queue publish.");
+            var publishDisabled = string.Equals(Environment.GetEnvironmentVariable("BOOKING_PUBLISH_DISABLED"), "true", StringComparison.OrdinalIgnoreCase);
+            if (publishDisabled)
+            {
+                _logger.LogWarning(ex, "Booking event publish failed but publish disabled via BOOKING_PUBLISH_DISABLED; continuing without queue publish.");
+            }
+            else
+            {
+                _logger.LogError(ex, "Booking event publish failed and will be surfaced to caller.");
+                throw;
+            }
         }
 
         return new CreateBookingResponse

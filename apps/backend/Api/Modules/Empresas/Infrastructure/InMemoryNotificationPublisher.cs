@@ -53,11 +53,13 @@ namespace Api.Modules.Empresas.Infrastructure
                     _logger.LogInformation("[InMemoryPublisher] Sending domain notification to Empresa {EmpresaId} (attempt {Attempt}) - {State} {Domain}", message.EmpresaId, attempt, message.State, message.Domain);
                     // Simulated send - in production a worker would do real send via SMTP/HTTP provider.
                     var sendSuccess = await SimulateSendAsync(message);
-                    _attemptsCounter.Add(1);
+                    var tags = new[] { new System.Collections.Generic.KeyValuePair<string, object?>("empresa_id", message.EmpresaId.ToString()), new System.Collections.Generic.KeyValuePair<string, object?>("category", message.State) };
+                    _attemptsCounter.Add(1, tags);
                     if (sendSuccess)
                     {
                         resultado = "sent";
-                        _sentCounter.Add(1);
+                        var sentTags = new[] { new System.Collections.Generic.KeyValuePair<string, object?>("empresa_id", message.EmpresaId.ToString()), new System.Collections.Generic.KeyValuePair<string, object?>("category", message.State), new System.Collections.Generic.KeyValuePair<string, object?>("outcome", "success") };
+                        _sentCounter.Add(1, sentTags);
                         break;
                     }
                 }
@@ -71,7 +73,8 @@ namespace Api.Modules.Empresas.Infrastructure
 
             if (resultado != "sent")
             {
-                _failedCounter.Add(1);
+                var failedTags = new[] { new System.Collections.Generic.KeyValuePair<string, object?>("empresa_id", message.EmpresaId.ToString()), new System.Collections.Generic.KeyValuePair<string, object?>("category", message.State), new System.Collections.Generic.KeyValuePair<string, object?>("outcome", "failure") };
+                _failedCounter.Add(1, failedTags);
             }
 
             try

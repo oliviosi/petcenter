@@ -8,4 +8,9 @@
 
 - [x] client-booking-shell — Client booking shell UI (select pet, services, date/time) and booking integration
 
-- [ ] tests-and-migrations — Tests and DB migration for Cliente table; update README with setup steps
+- [x] tests-and-migrations — Tests and DB migration for Cliente table; update README with setup steps (completed)
+
+Notes:
+- Added unit tests for RegisterService and LoginService in apps/backend/Api.Tests.
+- Migration AddClientes already present at apps/backend/Api/Migrations/20260615131205_AddClientes.cs
+- Created runbook (runbook.md) with migration and test instructions.
