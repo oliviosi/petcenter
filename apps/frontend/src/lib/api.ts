@@ -1459,6 +1459,65 @@ export const api = {
     return readArray(response).map(mapAdminFeedbackEntry);
   },
 
+  // Domain health endpoints
+  async getAdminTenantDomainHealth(tenantId: string, token: string) {
+    const response = await request<unknown>(`/admin/tenants/${tenantId}/domain-health`, {
+      method: "GET",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+    });
+
+    // Return raw DTO; caller will read fields
+    return response as {
+      totalNotifications: number;
+      failedNotifications: number;
+      recentNotifications: Array<{
+        id: string;
+        createdAt: string;
+        category: string;
+        reason?: string | null;
+        outcome?: string | null;
+        attempts: number;
+      }>;
+    };
+  },
+
+  async listAdminTenantDomainNotifications(tenantId: string, page: number, pageSize: number, token: string) {
+    const response = await request<unknown>(`/admin/tenants/${tenantId}/domain-health/notifications`, {
+      method: "GET",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+      params: {
+        page,
+        pageSize,
+      },
+    });
+
+    return response as { items: Array<{
+      id: string;
+      createdAt: string;
+      category: string;
+      reason?: string | null;
+      outcome?: string | null;
+      attempts: number;
+    }>; total: number };
+  },
+
+  async getAdminBookingById(id: string, token: string) {
+    const response = await request<unknown[]>("/bookings/feedback", {
+      method: "GET",
+      cache: "no-store",
+      headers: buildAuthHeaders(token),
+      params: {
+        startDate: filters.startDate || undefined,
+        endDate: filters.endDate || undefined,
+        professionalId: filters.professionalId || undefined,
+      },
+    });
+
+    return readArray(response).map(mapAdminFeedbackEntry);
+  },
+
   async getAdminBookingById(id: string, token: string) {
     const response = await request<unknown>(`/bookings/${id}`, {
       method: "GET",
