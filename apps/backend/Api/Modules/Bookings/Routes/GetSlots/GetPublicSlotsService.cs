@@ -30,7 +30,7 @@ public class GetPublicSlotsService : IGetPublicSlotsService
         var slots = await _availabilityService.GetAvailableSlotsAsync(new BookingAvailabilityQuery
         {
             PetshopId = request.PetshopId!.Value,
-            ServiceId = request.ServiceId,
+            ServiceId = request.ServiceId!.Value,
             ProfessionalId = request.ProfessionalId,
             StartDate = startDate,
             EndDate = endDate
