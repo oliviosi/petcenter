@@ -1,9 +1,25 @@
 # Tasks: Session-aware Header & Navigation
 
 ## Overview
-Implement Header component, wire into layouts, add sign-out action, and tests.
+Implement Header component, wire into layouts, add sign-out server action, and tests.
 
 ## Tasks
+- [ ] create-header-component — Implement a server Header component at apps/frontend/src/components/Header/Header.tsx that calls getAdminSession(), shows brand and primary navigation, and renders authentication controls (Entrar vs Dashboard / Sair). Use existing UI primitives and design tokens. (estimate: 3h)
+
+- [ ] integrate-header-to-layouts — Add Header to public and admin layouts: apps/frontend/src/app/(public)/layout.tsx and apps/frontend/src/app/admin/(dashboard)/layout.tsx. Ensure correct spacing and PageWrapper slot usage. (estimate: 1.5h)  
+  depends_on: [create-header-component]
+
+- [ ] sign-out-server-action — Implement sign-out server action that clears admin session cookie and redirects to /admin/login?reason=session. Place in apps/frontend/src/app/admin/actions or alongside Header as appropriate. (estimate: 1h)  
+  depends_on: [create-header-component]
+
+- [ ] add-tests — Unit tests for Header rendering (authenticated / unauthenticated) and an integration test for the sign-out server action. Use Vitest + React Testing Library. (estimate: 2h)  
+  depends_on: [create-header-component, sign-out-server-action]
+
+- [ ] qa-and-e2e-checklist — Provide a QA checklist for manual verification (links visibility, sign-in/out flow, no regressions). (estimate: 0.5h)  
+  depends_on: [integrate-header-to-layouts]
+
+## Ready to implement
+When ready, run /opsx:apply to implement the change.
 - task: create-header-component
   title: Creating Header component
   description: |
