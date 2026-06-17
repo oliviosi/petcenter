@@ -59,12 +59,14 @@ ORDER BY created_at DESC
 LIMIT 20;
 
 Observações de implementação (melhores práticas)
+
 - Todas as queries devem filtrar por EmpresaId (multi-tenancy strict).
 - Paginamento e limites por padrão (pageSize max 100).
 - Endpoints admin apenas (não expor dados sensíveis no endpoint público).
 - Expor métricas: notifications_attempts_total (labels: empresa_id,outcome,category), notifications_sent_total (labels: outcome,category).
 
 Aceitação técnica
+
 - Endpoints implementados com testes unitários e de integração (mock DB ou staging).
 - Métricas emitidas via System.Diagnostics.Metrics ou Prometheus exporter.
 - Migration.sql revisada por ops e aplicada em staging antes da validação.

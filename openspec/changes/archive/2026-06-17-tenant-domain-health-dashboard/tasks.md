@@ -1,6 +1,6 @@
 # Tasks — tenant-domain-health-dashboard
 
-Status: draft
+Status: archived
 
 ## Backend
 
@@ -29,3 +29,4 @@ Status: draft
 - [ ] 11. Atualizar runbook com passos de verificação e troubleshooting.
 - [ ] 12. Registrar instruções de aplicação e rollback para staging.
 
+Archived on: 2026-06-17

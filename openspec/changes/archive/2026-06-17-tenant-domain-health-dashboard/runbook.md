@@ -72,4 +72,3 @@ Acceptance:
 - Import succeeds without errors.
 - Selecting a tenant filters all panels to that `empresa_id`.
 - Numbers match Prometheus queries run from the backend metrics.
-

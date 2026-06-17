@@ -22,4 +22,3 @@ Adiciona um dashboard de saúde de domínio por tenant com foco em falhas de not
 - Validar endpoints com filtro por tenant.
 - Conferir métricas no backend e no Grafana.
 - Fazer smoke test da página admin.
-

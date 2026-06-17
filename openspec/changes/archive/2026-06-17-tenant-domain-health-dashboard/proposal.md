@@ -34,4 +34,3 @@ Criar um dashboard por tenant para acompanhar a saúde dos domínios: falhas de 
 - Divergência entre métricas e banco.
 - Consulta lenta em ambiente com muitos tenants.
 - Exposição indevida de dados fora do tenant.
-
