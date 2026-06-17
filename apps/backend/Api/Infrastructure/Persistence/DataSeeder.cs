@@ -23,10 +23,13 @@ public static class DataSeeder
             return;
         }
 
-        // If database already has empresas, attempt to ensure at least one is public for local testing.
+        // Determine or create a development Empresa to seed other data against
+        Api.Modules.Empresas.Domain.Empresa empresa;
+
         if (await db.Empresas.AnyAsync())
         {
             var existing = await db.Empresas.FirstAsync();
+            empresa = existing;
             var updated = false;
 
             // Ensure required public profile fields are present for publishing
@@ -93,23 +96,23 @@ public static class DataSeeder
             {
                 logger.LogWarning(ex, "Failed to update existing Empresa during seed.");
             }
+        }
+        else
+        {
+            var empresaName = configuration["Seed:EmpresaName"] ?? "Pet Center Dev";
+            var adminEmail = configuration["Seed:AdminEmail"] ?? "admin@petcenter.dev";
 
-            return;
+            empresa = new Api.Modules.Empresas.Domain.Empresa(empresaName);
+            db.Empresas.Add(empresa);
+
+            var senhaHash = BCrypt.Net.BCrypt.HashPassword(adminPassword);
+            var usuario = new Api.Modules.Usuarios.Domain.Usuario(adminEmail, senhaHash, empresa.Id);
+            db.Usuarios.Add(usuario);
+
+            await db.SaveChangesAsync();
         }
 
-        var empresaName = configuration["Seed:EmpresaName"] ?? "Pet Center Dev";
-        var adminEmail = configuration["Seed:AdminEmail"] ?? "admin@petcenter.dev";
-
-        var empresa = new Empresa(empresaName);
-        db.Empresas.Add(empresa);
-
-        var senhaHash = BCrypt.Net.BCrypt.HashPassword(adminPassword);
-        var usuario = new Usuario(adminEmail, senhaHash, empresa.Id);
-        db.Usuarios.Add(usuario);
-
-        await db.SaveChangesAsync();
-
-        // Development-only: ensure there's at least one service, professional and availability
+        // Development-only: ensure there's at least one service, professional and availability for this empresa
         try
         {
             var existingServices = await db.Servicos.Where(s => s.EmpresaId == empresa.Id).ToListAsync();
