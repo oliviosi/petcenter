@@ -108,5 +108,41 @@ public static class DataSeeder
         db.Usuarios.Add(usuario);
 
         await db.SaveChangesAsync();
+
+        // Development-only: ensure there's at least one service, professional and availability
+        try
+        {
+            var existingServices = await db.Servicos.Where(s => s.EmpresaId == empresa.Id).ToListAsync();
+            if (!existingServices.Any())
+            {
+                var servico = new Api.Modules.Servicos.Domain.Servico(empresa.Id, "Banho e Tosa (Dev)", 30, 50m);
+                db.Servicos.Add(servico);
+
+                var profissional = new Api.Modules.Profissionais.Domain.Profissional(empresa.Id, "Profissional Dev");
+                db.Profissionais.Add(profissional);
+
+                await db.SaveChangesAsync();
+
+                var disponibilidade = new Api.Modules.Disponibilidade.Domain.DisponibilidadeProfissional(
+                    profissional.Id,
+                    DateTime.UtcNow.DayOfWeek,
+                    TimeOnly.Parse("09:00"),
+                    TimeOnly.Parse("17:00"));
+                db.DisponibilidadesProfissionais.Add(disponibilidade);
+
+                var assignment = new Api.Modules.ProfessionalServiceAssignments.Domain.ProfessionalServiceAssignment(
+                    empresa.Id,
+                    profissional.Id,
+                    servico.Id);
+                db.ProfessionalServiceAssignments.Add(assignment);
+
+                await db.SaveChangesAsync();
+                logger.LogInformation("Seeded dev service, professional and availability for local testing.");
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Dev seeding of services/professionals failed.");
+        }
     }
 }

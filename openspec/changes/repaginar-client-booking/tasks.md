@@ -35,4 +35,4 @@
 ## 6. Cleanup
 
 - [x] 6.1 Remove debug artifacts (playwright scripts/screenshots) or move to `.debug/` and ignore (added .gitignore entries)
-- [ ] 6.2 Final polish and merge PR
+- [x] 6.2 Final polish and merge PR
