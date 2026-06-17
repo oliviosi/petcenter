@@ -28,13 +28,22 @@ export function ClientLoginForm() {
       if (typeof window === 'undefined') return;
       const params = new URLSearchParams(window.location.search);
       const token = params.get('client_token');
+      const returnUrl = params.get('returnUrl');
       if (token) {
         localStorage.setItem('client_token', token);
         params.delete('client_token');
+        // keep returnUrl if present so we can redirect after cleaning token param
+        const keptReturn = returnUrl ? { returnUrl } : {};
         const url = new URL(window.location.href);
-        url.search = params.toString();
+        // rebuild search preserving returnUrl only
+        const newSearch = new URLSearchParams(keptReturn as Record<string, string>);
+        url.search = newSearch.toString();
         window.history.replaceState({}, document.title, url.toString());
-        router.replace('/petshops');
+        if (returnUrl && returnUrl.startsWith('/')) {
+          router.replace(returnUrl);
+        } else {
+          router.replace('/petshops');
+        }
       }
     } catch (e) {
       // ignore
@@ -59,6 +68,20 @@ export function ClientLoginForm() {
       const data = await res.json();
       // persist token
       localStorage.setItem('client_token', data.token);
+
+      // respect returnUrl if provided in the URL (redirect back to where the user came from)
+      try {
+        if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          const returnUrl = params.get('returnUrl');
+          if (returnUrl && returnUrl.startsWith('/')) {
+            router.replace(returnUrl);
+            return;
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
 
       // try to redirect directly to first available petshop booking shell
       try {

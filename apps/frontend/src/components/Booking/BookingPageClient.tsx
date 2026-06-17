@@ -46,6 +46,26 @@ export function BookingPageClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+
+  // If this booking page was opened via a company-sent link, require client login.
+  // Companies should append `companyLink=true` to the URL when sending links.
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+      const sp = new URLSearchParams(searchParams.toString());
+      const companyLink = sp.get('companyLink');
+      if (companyLink === 'true') {
+        const token = localStorage.getItem('client_token');
+        if (!token) {
+          const current = `${window.location.pathname}${window.location.search}`;
+          const encoded = encodeURIComponent(current);
+          router.replace(`/login?returnUrl=${encoded}`);
+        }
+      }
+    } catch (e) {
+      // ignore errors (do not block booking flow)
+    }
+  }, [searchParams, router]);
   const [selectedPet, setSelectedPet] = useState<{ id?: string; name: string; species: string; avatar?: string } | null>(null);
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
   const [submissionError, setSubmissionError] = useState<string | null>(null);

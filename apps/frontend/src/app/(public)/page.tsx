@@ -52,12 +52,11 @@ function NeutralHomePage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button href="/petshops" variant="secondary">
-              Abrir catálogo
-              <ArrowRight className="h-4 w-4" />
+            <Button href="/login" variant="primary">
+              Sou cliente — Entrar / Criar conta
             </Button>
-            <Button href="/admin/login" variant="primary">
-              Entrar
+            <Button href="/register" variant="secondary">
+              Sou dono de petshop — Cadastre sua loja
             </Button>
           </div>
         </Card>
