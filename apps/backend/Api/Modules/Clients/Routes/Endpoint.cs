@@ -2,6 +2,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Api.Modules.Clients.Routes.Login;
 using Api.Modules.Clients.Routes.Register;
+using Api.Modules.Clients.Infrastructure;
+using Microsoft.Extensions.Configuration;
 
 namespace Api.Modules.Clients.Routes;
 

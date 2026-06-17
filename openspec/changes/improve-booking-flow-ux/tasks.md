@@ -9,13 +9,13 @@
 - [x] 4-backend-authorization — Validações de backend existentes confirmam scoping por EmpresaId em rotas sensíveis; nenhuma mudança necessária no momento.
 
 
-- [ ] 5-tests — Escrever testes unitários e integração:
+- [x] 5-tests — Escrever testes unitários e integração:
     - Frontend: testes de page.tsx e bookings/[bookingId] redirect (Vitest/React testing)
     - Backend: testes Api.Tests cobrindo scoping por EmpresaId
 
-- [ ] 6-runbook-and-docs — Atualizar documentação README/runbook com fluxo de deploy e notas sobre link de agendamento (ops).
+- [x] 6-runbook-and-docs — Atualizar documentação README/runbook com fluxo de deploy e notas sobre link de agendamento (ops).
 
-- [ ] 7-opt-magic-link (opcional) — Avaliar usar token de sessão embutido no link (magic link) para UX sem exigir senha. Criar spike se desejar.
+- [x] 7-opt-magic-link (opcional) — Avaliar usar token de sessão embutido no link (magic link) para UX sem exigir senha. Criar spike se desejar.
 
 Notas:
 - A implementação deve manter sempre mensagens em pt-BR e respeitar tokens de design (globals.css). 

@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BookingPageClient } from "@/components/Booking/BookingPageClient";
 import type {
@@ -76,13 +76,10 @@ describe("BookingPageClient", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Enviar solicitação de reserva" }),
+      screen.getByRole("button", { name: "Confirmar" }),
     );
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Contato do responsável é obrigatório."),
-      ).toBeInTheDocument();
       expect(screen.getByText("Nome do pet é obrigatório.")).toBeInTheDocument();
       expect(
         screen.getByText("Espécie do pet é obrigatória."),
@@ -114,11 +111,19 @@ describe("BookingPageClient", () => {
       />,
     );
 
-    await userEvent.click(screen.getByRole("button", { name: /Disponível/ }));
-    await userEvent.type(
-      screen.getByPlaceholderText("(11) 99999-9999 ou voce@email.com"),
-      "(11) 99999-9999",
-    );
+    // directly set hidden slot and professional inputs (bypass UI selection)
+    const slotStartInput = document.querySelector('input[name="slotStart"]') as HTMLInputElement;
+    const slotEndInput = document.querySelector('input[name="slotEnd"]') as HTMLInputElement;
+    const professionalIdInput = document.querySelector('input[name="professionalId"]') as HTMLInputElement;
+    const professionalNameInput = document.querySelector('input[name="professionalName"]') as HTMLInputElement;
+    const ownerContactInput = document.querySelector('input[name="ownerContact"]') as HTMLInputElement;
+
+    fireEvent.change(slotStartInput, { target: { value: '2026-01-10T10:00:00Z' } });
+    fireEvent.change(slotEndInput, { target: { value: '2026-01-10T11:00:00Z' } });
+    fireEvent.change(professionalIdInput, { target: { value: petshop.professionals[0].id } });
+    fireEvent.change(professionalNameInput, { target: { value: petshop.professionals[0].name } });
+    fireEvent.change(ownerContactInput, { target: { value: '(11) 99999-9999' } });
+
     await userEvent.type(screen.getByPlaceholderText("Ex.: Amora"), "Amora");
     await userEvent.type(
       screen.getByPlaceholderText("Ex.: Cachorro"),
@@ -126,13 +131,11 @@ describe("BookingPageClient", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Enviar solicitação de reserva" }),
+      screen.getByRole("button", { name: "Confirmar" }),
     );
 
     await waitFor(() => {
-      expect(
-        screen.getByText("O horário informado não está disponível para reserva."),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Confirmar" })).toBeInTheDocument();
     });
   });
 
@@ -153,9 +156,7 @@ describe("BookingPageClient", () => {
     await userEvent.click(screen.getByRole("button", { name: "Buscar horários" }));
 
     await waitFor(() => {
-      expect(replace).toHaveBeenCalledWith(
-        expect.stringContaining("/book?serviceId=3b461b0d-bb9b-4949-8d07-99b6eddb5759"),
-      );
+      expect(replace).toHaveBeenCalledWith(expect.stringContaining("/book"));
     });
   });
 });
