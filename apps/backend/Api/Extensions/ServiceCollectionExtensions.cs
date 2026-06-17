@@ -63,6 +63,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IClienteRepository, ClienteRepository>();
         services.AddScoped<IClientRegisterService, RegisterService>();
         services.AddScoped<IClientLoginService, Api.Modules.Clients.Routes.Login.LoginService>();
+        // Magic link spike service (in-memory)
+        services.AddSingleton<Api.Modules.Clients.Infrastructure.IMagicLinkService, Api.Modules.Clients.Infrastructure.InMemoryMagicLinkService>();
 
         services.AddScoped<ILoginService, Api.Modules.Auth.Routes.Login.LoginService>();
         services.AddScoped<IGetMeService, GetMeService>();

@@ -3,7 +3,17 @@ import { render, screen } from "@testing-library/react";
 import HomePage from "@/app/(public)/page";
 import { ApiRequestError } from "@/lib/api";
 
-const { getHeaderValue, getPublicPetshopByHost } = vi.hoisted(() => ({
+const { getHeaderValue, getPublicPetshopByHost, useRouter } = vi.hoisted(() => ({
+  getHeaderValue: vi.fn(),
+  getPublicPetshopByHost: vi.fn(),
+  useRouter: vi.fn(() => ({ replace: vi.fn(), push: vi.fn() })),
+}));
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+}));
+
+
   getHeaderValue: vi.fn(),
   getPublicPetshopByHost: vi.fn(),
 }));
